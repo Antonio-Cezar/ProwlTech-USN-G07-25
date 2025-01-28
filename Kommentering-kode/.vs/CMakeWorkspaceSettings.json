@@ -1,0 +1,4 @@
+{
+  "enableCMake": true,
+  "sourceDirectory": "com_controller_full"
+}

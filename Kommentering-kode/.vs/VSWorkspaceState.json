@@ -1,0 +1,12 @@
+{
+  "ExpandedNodes": [
+    "",
+    "\\com_controller_full",
+    "\\com_controller_full\\out",
+    "\\com_controller_full\\out\\build",
+    "\\com_controller_full\\src",
+    "\\motor_controller"
+  ],
+  "SelectedNode": "\\com_controller_full\\src\\canbus.c",
+  "PreviewInSolutionExplorer": false
+}
