@@ -1,0 +1,15 @@
+{
+  "projects": {
+    "com_controller_full": {
+      "rel_path": "MicroBits-ProwlTech25\\com_controller_full",
+      "name": "com_controller_full",
+      "buildConfigs": {},
+      "confFiles": {
+        "config": [],
+        "extraConfig": [],
+        "overlay": [],
+        "extraOverlay": []
+      }
+    }
+  }
+}
