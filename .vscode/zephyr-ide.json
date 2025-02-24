@@ -57,32 +57,6 @@
         "overlay": [],
         "extraOverlay": []
       }
-    },
-    "blinky": {
-      "rel_path": "blinky",
-      "name": "blinky",
-      "buildConfigs": {
-        "build\\bbc_microbit_v2": {
-          "board": "bbc_microbit_v2",
-          "relBoardSubDir": "bbc\\microbit_v2",
-          "name": "build\\bbc_microbit_v2",
-          "westBuildArgs": "",
-          "westBuildCMakeArgs": " -DCONFIG_DEBUG_OPTIMIZATIONS=y -DCONFIG_DEBUG_THREAD_INFO=y ",
-          "confFiles": {
-            "config": [],
-            "extraConfig": [],
-            "overlay": [],
-            "extraOverlay": []
-          },
-          "runnerConfigs": {}
-        }
-      },
-      "confFiles": {
-        "config": [],
-        "extraConfig": [],
-        "overlay": [],
-        "extraOverlay": []
-      }
     }
   }
 }
