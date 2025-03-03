@@ -8602,3 +8602,81 @@ input, select, textarea {
 			#wrapper.divided > .invert:first-child {
 				box-shadow: none !important;
 			}
+
+	/* Override the spotlight default for a smaller image */
+.spotlight.style1.orient-right.content-align-left.image-position-center .image {
+	position: relative; /* Instead of "absolute" child */
+  }
+  
+  .spotlight.style1.orient-right.content-align-left.image-position-center .image img {
+	position: static;   /* Remove absolute positioning */
+	width: auto;        /* Let width auto-fit or use a fixed size */
+	max-width: 100%;     /* Control how large the image can get */
+	height: auto;       /* Keep aspect ratio */
+	object-fit: contain; /* or cover, depending on preference */
+	margin: 0 auto;     /* Center horizontally if needed */
+	display: block;
+  }
+  
+  /* Make the right spotlight box black and center the image */
+.spotlight.style1.orient-right.content-align-left.image-position-center .image {
+	background-color: #000;       /* Black background */
+	position: relative;           /* So we can reposition the <img> */
+	display: flex;                /* Enable flex for centering */
+	align-items: center;          /* Vertically center the image */
+	justify-content: center;      /* Horizontally center the image */
+  }
+  
+  .spotlight.style1.orient-right.content-align-left.image-position-center .image img {
+	position: static;             /* Remove absolute positioning */
+	max-width: 99%;               /* Shrink image to fit, adjust as needed */
+	height: auto;                 /* Keep aspect ratio */
+	object-fit: contain;          /* Show the entire image without cropping */
+	display: block;
+  }
+
+  /* Ensure the banner can position absolute children */
+.banner.style1.orient-left.content-align-left.image-position-right.fullscreen {
+	position: relative; /* If not already relative */
+  }
+  
+  /* Position the logo in the top-left */
+  .banner.style1 .logo-container {
+	position: absolute;
+	top: 1rem;       /* Adjust vertical offset */
+	left: 1rem;      /* Adjust horizontal offset */
+	z-index: 9999;   /* Make sure it appears above other elements */
+  }
+  
+  /* Control the size of the logo image */
+  .banner.style1 .logo-container img {
+	width: 180px;    /* Adjust to the desired width */
+	height: auto;
+	display: block;
+  }
+  
+  /* Position the banner container so we can absolutely position the logo container */
+.banner.style1.orient-left.content-align-left.image-position-right.fullscreen {
+	position: relative; /* If not already set */
+  }
+  
+  /* The logo container itself */
+  .banner.style1 .logo-container {
+	position: absolute;
+	top: 1rem;
+	left: 1rem;
+	z-index: 9999;
+	
+	/* Flex layout to keep logos side by side */
+	display: flex;
+	align-items: center;   /* Vertically center them */
+	gap: 1rem;            /* Spacing between the logos */
+  }
+  
+  /* Control the size of each logo image */
+  .banner.style1 .logo-container img {
+	width: 200px;   /* Adjust to your preferred width */
+	height: auto;
+	display: block;
+  }
+  
