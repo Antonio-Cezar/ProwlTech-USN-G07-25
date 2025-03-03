@@ -24,7 +24,7 @@ class ProwlTechApp(ctk.CTk):
         self.error_section()    #row=2
 
 
-
+    #toppseksjon (row=0) med tittel og knapp
     def top_bar(self):
         self.top_frame = ctk.CTkFrame(self, width=10, height=150, fg_color="#4C0643")
         self.top_frame.grid(row=0, columnspan=2, sticky="nsew")
@@ -32,8 +32,10 @@ class ProwlTechApp(ctk.CTk):
         #grid for toppraden
         self.top_frame.grid_rowconfigure(0, weight=1)
         self.top_frame.grid_columnconfigure(0, weight=0)    #knapp til venstre
-        self.top_frame.grid_columnconfigure(1, weight=1)    #tittel i midten
+        self.top_frame.grid_columnconfigure(1, weight=0)    #tittel i midten
         self.top_frame.grid_columnconfigure(2, weight=0)    #plass til annet 
+
+        #self.rowconfigure(2, minsize=70)
 
         #tittel
         self.title_label = ctk.CTkLabel(
@@ -56,17 +58,83 @@ class ProwlTechApp(ctk.CTk):
         )
         self.connect_button.grid(row=0, column=0, padx=10, pady=10, sticky="w")
 
-        #dummy-widget for å balansere layouten
-        #self.spacer = ctk.CTkFrame(self, fg_color="#4C0643")
-        #self.spacer.grid(row=0, column=2, sticky="nsew")
-
+      
+    #midtseksjon med statusinformasjon
     def status_section(self):
-        self.status_frame = ctk.CTkFrame(self, width=10, height=200, fg_color="#29043C")
-        self.status_frame.grid(row=1, column=0, columnspan=2, sticky="nsew")
+        #hele midtseksjonen:
+        self.status_frame = ctk.CTkFrame(self, fg_color="#29043C")
+        self.status_frame.grid(row=1, column=0, columnspan=3, sticky="nsew")
+        self.status_frame.grid_propagate(False)
 
+        #grid i midtreseksjon:
+        self.status_frame.grid_rowconfigure(0, weight=1)
+        self.status_frame.grid_columnconfigure(0, weight=1)  #venstre
+        self.status_frame.grid_columnconfigure(1, weight=1) #høyre
+
+        #venstre kolonne: to bokser side om side
+        self.left_frame = ctk.CTkFrame(self.status_frame, fg_color="#29043C")
+        self.left_frame.grid(row=0, column=0, sticky="nsew", padx=5, pady=5)
+
+        #grid i venstre kolonne:
+        self.left_frame.grid_rowconfigure(0, weight=1)
+        self.left_frame.grid_columnconfigure(0, weight=1)
+        self.left_frame.grid_columnconfigure(1, weight=1)
+
+        #batteristatus
+        self.battery_frame = ctk.CTkFrame(self.left_frame, fg_color="#4C0643", corner_radius=20)
+        self.battery_frame.grid(row=0, column=0, sticky="nsew", padx=5, pady=5)
+        self.battery_frame.configure(height=170, width=170)
+        self.battery_frame.grid_propagate(False)
+
+        #temperaturmålinger
+        self.temp_frame = ctk.CTkFrame(self.left_frame, fg_color="#4C0643", corner_radius=20)
+        self.temp_frame.grid(row=0, column=1, sticky="nsew", padx=5, pady=5)
+        self.temp_frame.configure(height=170, width=170)
+        self.temp_frame.grid_propagate(False)
+
+        #høyre kolonne: to bokser over hverandre
+        self.right_frame = ctk.CTkFrame(self.status_frame, fg_color="#29043C")
+        self.right_frame.grid(row=0, column=1, sticky="nsew", padx=5, pady=5)
+
+        #grid i høyre kolonne
+        self.right_frame.grid_rowconfigure(0, weight=1)
+        self.right_frame.grid_rowconfigure(1, weight=1)
+        self.right_frame.grid_columnconfigure(0, weight=1)
+
+        #tilkoblingsstatus
+        self.connection_frame = ctk.CTkFrame(self.right_frame, fg_color="#4C0643", corner_radius=20)
+        self.connection_frame.grid(row=0, column=0, sticky="nsew", padx=5, pady=5)
+        self.connection_frame.configure(height=70, width=250)
+        self.connection_frame.grid_propagate(False)
+
+        #sensormålinger
+        self.sensor_frame = ctk.CTkFrame(self.right_frame, fg_color="#4C0643", corner_radius=20)
+        self.sensor_frame.grid(row=1, column=0, sticky="nsew", padx=5, pady=5)
+        self.sensor_frame.configure(height=70, width=250)
+        self.sensor_frame.grid_propagate(False)
+
+
+    #bunnseksjon med feilmeldinger 
     def error_section(self):
-        self.error_frame = ctk.CTkFrame(self, width=10, height=100, fg_color="#29043C")
-        self.error_frame.grid(row=2, columnspan=2, sticky="nsew")
+        self.error_container = ctk.CTkFrame(self, fg_color="#29043C", height=50)
+        self.error_container.grid(row=2, column=0, columnspan=2, sticky="nsew")
+        self.error_container.grid_propagate(False)
+
+        self.error_container.grid_rowconfigure(0, weight=1)
+        self.error_container.grid_columnconfigure(0, weight=1)
+
+        self.error_frame = ctk.CTkFrame(self.error_container, fg_color="#3B3B3B", corner_radius=20)
+        self.error_frame.grid(row=0, column=0, padx=10, pady=10, sticky="nsew")
+
+        self.error_label = ctk.CTkLabel(
+            self.error_frame,
+            text="Feilmeldinger:", 
+            font=("Century Gothic", 16),
+            text_color="white",
+            justify="left",
+            anchor="w"
+        )
+        self.error_label.pack(fill="both", padx=10, pady=10)
 
 
 
