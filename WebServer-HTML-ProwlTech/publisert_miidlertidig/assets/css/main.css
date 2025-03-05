@@ -8742,6 +8742,27 @@ input, select, textarea {
 
 .back-button-container {
 	margin-top: 2rem;  /* Adjust the value as needed */
-	margin-left: 2rem; /* If you also want it moved from the left */
+	margin-left: 22rem; /* If you also want it moved from the left */
   }
+  @media screen and (max-width: 1013px) {
+	/* Gjelder for skjermer under ^x bredde */
+	.banner.style1 .logo-container {
+	  position: static;        /* Fjern absolutt plassering */
+	  top: auto;
+	  left: auto;
+	  margin: 0 auto;
+	  width: 100%;
+	  padding: 1rem;
+  
+	  /* Juster flex-oppsettet for mobil */
+	  display: flex;
+	  flex-direction: column;   /* Stabler logoene vertikalt */
+	  align-items: center;      /* Midtstill */
+	  gap: 1rem;                /* Mellomrom mellom logoene */
+	}
+  
+	/* Om du vil ha dem i én rad (side ved side) men likevel på topp,
+	   kan du i stedet gjøre flex-direction: row; flex-wrap: wrap; */
+  }
+  
   
