@@ -41,7 +41,7 @@ class ProwlTechApp(ctk.CTk):
         self.title_label = ctk.CTkLabel(
             self.top_frame, 
             text="ProwlTech\nKontrollpanel",
-            font=("Century Gothic", 30, "bold"),
+            font=("Century Gothic", 50, "bold"),
             text_color="white",
             justify="center",
             anchor="center"
@@ -51,12 +51,15 @@ class ProwlTechApp(ctk.CTk):
         #knapp (koble til kontroller)
         self.connect_button = ctk.CTkButton(
             self.top_frame,
+            width=50,
+            height=50,
             text="Koble til kontroller",
+            font=("Century Gothic", 18, "bold"),
             fg_color="#6f1c7c",
             text_color="white",
             corner_radius=10
         )
-        self.connect_button.grid(row=0, column=0, padx=10, pady=10, sticky="w")
+        self.connect_button.grid(row=0, column=0, padx=20, pady=20, sticky="w")
 
       
     #midtseksjon med statusinformasjon
@@ -86,11 +89,33 @@ class ProwlTechApp(ctk.CTk):
         self.battery_frame.configure(height=170, width=170)
         self.battery_frame.grid_propagate(False)
 
+        #batteristatus: tittel
+        self.battery_label = ctk.CTkLabel(
+            self.battery_frame, 
+            text="Batteristatus",
+            font=("Century Gothic", 14, "bold"),
+            text_color="white",
+            justify="center",
+            anchor="center"
+        )
+        self.battery_label.place(relx=0.5, rely=0.5, anchor=ctk.CENTER)
+
         #temperaturmålinger
         self.temp_frame = ctk.CTkFrame(self.left_frame, fg_color="#4C0643", corner_radius=20)
         self.temp_frame.grid(row=0, column=1, sticky="nsew", padx=5, pady=5)
         self.temp_frame.configure(height=170, width=170)
         self.temp_frame.grid_propagate(False)
+
+        #temperaturmålinger: tittel
+        self.temp_label = ctk.CTkLabel(
+            self.temp_frame, 
+            text="Temperaturmåling",
+            font=("Century Gothic", 14, "bold"),
+            text_color="white",
+            justify="center",
+            anchor="center"
+        )
+        self.temp_label.place(relx=0.5, rely=0.5, anchor=ctk.CENTER)
 
         #høyre kolonne: to bokser over hverandre
         self.right_frame = ctk.CTkFrame(self.status_frame, fg_color="#29043C")
@@ -107,11 +132,33 @@ class ProwlTechApp(ctk.CTk):
         self.connection_frame.configure(height=70, width=250)
         self.connection_frame.grid_propagate(False)
 
+        #tilkoblingsstatus: tittel
+        self.connect_label = ctk.CTkLabel(
+            self.connection_frame, 
+            text="Tilkoblingsstatus",
+            font=("Century Gothic", 14, "bold"),
+            text_color="white",
+            justify="center",
+            anchor="center"
+        )
+        self.connect_label.place(relx=0.5, rely=0.5, anchor=ctk.CENTER)
+
         #sensormålinger
         self.sensor_frame = ctk.CTkFrame(self.right_frame, fg_color="#4C0643", corner_radius=20)
         self.sensor_frame.grid(row=1, column=0, sticky="nsew", padx=5, pady=5)
         self.sensor_frame.configure(height=70, width=250)
         self.sensor_frame.grid_propagate(False)
+
+        #sensormålinger: tittel
+        self.sensor_label = ctk.CTkLabel(
+            self.sensor_frame, 
+            text="Sensordata",
+            font=("Century Gothic", 14, "bold"),
+            text_color="white",
+            justify="center",
+            anchor="center"
+        )
+        self.sensor_label.place(relx=0.5, rely=0.5, anchor=ctk.CENTER)
 
 
     #bunnseksjon med feilmeldinger 
