@@ -47,8 +47,8 @@ class ProwlTechApp(ctk.CTk):
         logo_image = Image.open("USN_logo.png")                                            #laste inn bilde av logo
         self.logo_icon = ctk.CTkImage(light_image=logo_image, size=(50, 50))               #lage bilde og sette størresle 
 
-        self.logo_label = ctk.CTkLabel(self.top_frame, image=self.logo_icon, text="")
-        self.logo_label.place(relx=10, rely=10, anchor="ne")
+        self.logo_label = ctk.CTkLabel(self.top_frame, image=self.logo_icon, text="")      #legge logo i en Label
+        self.logo_label.place(x=730, y=25)                             #plassering av logoen
 
     #ikon
         bluetooth_image = Image.open("bluetooth.png")
