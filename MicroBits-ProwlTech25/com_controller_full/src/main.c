@@ -16,7 +16,7 @@ void main(void)
     canBegin();
     start_sensor_thread();
     start_js_thread();
-    interruptBegin();
+    interruptThreadBegin();
 
     while(1) {
         k_msleep(500);  // Sleep for 100 milliseconds

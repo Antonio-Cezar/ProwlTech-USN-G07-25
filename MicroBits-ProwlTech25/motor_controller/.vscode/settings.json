@@ -1,5 +1,7 @@
 {
     "files.associations": {
-        "motorkontroller.h": "c"
+        "kernel.h": "c",
+        "gpio.h": "c",
+        "can.h": "c"
     }
 }
