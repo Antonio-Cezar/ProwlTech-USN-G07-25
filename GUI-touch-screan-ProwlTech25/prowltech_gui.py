@@ -1,4 +1,5 @@
 import customtkinter as ctk 
+from PIL import Image
 
 # Hovedvindu-oppsett
 ctk.set_appearance_mode("dark")
@@ -6,10 +7,10 @@ ctk.set_default_color_theme("dark-blue")
 
 #fargestandarder 
 background_color = "#0F0418"
-top_panel_color = "#37122F"
-button_color = "#77277B"
-frame_color = "#3D1232"
-border_color = "#2F0729"
+top_panel_color = "#3F1435"
+button_color = "#5A1E5E"
+frame_color = "#2F0E2F"
+border_color = "#2C0D2F"
 
 class ProwlTechApp(ctk.CTk):
     def __init__(self):
@@ -31,6 +32,8 @@ class ProwlTechApp(ctk.CTk):
         self.status_section()   #row=1
         self.error_section()    #row=2
 
+       
+
 
     #toppseksjon (row=0) med tittel og knapp
     def top_bar(self):
@@ -45,6 +48,11 @@ class ProwlTechApp(ctk.CTk):
         self.top_frame.grid_columnconfigure(2, weight=0)    #plass til annet 
 
         #self.rowconfigure(2, minsize=70)
+        
+        #ikon
+        bluetooth_image = Image.open("bluetooth.png")
+        self.bluetooth_icon = ctk.CTkImage(light_image=bluetooth_image, size=(20, 20))
+
 
         #tittel
         self.title_label = ctk.CTkLabel(
@@ -63,6 +71,8 @@ class ProwlTechApp(ctk.CTk):
             width=50,
             height=50,
             text="Koble til kontroller",
+            image=self.bluetooth_icon,
+            compound="right",
             font=("Century Gothic", 18),
             fg_color=button_color,
             text_color="white",
@@ -113,22 +123,32 @@ class ProwlTechApp(ctk.CTk):
         self.left_frame.grid_columnconfigure(0, weight=1)
         self.left_frame.grid_columnconfigure(1, weight=1)
 
-        #batteristatus
-        self.battery_frame = ctk.CTkFrame(self.left_frame, fg_color=frame_color, corner_radius=20, border_width=7, border_color=border_color)
-        self.battery_frame.grid(row=0, column=0, padx=10, pady=10)
+
+
+        #batteristatus: seksjon
+        self.battery_container = ctk.CTkFrame(self.left_frame, fg_color="white")
+        self.battery_container.grid(row=0, column=0, sticky="nsew", padx=5, pady=5)
+        self.battery_container.grid_rowconfigure(0, weight=0)
+        self.battery_container.grid_rowconfigure(1, weight=0)
+
+        #batteristatus: ramme
+        self.battery_frame = ctk.CTkFrame(self.battery_container, fg_color=frame_color, corner_radius=20, border_width=7, border_color=border_color)
+        self.battery_frame.grid(row=1, column=0, padx=20, pady=10, sticky="nsew")     #self.battery_frame.grid(row=0, column=0, padx=10, pady=10)
         self.battery_frame.configure(height=170, width=170)
         self.battery_frame.grid_propagate(False)
 
         #batteristatus: tittel
         self.battery_label = ctk.CTkLabel(
-            self.battery_frame, 
+            self.battery_container, 
             text="Batteristatus",
             font=("Century Gothic", 14, "bold"),
             text_color="white",
             justify="center",
             anchor="center"
         )
-        self.battery_label.place(relx=0.5, rely=0.5, anchor=ctk.CENTER)
+        self.battery_label.grid(row=0, column=0, sticky="ew", pady=(0, 5))                            #self.battery_label.place(relx=0.5, rely=0.5, anchor=ctk.CENTER)
+
+
 
         #temperaturmålinger
         self.temp_frame = ctk.CTkFrame(self.left_frame, fg_color=frame_color, corner_radius=20, border_width=7, border_color=border_color)
