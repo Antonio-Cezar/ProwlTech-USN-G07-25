@@ -48,7 +48,7 @@ class ProwlTechApp(ctk.CTk):
         self.logo_icon = ctk.CTkImage(light_image=logo_image, size=(50, 50))               #lage bilde og sette størresle 
 
         self.logo_label = ctk.CTkLabel(self.top_frame, image=self.logo_icon, text="")      #legge logo i en Label
-        self.logo_label.place(x=730, y=25)                             #plassering av logoen
+        self.logo_label.place(x=730, y=25)                                                 #plassering av logoen
 
     #ikon
         bluetooth_image = Image.open("bluetooth.png")
@@ -87,15 +87,26 @@ class ProwlTechApp(ctk.CTk):
 
 #pop-up tilkoblingsvindu
     def open_connection_window(self):
-        self.popup_panel = ctk.CTkFrame(self, fg_color=background_color, corner_radius=0, border_width=10, border_color=border_color)
+        self.popup_panel = ctk.CTkFrame(self, fg_color=background_color, corner_radius=20, border_width=10, border_color="black")
         self.popup_panel.place(relx=0.5, rely=0.5, anchor="center", relwidth=0.9, relheight=0.9)
 
-        label = ctk.CTkLabel(self.popup_panel, text="Tilkobling", font=("Century Gothic", 18))
-        label.pack(padx=20, pady=20)
+        self.popup_panel.grid_rowconfigure(0, weight=0)
+        self.popup_panel.grid_rowconfigure(1, weight=1)
+        self.popup_panel.grid_columnconfigure(0, weight=1)
+        self.popup_panel.grid_columnconfigure(1, weight=1)
+
+        self.top = ctk.CTkFrame(self.popup_panel, fg_color=top_panel_color)
+        self.top.grid(row=0, column=0, columnspan=2, sticky="nsew")
+
+        self.bottom = ctk.CTkFrame(self.popup_panel, fg_color=background_color)
+        self.bottom.grid(row=1, column=0, columnspan=2, sticky="nsew")
+
+        self.label = ctk.CTkLabel(self.top, text="Tilkobling", font=("Century Gothic", 18))
+        self.label.pack(fill="x")
 
     #knapp til å lukke pop-up
         close_button = ctk.CTkButton(
-            self.popup_panel,
+            self.top,
             text="Lukk",
             command=self.close_connection_popup
         )
