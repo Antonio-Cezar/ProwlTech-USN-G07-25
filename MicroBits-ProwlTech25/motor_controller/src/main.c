@@ -7,7 +7,7 @@
 #include <string.h>
 #include <stdio.h>
 #include "pwm.h"
-#include "motor_controller.h"
+#include "motorkontroller.h"
 #include "canbus.h"
 // Commented and coded by OA and EAH
 

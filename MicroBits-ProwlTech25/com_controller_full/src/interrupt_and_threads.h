@@ -38,6 +38,7 @@ void continous_sensor_thread();
 // Dette er funksjonen som kjøres når timet interrupt inntreffer. Når interrupt inntreffer endres event_type slik at ny funksjonalitet skjer --> lager tråd som kjører process_data
 static void timer_handler(nrf_timer_event_t event_type, void *p_context);
 
+
 // Dette er funksjonen som setter opp og initialiserer timet interrupt. Denne funksjonen er tatt fra veileders kode på github: https://github.com/aiunderstand/Real-TimeOS-with-Microbit-nRF52833/tree/main/Zephyr-C/Hardware_Timer_with_interrupt
 void interruptThreadBegin();
 
