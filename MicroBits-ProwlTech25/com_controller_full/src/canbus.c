@@ -5,7 +5,7 @@
 #include <zephyr/device.h>
 #include "canbus.h"
 #include <stdio.h>
-// Commented and coded by OAo
+// Commented and coded by OA
 
 uint8_t received_byte;
 
