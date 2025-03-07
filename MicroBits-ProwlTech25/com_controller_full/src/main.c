@@ -6,20 +6,18 @@
 #include "path_check.h"
 #include "canbus.h"
 #include "bt_controller.h"
-//(PROWLTECH25) Commented and coded by CA & RS 
 
-void main(void)
-{
 
-    //(FENRIS24) configure_uart(uart_dev);
+int main(void) {
+    //configure_uart(uart_dev);
     btBegin();
     canBegin();
     start_sensor_thread();
     start_js_thread();
     interruptThreadBegin();
 
-    while(1) {
-        k_msleep(500);  // (FENRIS24) Sleep for 100 milliseconds
+    while (1) {
+        k_msleep(500);  // Sleep for 100 milliseconds
     }
-
+    return 0; // Add return statement
 }
