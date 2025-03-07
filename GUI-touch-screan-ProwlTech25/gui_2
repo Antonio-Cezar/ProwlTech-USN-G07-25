@@ -51,9 +51,13 @@ class ProwlTechApp(ctk.CTk):
         self.logo_label = ctk.CTkLabel(self.top_frame, image=self.logo_icon, text="")      #legge logo i en Label
         self.logo_label.place(x=720, y=25)                                                 #plassering av logoen
 
-    #ikon
+    #ikon: bluetooth
         bluetooth_image = Image.open("bluetooth.png")
         self.bluetooth_icon = ctk.CTkImage(light_image=bluetooth_image, size=(20, 20))
+
+    #ikon: av/på
+        power_image = Image.open("power.png")
+        self.power_icon = ctk.CTkImage(light_image=power_image, size=(25, 25))
 
     #tittel
         self.title_label = ctk.CTkLabel(
@@ -84,6 +88,21 @@ class ProwlTechApp(ctk.CTk):
             command=self.open_connection_window         #funksjon av knappetrykk
         )
         self.connect_button.grid(row=0, column=0, padx=30, pady=45)
+
+    #knapp: av/på
+        self.power_button = ctk.CTkButton(
+            self.top_frame,
+            width=25,
+            height=60,
+            text="",
+            image=self.power_icon,
+            compound="right",
+            fg_color=button_color,
+            corner_radius=90,
+            border_width=1,
+            border_color="#3D143F"
+        )
+        self.power_button.grid(row=0, column=3, padx=(320, 10), pady=45)
 
 
 #Pop-up vindu:
