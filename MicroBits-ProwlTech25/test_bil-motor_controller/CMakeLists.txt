@@ -1,6 +1,6 @@
 cmake_minimum_required(VERSION 3.20.0)
 find_package(Zephyr REQUIRED HINTS $ENV{ZEPHYR_BASE})
 
-project(can_sensor)
+project(motorkontroller)
 
-target_sources(app PRIVATE src/main.c src/hc_sr04.c src/canbus.c)
+target_sources(app PRIVATE src/main.c src/motorkontroller.c src/pwm.c src/canbus.c)
