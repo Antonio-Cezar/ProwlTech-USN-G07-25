@@ -5,6 +5,7 @@
 #include <zephyr/kernel.h>
 #include <zephyr/sys/printk.h>
 #include "bt_controller.h"
+//(PROWLTECH25) Commented and coded by CA & RS 
 
 //(FENRSI24) Definerer hvor stort plass hver tråd skal tildeles
 #define PROCESS_THREAD_STACK_SIZE_JOY  4096

@@ -5,6 +5,7 @@
 #include <stdbool.h>
 #include <zephyr/sys/printk.h>
 #include <nrfx_timer.h>
+//(PROWLTECH25) Commented and coded by CA & RS 
 
 //(FENRSI24) Dette er en datatype brukt til å ta imot joystick-data fra den trådløse kontrolleren
 //(FENRSI24) Den består av 2 heltall (potmeter verdi i x og y retning), og en bool (om joystick knapp er trykket inn)

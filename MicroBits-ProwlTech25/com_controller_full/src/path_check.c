@@ -1,7 +1,7 @@
-
 #include <stdio.h>
 #include <stdbool.h>
 #include "path_check.h"
+//(PROWLTECH25) Commented and coded by CA & RS 
 
 struct path_check_results path_check(int angle, int speed, bool js_num, uint8_t sensorValues){
     // (FENRIS24) Lager en variabel som kan settes lik sensorene i retningen som skal testen. Se Masketabell for sensorer (tabell 9 i rapport)

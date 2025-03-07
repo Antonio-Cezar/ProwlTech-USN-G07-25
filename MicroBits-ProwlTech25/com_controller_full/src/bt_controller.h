@@ -5,6 +5,7 @@
 #include <stdbool.h>
 
 //(FENRSI24) Commented and coded by OA
+//(PROWLTECH25) Commented and coded by CA & RS 
 
 #define RING_BUF_SIZE 1024 //(FENRSI24) Defining the size of the ring-buffer
 

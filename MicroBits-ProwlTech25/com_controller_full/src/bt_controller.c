@@ -5,6 +5,7 @@
 #include <string.h>
 #include <stdlib.h>
  //(FENRSI24) Commented and coded by OA
+ //(PROWLTECH25) Commented and coded by CA & RS 
 
 const struct device *const get_uart_dev(void){ //(FENRSI24) ferFuction responsible for finding and accessing the UART/ HC-05 device
     return DEVICE_DT_GET(DT_NODELABEL(uart1)); //(FENRSI24) Returns the UART device by looking for it in the devicetree/ overlay file by label - 

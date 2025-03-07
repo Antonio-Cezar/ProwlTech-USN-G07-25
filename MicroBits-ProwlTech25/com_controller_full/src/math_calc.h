@@ -1,5 +1,7 @@
 #ifndef __MATH_CALC_H
 #define __MATH_CALC_H
+//(PROWLTECH25) Commented and coded by CA & RS 
+
 //(FENRIS24) Datatype for variabel som skal holde x og y verdi etter stereografisk projeksjon
 struct ProjectionResult {
     int x;

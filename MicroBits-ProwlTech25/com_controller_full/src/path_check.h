@@ -1,6 +1,7 @@
 #ifndef __PATH_CHECK_H
 #define __PATH_CHECK_H
 #include <stdio.h>
+//(PROWLTECH25) Commented and coded by CA & RS 
 
 //(FENRIS24) datatype for kjørekommando etter path_check. Inneholder 2 int (vinkel og fart) og en bool (om joystick er trykket inn eller ikke)
 struct path_check_results {

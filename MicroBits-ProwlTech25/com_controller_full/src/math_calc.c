@@ -1,5 +1,7 @@
 #include <math.h>
 #include "math_calc.h"
+//(PROWLTECH25) Commented and coded by CA & RS 
+
 // (FENRIS24) Funksjonen tar inn rå potmeter verdi sendt fra kontroller (0 til 1023)
 struct ProjectionResult stereographic_projection_2D(int x, int y){
     // (FENRIS24) Trekker fra 512 (1023/2) fra x og y. Må finne midtpunkt og ha muligheten til å ha negative akse-verdier for å senere bruke verdier i enhetssirkel.

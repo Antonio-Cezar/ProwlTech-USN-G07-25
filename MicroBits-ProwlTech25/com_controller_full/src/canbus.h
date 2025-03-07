@@ -3,6 +3,7 @@
 #include <zephyr/drivers/can.h>
 
 // Commented and coded by OA
+//(PROWLTECH25) Commented and coded by CA & RS 
 
 //can_dev
 const struct device *const get_can_dev(void); // Function for getting the CAN device
