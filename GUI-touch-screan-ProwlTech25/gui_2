@@ -15,9 +15,9 @@ border_color = "#2C0D2F"
 class ProwlTechApp(ctk.CTk):
     def __init__(self):
         super().__init__()
-        self.title("ProwlTech Kontrollpanel")   #tittel
-        self.geometry("800x480")    #størrelse på vindu 
-        self.resizable(False,False)
+        self.title("ProwlTech Kontrollpanel")       #tittel
+        self.geometry("800x480")                    #størrelse på vindu 
+        self.resizable(False,False)                 #vinduet har ikke en dynamisk størrelse
 
 
 
@@ -37,6 +37,7 @@ class ProwlTechApp(ctk.CTk):
         self.mid_section()
         self.bot_section()
 
+#Toppseksjon:
     def top_section(self):
     #ramme for toppseksjonen
         self.top_frame = ctk.CTkFrame(self, fg_color=top_panel_color, height=150)
@@ -87,10 +88,14 @@ class ProwlTechApp(ctk.CTk):
 
 #pop-up tilkoblingsvindu
     def open_connection_window(self):
-        self.popup_panel = ctk.CTkFrame(self, fg_color=background_color, corner_radius=20, border_width=10, border_color="black")
-        self.popup_panel.place(relx=0.5, rely=0.5, anchor="center", relwidth=0.9, relheight=0.9)
+        self.popup_border =ctk.CTkFrame(self, fg_color=border_color, corner_radius=0)
+        self.popup_border.place(relx=0.5, rely=0.5, anchor="center", relwidth=0.9, relheight=0.9)
+        self.popup_border.grid_propagate(False)
 
-        self.popup_panel.grid_rowconfigure(0, weight=0)
+        self.popup_panel = ctk.CTkFrame(self.popup_border, fg_color=background_color, corner_radius=20)
+        self.popup_panel.place(relx=0.5, rely=0.5, anchor="center", relwidth=0.98, relheight=0.98)
+
+        self.popup_panel.grid_rowconfigure(0, minsize=150)
         self.popup_panel.grid_rowconfigure(1, weight=1)
         self.popup_panel.grid_columnconfigure(0, weight=1)
         self.popup_panel.grid_columnconfigure(1, weight=1)
@@ -100,20 +105,34 @@ class ProwlTechApp(ctk.CTk):
 
         self.bottom = ctk.CTkFrame(self.popup_panel, fg_color=background_color)
         self.bottom.grid(row=1, column=0, columnspan=2, sticky="nsew")
+        self.bottom.grid_propagate(False)
 
         self.label = ctk.CTkLabel(self.top, text="Tilkobling", font=("Century Gothic", 18))
         self.label.pack(fill="x")
 
-    #knapp til å lukke pop-up
+    #knapp: lukke pop-up
         close_button = ctk.CTkButton(
             self.top,
             text="Lukk",
+            width=70,
+            height=50,
             command=self.close_connection_popup
         )
-        close_button.pack(padx=20, pady=20)
+        close_button.place(x=500, y=30)
+
+    #knapp: søke etter kontrollere
+        search_button = ctk.CTkButton(
+            self.top,
+            text="Søk",
+            width=70,
+            height=50
+        )
+        search_button.place(x=10, y=30)
+
 
 #funskjon til å lukke pop-up vindu
     def close_connection_popup(self):
+        self.popup_border.destroy()
         self.popup_panel.destroy()
 
 
