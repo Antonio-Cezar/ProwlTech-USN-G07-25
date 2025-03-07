@@ -1,77 +1,78 @@
 #include <math.h>
 #include "math_calc.h"
-// Funksjonen tar inn rå potmeter verdi sendt fra kontroller (0 til 1023)
+
+//(FENRIS24) Funksjonen tar inn rå potmeter verdi sendt fra kontroller (0 til 1023)
 struct ProjectionResult stereographic_projection_2D(int x, int y){
-    // Trekker fra 512 (1023/2) fra x og y. Må finne midtpunkt og ha muligheten til å ha negative akse-verdier for å senere bruke verdier i enhetssirkel.
+    //(FENRIS24) Trekker fra 512 (1023/2) fra x og y. Må finne midtpunkt og ha muligheten til å ha negative akse-verdier for å senere bruke verdier i enhetssirkel.
     int unit_x = x - 512;
     int unit_y = y - 512;
 
-    // Finner forholdet mellom x og y verdi
+    //(FENRIS24) Finner forholdet mellom x og y verdi
     double a = (double)y / (double)x;
 
-    // Trigonometrisk formel for å finne x i en sirkel vha forholdet mellom x og y i en firkant
+    //(FENRIS24) Trigonometrisk formel for å finne x i en sirkel vha forholdet mellom x og y i en firkant
     double temp_x = 1 / sqrt(1 + (a * a));
 
-    // Finner y-verdi ved å bruke forholdet mellom x og y i en firkant, og multipliserer med ny x-verdi
+    //(FENRIS24) Finner y-verdi ved å bruke forholdet mellom x og y i en firkant, og multipliserer med ny x-verdi
     double temp_y = a * temp_x;
     
-    // lager en variabel som kan holde resultatene fra funksjonen
+    //(FENRIS24) lager en variabel som kan holde resultatene fra funksjonen
     struct ProjectionResult result;
 
-    // Oppdaterer variablen med resultatene utregnet i funksjonen
+    //(FENRIS24) Oppdaterer variablen med resultatene utregnet i funksjonen
     result.x = (int)(temp_x * unit_x);
     result.y = (int)(temp_y * unit_y);
 
-    // Funksjon som sjekker etter fortegnsfeil etter omforming av verdier
+    //(FENRIS24) Funksjon som sjekker etter fortegnsfeil etter omforming av verdier
     if ((unit_y > 29 && result.y < 29) || (unit_y < -29 && result.y > 29)){
         result.y = (result.y * -1);
     }
     
-    // Returnerer variablen
+    //(FENRIS24) Returnerer variablen
     return result;
 }
 
-// Denne funksjonen på få inn stereografisk projeksjonerte x og y verdier
+//(FENRIS24) Denne funksjonen på få inn stereografisk projeksjonerte x og y verdier
 int calculate_angle_degrees(int x, int y){
-    // Lager variabler som lagrer x og y midlertidig
+    //(FENRIS24) Lager variabler som lagrer x og y midlertidig
     int temp_x = x;
     int temp_y = y;
 
-    // Funksjon for å definere dødsonen til joystick i x-retning
+    //(FENRIS24) Funksjon for å definere dødsonen til joystick i x-retning
     if ((-40 < x) && (x < 41)){
         temp_x = 0;
     }
-    // Funksjon for å definere dødsone til joystick i y-retning
+    //(FENRIS24) Funksjon for å definere dødsone til joystick i y-retning
     if ((-28 < y) && (y < 29)){
         temp_y = 0;
     }
 
-    // Sikkerhetslag i tilfelle joystick-verdiene kommer utenfor maks område i negativ og positiv retning
+    //(FENRIS24) Sikkerhetslag i tilfelle joystick-verdiene kommer utenfor maks område i negativ og positiv retning
     if (x > 512){temp_x = 512;}
     if (x < -512){temp_x = -512;}
     if (y > 512){temp_y = 512;}
     if (y < -512){temp_y = -512;}
 
-    // Lager variabel som skal holde vinkelen målt i radianer. Variabelen settes lik resultatet av en atan2 funksjon med x og y som parametere
+    //(FENRIS24) Lager variabel som skal holde vinkelen målt i radianer. Variabelen settes lik resultatet av en atan2 funksjon med x og y som parametere
     double angle_radians = atan2(temp_x, temp_y);
 
-    // Lager variabel som skal holde vinkel målt i grader. Variabelen settes lik radianer utregnet omgjort til vinkel
+    //(FENRIS24) Lager variabel som skal holde vinkel målt i grader. Variabelen settes lik radianer utregnet omgjort til vinkel
     double angle_degrees = ((angle_radians * 180) / 3.14159);
 
-    //atan2 gir vinkel fra -180 til 180 grader. Denne funksjonen omgjør negativ vinkel til vinkler over 180 grader. Slik at 0-360 grader oppnåes.
+    //(FENRIS24) atan2 gir vinkel fra -180 til 180 grader. Denne funksjonen omgjør negativ vinkel til vinkler over 180 grader. Slik at 0-360 grader oppnåes.
     if (angle_degrees < 0){angle_degrees += 360.0;}
 
-    // returnerer utregnet vinkel
+    //(FENRIS24) returnerer utregnet vinkel
     return (int)angle_degrees;
 }
 
-// Funksjon som regner på punkt(x,y) sin lengde fra origo. Bruker vanlig pytagoras setning h = sqrt(k1*k1 + k2*k2)
+//(FENRIS24) Funksjon som regner på punkt(x,y) sin lengde fra origo. Bruker vanlig pytagoras setning h = sqrt(k1*k1 + k2*k2)
 int calculate_radius(int x, int y){
     // lager variabler midlertidig for å holde verdiene.
     int temp_x = x;
     int temp_y = y;
 
-    // Sjekk for å definere dødsone fra joystick
+    //(FENRIS24) Sjekk for å definere dødsone fra joystick
     if ((-40 < x) && (x < 40)){
         temp_x = 0;
     }
@@ -79,18 +80,18 @@ int calculate_radius(int x, int y){
         temp_y = 0;
     }
 
-    // lager variabel som holder resultatet utregnet etter pytagoras sin setning
+    //(FENRIS24) lager variabel som holder resultatet utregnet etter pytagoras sin setning
     double radius = sqrt((temp_x * temp_x) + (temp_y * temp_y));
 
-    // Returnerer punktets lengde fra origo
+    //(FENRIS24) Returnerer punktets lengde fra origo
     return (int)radius;
 }
 
 
 int scale_to_percent(int number, int max_value){
-    // Lager variabel som holder det skalerte tallet etter prosentutregning.
+    //(FENRIS24) Lager variabel som holder det skalerte tallet etter prosentutregning.
     double scaled_number = ((double)number / (double)max_value) * 100.0;
 
-    // Returnerer tall som beskriver hvor stort number er iforhold til max_value
+    //(FENRIS24) Returnerer tall som beskriver hvor stort number er iforhold til max_value
     return (int)(scaled_number);
 }
