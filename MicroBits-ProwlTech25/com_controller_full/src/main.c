@@ -11,7 +11,7 @@
 void main(void)
 {
 
-    //configure_uart(uart_dev);
+    //(FENRIS24) configure_uart(uart_dev);
     btBegin();
     canBegin();
     start_sensor_thread();
@@ -19,7 +19,7 @@ void main(void)
     interruptThreadBegin();
 
     while(1) {
-        k_msleep(500);  // Sleep for 100 milliseconds
+        k_msleep(500);  // (FENRIS24) Sleep for 100 milliseconds
     }
 
 }
