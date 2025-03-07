@@ -45,11 +45,11 @@ class ProwlTechApp(ctk.CTk):
         self.top_frame.grid_propagate(False)
 
     #USN-logo
-        logo_image = Image.open("USN_logo.png")                                            #laste inn bilde av logo
-        self.logo_icon = ctk.CTkImage(light_image=logo_image, size=(50, 50))               #lage bilde og sette størresle 
+        logo_image = Image.open("USN_logo2.png")                                            #laste inn bilde av logo
+        self.logo_icon = ctk.CTkImage(light_image=logo_image, size=(60, 40))               #lage bilde og sette størresle 
 
         self.logo_label = ctk.CTkLabel(self.top_frame, image=self.logo_icon, text="")      #legge logo i en Label
-        self.logo_label.place(x=730, y=25)                                                 #plassering av logoen
+        self.logo_label.place(x=720, y=25)                                                 #plassering av logoen
 
     #ikon
         bluetooth_image = Image.open("bluetooth.png")
@@ -86,49 +86,87 @@ class ProwlTechApp(ctk.CTk):
         self.connect_button.grid(row=0, column=0, padx=30, pady=45)
 
 
-#pop-up tilkoblingsvindu
+#Pop-up vindu:
     def open_connection_window(self):
+
+        #ikon: kryss 
+        cross_image = Image.open("cross.png")
+        self.cross_icon = ctk.CTkImage(light_image=cross_image, size=(15, 15))
+
+        #ikon: kryss 
+        search_image = Image.open("search.png")
+        self.search_icon = ctk.CTkImage(light_image=search_image, size=(15, 15))
+
+    #ytre ramme
         self.popup_border =ctk.CTkFrame(self, fg_color=border_color, corner_radius=0)
         self.popup_border.place(relx=0.5, rely=0.5, anchor="center", relwidth=0.9, relheight=0.9)
         self.popup_border.grid_propagate(False)
 
+    #indre ramme
         self.popup_panel = ctk.CTkFrame(self.popup_border, fg_color=background_color, corner_radius=20)
         self.popup_panel.place(relx=0.5, rely=0.5, anchor="center", relwidth=0.98, relheight=0.98)
 
-        self.popup_panel.grid_rowconfigure(0, minsize=150)
+    #grid i indre ramme
+        self.popup_panel.grid_rowconfigure(0, minsize=80)
         self.popup_panel.grid_rowconfigure(1, weight=1)
         self.popup_panel.grid_columnconfigure(0, weight=1)
         self.popup_panel.grid_columnconfigure(1, weight=1)
+        self.popup_panel.grid_columnconfigure(2, weight=1)
 
+    #toppseksjon
         self.top = ctk.CTkFrame(self.popup_panel, fg_color=top_panel_color)
-        self.top.grid(row=0, column=0, columnspan=2, sticky="nsew")
+        self.top.grid(row=0, column=0, columnspan=3, sticky="nsew")
 
+    #bunnseksjon
         self.bottom = ctk.CTkFrame(self.popup_panel, fg_color=background_color)
-        self.bottom.grid(row=1, column=0, columnspan=2, sticky="nsew")
-        self.bottom.grid_propagate(False)
+        self.bottom.grid(row=1, column=0, columnspan=3, sticky="nsew")
+        #self.bottom.grid_propagate(False)
+        
+     #knapp: søke etter kontrollere
+        search_button = ctk.CTkButton(
+            self.top,
+            text="Søk",
+            width=150,
+            height=50,
+            image=self.search_icon,
+            compound="right",  
+            font=("Century Gothic", 16),
+            fg_color=button_color,
+            text_color="white",
+            corner_radius=70,
+            border_width=1,
+            border_color="#3D143F",
+        )
+        search_button.grid(row=0, column=0, padx=(10, 50), pady=30)
 
-        self.label = ctk.CTkLabel(self.top, text="Tilkobling", font=("Century Gothic", 18))
-        self.label.pack(fill="x")
+    #tittel
+        self.label = ctk.CTkLabel(
+            self.top, 
+            text="Enheter", 
+            font=("Century Gothic", 24),
+            justify="center",
+            anchor="center"
+            )
+        self.label.grid(row=0, column=1, padx=95, pady=30)
 
+   
     #knapp: lukke pop-up
         close_button = ctk.CTkButton(
             self.top,
             text="Lukk",
-            width=70,
+            width=150,
             height=50,
+            image=self.cross_icon,
+            compound="right",  
+            font=("Century Gothic", 16),
+            fg_color=button_color,
+            text_color="white",
+            corner_radius=70,
+            border_width=1,
+            border_color="#3D143F",
             command=self.close_connection_popup
         )
-        close_button.place(x=500, y=30)
-
-    #knapp: søke etter kontrollere
-        search_button = ctk.CTkButton(
-            self.top,
-            text="Søk",
-            width=70,
-            height=50
-        )
-        search_button.place(x=10, y=30)
-
+        close_button.grid(row=0, column=2, padx=(60, 10), pady=30)
 
 #funskjon til å lukke pop-up vindu
     def close_connection_popup(self):
