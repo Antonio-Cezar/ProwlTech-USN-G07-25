@@ -5,6 +5,10 @@
 #include <string.h>
 #include <stdlib.h>
  //(FENRSI24) Commented and coded by OA
+
+#include <zephyr/bluetooth/bluetooth.h>
+#include <zephyr/bluetooth/gap.h>
+#include <zephyr/bluetooth/conn.h>
  //(PROWLTECH25) Commented and coded by CA & RS 
 
 const struct device *const get_uart_dev(void){ //(FENRSI24) ferFuction responsible for finding and accessing the UART/ HC-05 device
@@ -63,26 +67,73 @@ void uart_fifo_callback(const struct device *dev, void *user_data) { //(FENRSI24
 }
 
 
-void process_joystick_data() { // Function that checks if there is new available data
-    if (new_data_available) { // If test to check if there is new data available
-        //printk("Using joystick data: ID=%d, X=%d, Y=%d\n", last_received_data.joystickId, last_received_data.x, last_received_data.y);
+void process_joystick_data() { //(FENRSI24) Function that checks if there is new available data
+    if (new_data_available) { //(FENRSI24) If test to check if there is new data available
+        //(FENRSI24) printk("Using joystick data: ID=%d, X=%d, Y=%d\n", last_received_data.joystickId, last_received_data.x, last_received_data.y);
         new_data_available = false;  // Sets the new data variable to false, indicating that there is no new data available at this point
     }
 }
 
-void configure_uart(const struct device *dev) { // Fucntion for setting up interrupt-driven UART communication using a ring-buffer
+void configure_uart(const struct device *dev) { //(FENRSI24) Fucntion for setting up interrupt-driven UART communication using a ring-buffer
     uart_irq_callback_set(dev, uart_fifo_callback); // Callback function that will be triggered by interrupts
-    uart_irq_rx_enable(dev); // Function that enables the receive interrupt for the device, triggering the callback function when there is new data comming in
-    ring_buf_init(&ringbuf, RING_BUF_SIZE, ring_buffer_storage); // Buffer used to store incoming data
+    uart_irq_rx_enable(dev); //(FENRSI24) Function that enables the receive interrupt for the device, triggering the callback function when there is new data comming in
+    ring_buf_init(&ringbuf, RING_BUF_SIZE, ring_buffer_storage); //(FENRSI24) Buffer used to store incoming data
 }
 
-void btBegin(){ // Function responcible for the initialization, configuration and startup of the UART/ HC-05 device
-    const struct device *const uart_dev = get_uart_dev(); // Getting the UART device
-    if (!device_is_ready(uart_dev)) { // If test checking if the UART device is ready or not
-        printk("UART device is not ready\n");
+static struct bt_conn *default_conn = NULL; //(PWORLTECH25) ....
+
+void device_found(const bt_addr_le_t *addr, int8_t rssi, uint8_t type, struct net_buf_simple *ad) //(PWORLTECH25) ....
+{
+    char dev[BT_ADDR_LE_STR_LEN];
+    bt_addr_le_to_str(addr, dev, sizeof(dev));
+    printk("Device found: %s (RSSI %d)\n", dev, rssi);
+
+    // Check if the device name contains "Xbox"
+    if (strstr(dev, "Xbox")) {
+        printk("Xbox Controller found! Connecting...\n");
+
+        struct bt_conn_le_create_param *create_param = BT_CONN_LE_CREATE_PARAM(
+            BT_CONN_LE_OPT_NONE, BT_GAP_SCAN_FAST_INTERVAL, BT_GAP_SCAN_FAST_WINDOW);
+
+        int err = bt_conn_le_create(addr, create_param, BT_LE_CONN_PARAM_DEFAULT, &default_conn);
+        if (err) {
+            printk("Failed to create connection (err %d)\n", err);
+        } else {
+            printk("Connection established\n");
+        }
+
+        bt_le_scan_stop();  // Stop scanning after finding the controller
+    }
+}
+
+
+void btReady(int err) //(PROWLTECH25) ....
+{
+    if (err) {
+        printk("Bluetooth init failed");
         return;
     }
+    printk("Bluetooth initialized\n");
 
-    configure_uart(uart_dev); // Calling upon the configure_uart function
-    printk("Starting to receive data...\n");
+    struct bt_le_scan_param scan_param = {
+        .type       = BT_LE_SCAN_ACTIVE,
+        .options    = BT_LE_SCAN_OPT_NONE,
+        .interval   = BT_GAP_SCAN_FAST_INTERVAL,
+        .window     = BT_GAP_SCAN_FAST_WINDOW,
+    };
+
+    err = bt_le_scan_start(&scan_param, device_found);
+    if (err) {
+        printk("Scanning failed to start");
+        return;
+    }
+    printk("Scanning started\n");
+}
+
+void btBegin() //(PROWLTECH25) ...
+{
+    int err = bt_enable(btReady);
+    if (err) {
+        printk("Bluetooth init failed");
+    }
 }
