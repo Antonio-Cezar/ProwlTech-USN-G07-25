@@ -1,0 +1,33 @@
+% Hvordan de tre microbitene v2.0 fungerer
+    - Disse er 
+
+% microbit "com_controller_full"
+    - Denne microbiten er CAN-bus kommunikasjons enheten som tar imot og sender data til de to andre microbitene og Raspberry PI 4
+    - Denne microbiten tar imot data fra Raspberry PI 4 og sender videre til motor_controller
+
+% microbit "motor_controller"
+    - Denne microbiten er motor kontrolleren som skal styre de fire motorene på bilen
+    - Denne microbiten tar imot data fra "com_controller_full" og styrer motorene på bilen
+
+% microbit "sensor_controller" 
+    - Denne microbiten er en sensor kontroller som skal virke som en anti-kollisjons system
+    - Denne microbiten tar imot data fra "com_controller_full" og sender videre til Raspberry PI 4
+
+% Raspberry PI 4
+    - GUI enheten på bilen
+    - Sender kun data fra bluetooth kontroller til microbit "com_controller_full" som derretter sender videre til "motor_controller"
+    - Henter ut data som senso og feilmeldning data
+
+% Test prosedyrer
+    !! Teste før pushe på GitHub
+    - Teste at microbitene kan lages "build" og "flash" til microbitene
+    - Teste at microbitene kan kommunisere sammen
+    - Teste at alle tidligere funksjoner fungerer som de skal
+    - Teste at nye funksjoner fungerer som de skal
+
+% Installasjon 
+    !! Åpne kun foldere til en microbit om gangen
+    - implementer
+    - build 
+    - flash
+    - testprosedyre
