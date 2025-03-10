@@ -1,0 +1,35 @@
+% Informasjon
+    - Dette er en liste over hva som må gjøres for å få Raspberry PI 4 til å fungere på mecanum bilen
+
+% Hvordan delen fungerer
+    - Det er tre forskjellige microbit v2.0 på bilen som kommuniserer sammen
+        - Den ene microbiten er CAN-bus kommunikasjons enheten som tar imot og sender data til de to andre microbitene og Raspberry PI 4
+        - Den andre microbiten en sensor kontroller som skal virke som en anti-kollisjons system
+        - Den tredje microbiten er en motor kontroller som skal styre de fire motorene på bilen
+
+    - Raspberry PI 4 og GUI med touch skjerm
+        - Raspberry PI 4 er tilkoblet en touch skjerm som viser GUI-en til bilen
+            - GUI-en skal være enkel og brukervennlig
+            - GUI-en skal vise data som batteri prosent, temperatur, feilmeldninger og sensor data
+                - Batteri prosent data hentes gjenom at en shunt tilkobles batteriet
+                - Temperatur data hentes gjennom en microbit
+                - Feilmeldinger hentes gjennom en kommunikasjons microbiten
+                - Sensor data hentes gjennom en sensor microbiten
+                
+            - Gjennom GUI-en skal det kunnes tilkobles tredjeparts bluetooth kontroller
+                - Dette gjøres ved at en bluetooth modul tilkobles Raspberry PI 4
+                - Når en tredjeparts bluetooth kontroller er tilkoblet skal et python script sende verdiene som kommer fra kontrolleren til CAN-bus microbiten
+                - CAN-bus microbiten skal så sende verdiene til motor microbiten som skal styre motorene på bilen
+
+% Instalert på Raspberry PI 4
+    - Nødvendige biblioteker
+        - Pygame
+        - RPi.GPIO
+        - python
+        - CAN-bus bibliotek
+        - GUI bibliotek
+
+% Kontroller_com.py
+    - Dette er et python script som skal sende data fra en tredjeparts bluetooth kontroller til CAN-bus microbiten
+    - Dette scriptet skal kjøre i bakgrunnen på Raspberry PI 4
+    - Scriptet skal sende data til CAN-bus microbiten gjennom en seriel kommunikasjon
