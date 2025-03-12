@@ -75,12 +75,6 @@ try:
         left_stick_x = joystick.get_axis(0)
         left_stick_y = joystick.get_axis(1)
 
-        # Test print for å sjekke verdiene.
-        if a_pressed:
-            print("A-knappen er trykket")
-        if b_pressed:
-            print("B-knappen er trykket")
-
         print(
             f"Venstre stikke: x={left_stick_x:.2f}, y={left_stick_y:.2f} | "
             f"Høyre stikke: x={right_stick_x:.2f}, y={right_stick_y:.2f}")
