@@ -72,8 +72,8 @@ try:
         right_stick_y = joystick.get_axis(4)
 
         # Lesing av venstre joystick verdier (svinging ved kjøring fremover og bakover)
-        left_stick_x = joystick.get_axis(3)
-        left_stick_y = joystick.get_axis(4)
+        left_stick_x = joystick.get_axis(0)
+        left_stick_y = joystick.get_axis(1)
 
         # Test print for å sjekke verdiene.
         if a_pressed:
