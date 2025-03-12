@@ -25,23 +25,53 @@ try:
     while True:
         pygame.event.pump()
         
-        # Lesing av A-knappen (button 0 på Xbox-kontroller)
-        if joystick.get_button(0):
+        # Lesing av A-knappen (button 1 på Xbox-kontroller (A))
+        if joystick.get_button(1):
             print("A-knappen er trykket")
             GPIO.output(18, GPIO.HIGH)
         else:
             GPIO.output(18, GPIO.LOW)
 
-            # Lesing av A-knappen (button 0 på Xbox-kontroller)
-        if joystick.get_button(1):
+        # Lesing av B-knappen (button 2 på Xbox-kontroller (B))
+        if joystick.get_button(2):
             print("B-knappen er trykket")
             GPIO.output(18, GPIO.HIGH)
         else:
             GPIO.output(18, GPIO.LOW)
 
+        # Lesing av X-knappen (button 4 på Xbox-kontroller (X))
+        if joystick.get_button(4):
+            print("X-knappen er trykket")
+            GPIO.output(18, GPIO.HIGH)
+        else:
+            GPIO.output(18, GPIO.LOW)
+
+        # Lesing av Y-knappen (button 4 på Xbox-kontroller (Y))
+        if joystick.get_button(4):
+            print("Y-knappen er trykket")
+            GPIO.output(18, GPIO.HIGH)
+        else:
+            GPIO.output(18, GPIO.LOW)
+
+        # Lesing av LB-knappen rotasjon (button 5 på Xbox-kontroller (LB))
+        if joystick.get_button(5):
+            print("LB-knappen er trykket")
+            GPIO.output(18, GPIO.HIGH)
+        else:
+            GPIO.output(18, GPIO.LOW)
+
+        # Lesing av RB-knappen rotasjon (button 6 på Xbox-kontroller (RB))
+        if joystick.get_button(6):
+            print("RB-knappen er trykket")
+            GPIO.output(18, GPIO.HIGH)
+        else:
+            GPIO.output(18, GPIO.LOW)
+
+        # Lesing av høyre joystick verdier (horisontal, venstre og høyre styring på bilen)
         right_stick_x = joystick.get_axis(3)
         right_stick_y = joystick.get_axis(4)
 
+        # Lesing av venstre joystick verdier (svinging ved kjøring fremover og bakover)
         left_stick_x = joystick.get_axis(3)
         left_stick_y = joystick.get_axis(4)
 
