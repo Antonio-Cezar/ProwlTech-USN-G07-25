@@ -3,14 +3,16 @@ from PIL import Image
 
 # Hovedvindu-oppsett
 ctk.set_appearance_mode("dark")
-ctk.set_default_color_theme("dark-blue") 
+#ctk.set_default_color_theme("dark") 
 
 #fargestandarder 
-background_color = "#0F0418"
-top_panel_color = "#3F1435"
-button_color = "#5A1E5E"
-frame_color = "#2F0E2F"
-border_color = "#2C0D2F"
+text_color = "#b1b1b1"
+background_color = "#3c0077"
+top_panel_color = "#1a0539"
+button_color = "#5d3996"
+frame_color = "#1a0539"
+border_color = "#472b73"
+error_section = "#240146"
 
 class ProwlTechApp(ctk.CTk):
     def __init__(self):
@@ -84,7 +86,7 @@ class ProwlTechApp(ctk.CTk):
             text_color="white",
             corner_radius=10,
             border_width=1,
-            border_color="#3D143F",
+            border_color=border_color,
             command=self.open_connection_window         #funksjon av knappetrykk
         )
         self.connect_button.grid(row=0, column=0, padx=30, pady=45)
@@ -100,7 +102,7 @@ class ProwlTechApp(ctk.CTk):
             fg_color=button_color,
             corner_radius=90,
             border_width=1,
-            border_color="#3D143F"
+            border_color=border_color
         )
         self.power_button.grid(row=0, column=3, padx=(320, 10), pady=45)
 
@@ -154,7 +156,7 @@ class ProwlTechApp(ctk.CTk):
             text_color="white",
             corner_radius=70,
             border_width=1,
-            border_color="#3D143F",
+            border_color=border_color,
         )
         search_button.grid(row=0, column=0, padx=(10, 50), pady=30)
 
@@ -182,7 +184,7 @@ class ProwlTechApp(ctk.CTk):
             text_color="white",
             corner_radius=70,
             border_width=1,
-            border_color="#3D143F",
+            border_color=border_color,
             command=self.close_connection_popup
         )
         close_button.grid(row=0, column=2, padx=(60, 10), pady=30)
@@ -310,7 +312,7 @@ class ProwlTechApp(ctk.CTk):
         self.error_label.pack(side="top", anchor="w", padx=15, pady=0)
        
         #ramme
-        self.error_frame = ctk.CTkFrame(self.error_container, height=80, width=750, fg_color="#1F1627", corner_radius=20)
+        self.error_frame = ctk.CTkFrame(self.error_container, height=80, width=750, fg_color=error_section, corner_radius=20)
         self.error_frame.pack(side="top", expand=True, padx=10, pady=5)
 
        
