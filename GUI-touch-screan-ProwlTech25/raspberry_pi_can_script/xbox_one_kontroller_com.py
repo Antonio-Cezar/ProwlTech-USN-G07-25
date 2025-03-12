@@ -39,8 +39,8 @@ try:
         else:
             GPIO.output(18, GPIO.LOW)
 
-        # Lesing av X-knappen (button 4 på Xbox-kontroller (X))
-        if joystick.get_button(4):
+        # Lesing av X-knappen (button 3 på Xbox-kontroller (X))
+        if joystick.get_button(3):
             print("X-knappen er trykket")
             GPIO.output(18, GPIO.HIGH)
         else:
