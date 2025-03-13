@@ -19,12 +19,13 @@ class ProwlTechApp(ctk.CTk):
     def __init__(self):
         super().__init__()
         self.title("ProwlTech Kontrollpanel")           # Setter vindutittel
-        self.geometry("800x500")                        # Setter størrelse 
-        self.resizable(False,False)                     # Hindrer at vinduet kan skaleres
+        self.geometry("800x450")                        # Setter størrelse 
+        #self.resizable(False,False)                     # Hindrer at vinduet kan skaleres
+        self.attributes("-fullscreen", True)
         self.bind("<Escape>", self.exit_fullscreen)     # ESC lukker programmet
 
         # Konfigurerer rutenett(grid) for layout
-        self.grid_rowconfigure(0, minsize=170)
+        self.grid_rowconfigure(0, minsize=150)
         self.grid_rowconfigure(1, weight=1)
         self.grid_rowconfigure(2, weight=1)
         self.grid_rowconfigure(3, weight=1)
@@ -45,7 +46,7 @@ class ProwlTechApp(ctk.CTk):
 
     # Toppseksjon: logo, tittel og knapper
     def top_section(self):
-        self.top_frame = ctk.CTkFrame(self, fg_color=top_panel_color, height=150)
+        self.top_frame = ctk.CTkFrame(self, fg_color=top_panel_color, height=130)
         self.top_frame.grid(row=0, column=0, columnspan=4, sticky="nsew")
         self.top_frame.grid_propagate(False)
 
