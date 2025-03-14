@@ -18,8 +18,9 @@ class ProwlTechApp(ctk.CTk):
     def __init__(self):
         super().__init__()
         self.title("ProwlTech Kontrollpanel")       #tittel
-        self.geometry("800x480")                    #størrelse på vindu 
+        self.geometry("800x500")                    #størrelse på vindu 
         self.resizable(False,False)                 #vinduet har ikke en dynamisk størrelse
+        self.bind("<Escape>", self.exit_fullscreen)
 
 
 
@@ -38,6 +39,9 @@ class ProwlTechApp(ctk.CTk):
         self.top_section()
         self.mid_section()
         self.bot_section()
+
+    def exit_fullscreen(self, event=None):
+        self.destroy()
 
 #Toppseksjon:
     def top_section(self):
