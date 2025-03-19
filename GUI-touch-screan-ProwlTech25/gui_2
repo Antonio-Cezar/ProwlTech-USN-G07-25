@@ -1,0 +1,356 @@
+import customtkinter as ctk
+from PIL import Image
+
+# Hovedvindu-oppsett
+ctk.set_appearance_mode("dark")
+#ctk.set_default_color_theme("dark") 
+
+#fargestandarder 
+text_color = "#b1b1b1"
+background_color = "#3c0077"
+top_panel_color = "#1a0539"
+button_color = "#5d3996"
+frame_color = "#1a0539"
+frame_border_color = "#250852"
+button_border_color = "#472b73"
+error_section = "#240146"
+
+class ProwlTechApp(ctk.CTk):
+    def __init__(self):
+        super().__init__()
+        self.title("ProwlTech Kontrollpanel")       #tittel
+        self.geometry("800x500")                    #størrelse på vindu 
+        self.resizable(False,False)                 #vinduet har ikke en dynamisk størrelse
+        self.bind("<Escape>", self.exit_fullscreen)
+
+
+
+    #grid: rader
+        self.grid_rowconfigure(0, minsize=170)
+        self.grid_rowconfigure(1, weight=1)
+        self.grid_rowconfigure(2, weight=1)
+        self.grid_rowconfigure(3, weight=1)
+
+    #grid: kolonner
+        self.grid_columnconfigure(0, weight=1)
+        self.grid_columnconfigure(1, weight=1)
+        self.grid_columnconfigure(2, weight=1)
+        self.grid_columnconfigure(3, weight=1)
+
+        self.top_section()
+        self.mid_section()
+        self.bot_section()
+
+#Funksjon for å lukke vinduet
+    def exit_fullscreen(self, event=None):
+        self.destroy()
+
+#Toppseksjon:
+    def top_section(self):
+    #ramme for toppseksjonen
+        self.top_frame = ctk.CTkFrame(self, fg_color=top_panel_color, height=150)
+        self.top_frame.grid(row=0, column=0, columnspan=4, sticky="nsew")
+        self.top_frame.grid_propagate(False)
+
+    #USN-logo
+        logo_image = Image.open("USN_logo2.png")                                            #laste inn bilde av logo
+        self.logo_icon = ctk.CTkImage(light_image=logo_image, size=(60, 40))               #lage bilde og sette størresle 
+
+        self.logo_label = ctk.CTkLabel(self.top_frame, image=self.logo_icon, text="")      #legge logo i en Label
+        self.logo_label.place(x=720, y=25)                                                 #plassering av logoen
+
+    #ikon: bluetooth
+        bluetooth_image = Image.open("bluetooth.png")
+        self.bluetooth_icon = ctk.CTkImage(light_image=bluetooth_image, size=(20, 20))
+
+    #ikon: av/på
+        power_image = Image.open("power.png")
+        self.power_icon = ctk.CTkImage(light_image=power_image, size=(25, 25))
+
+    #tittel
+        self.title_label = ctk.CTkLabel(
+            self.top_frame, 
+            text="ProwlTech\nKontrollpanel",
+            font=("Helvetica", 40),
+            text_color="white",
+            justify="center",
+            anchor="center"
+        )
+        self.title_label.place(relx=0.5, rely=0.5, anchor=ctk.CENTER)
+
+
+    #knapp (koble til kontroller)
+        self.connect_button = ctk.CTkButton(
+            self.top_frame,
+            width=50,
+            height=50,
+            text="Koble til kontroller",
+            image=self.bluetooth_icon,
+            compound="right",                           #ikon-plassering
+            font=("Century Gothic", 16),
+            fg_color=button_color,
+            text_color="white",
+            corner_radius=10,
+            border_width=1,
+            border_color=button_border_color,
+            command=self.open_connection_window         #funksjon av knappetrykk
+        )
+        self.connect_button.grid(row=0, column=0, padx=30, pady=45)
+
+    #knapp: av/på
+        self.power_button = ctk.CTkButton(
+            self.top_frame,
+            width=25,
+            height=60,
+            text="",
+            image=self.power_icon,
+            compound="right",
+            fg_color=button_color,
+            corner_radius=90,
+            border_width=1,
+            border_color=button_border_color
+        )
+        self.power_button.grid(row=0, column=3, padx=(320, 10), pady=45)
+
+
+#Pop-up vindu:
+    def open_connection_window(self):
+
+    #Ikoner:
+        #Kryss 
+        cross_image = Image.open("cross.png")
+        self.cross_icon = ctk.CTkImage(light_image=cross_image, size=(15, 15))
+
+        #Oppdatere 
+        update_image = Image.open("rotate.png")
+        self.update_icon = ctk.CTkImage(light_image=update_image, size=(15, 15))
+
+    #ytre ramme
+        self.popup_border =ctk.CTkFrame(self, fg_color=border_color, corner_radius=0)
+        self.popup_border.place(relx=0.5, rely=0.5, anchor="center", relwidth=0.9, relheight=0.9)
+        self.popup_border.grid_propagate(False)
+
+    #indre ramme
+        self.popup_panel = ctk.CTkFrame(self.popup_border, fg_color=background_color, corner_radius=20)
+        self.popup_panel.place(relx=0.5, rely=0.5, anchor="center", relwidth=0.98, relheight=0.98)
+
+    #grid i indre ramme
+        self.popup_panel.grid_rowconfigure(0, minsize=80)
+        self.popup_panel.grid_rowconfigure(1, weight=1)
+        self.popup_panel.grid_columnconfigure(0, weight=1)
+        self.popup_panel.grid_columnconfigure(1, weight=1)
+        self.popup_panel.grid_columnconfigure(2, weight=1)
+
+    #toppseksjon
+        self.top = ctk.CTkFrame(self.popup_panel, fg_color=top_panel_color)
+        self.top.grid(row=0, column=0, columnspan=3, sticky="nsew")
+
+    #bunnseksjon
+        self.bottom = ctk.CTkFrame(self.popup_panel, fg_color=background_color)
+        self.bottom.grid(row=1, column=0, columnspan=3, sticky="nsew")
+        #self.bottom.grid_propagate(False)
+        
+     #knapp: søke etter kontrollere
+        search_button = ctk.CTkButton(
+            self.top,
+            text="Oppdater",
+            width=150,
+            height=50,
+            image=self.update_icon,
+            compound="right",  
+            font=("Century Gothic", 16),
+            fg_color=button_color,
+            text_color="white",
+            corner_radius=70,
+            border_width=1,
+            border_color=button_border_color,
+        )
+        search_button.grid(row=0, column=0, padx=(10, 50), pady=30)
+
+    #tittel
+        self.label = ctk.CTkLabel(
+            self.top, 
+            text="Enheter", 
+            font=("Century Gothic", 24),
+            justify="center",
+            anchor="center"
+            )
+        self.label.grid(row=0, column=1, padx=95, pady=30)
+
+   
+    #knapp: lukke pop-up
+        close_button = ctk.CTkButton(
+            self.top,
+            text="Lukk",
+            width=150,
+            height=50,
+            image=self.cross_icon,
+            compound="right",  
+            font=("Century Gothic", 16),
+            fg_color=button_color,
+            text_color="white",
+            corner_radius=70,
+            border_width=1,
+            border_color=button_border_color,
+            command=self.close_connection_popup
+        )
+        close_button.grid(row=0, column=2, padx=(50, 25), pady=30)
+
+#funskjon til å lukke pop-up vindu
+    def close_connection_popup(self):
+        self.popup_border.destroy()
+        self.popup_panel.destroy()
+
+
+
+
+    def mid_section(self):
+    #ramme for midt-seksjon
+        self.mid_frame = ctk.CTkFrame(self, fg_color=background_color)
+        self.mid_frame.grid(row=1, column=0, rowspan=2, columnspan=4, sticky="nsew")
+        self.mid_frame.grid_propagate(False)
+
+    #Ikoner:
+        #Bolt
+        bolt_image = Image.open("bolt.png")
+        self.bolt_icon = ctk.CTkImage(light_image=bolt_image, size=(15, 15))
+
+        #Termometer
+        temp_image = Image.open("temperature.png")
+        self.temp_icon = ctk.CTkImage(light_image=temp_image, size=(15, 15))
+
+        #Tilkobling
+        signal_image = Image.open("signal-2.png")
+        self.signal_icon = ctk.CTkImage(light_image=signal_image, size=(15, 15))
+
+        #Sensor
+        sensor_image = Image.open("signal.png")
+        self.sensor_icon = ctk.CTkImage(light_image=sensor_image, size=(17, 17))
+
+
+    #batteristatus:
+        #område
+        self.battery_container = ctk.CTkFrame(self.mid_frame, fg_color=background_color)
+        self.battery_container.grid(row=1, column=0, rowspan=2, padx=10, pady=20)
+
+        #tittel
+        self.battery_label = ctk.CTkLabel(
+            self.battery_container, 
+            text="BATTERISTATUS  ",
+            font=("Century Gothic", 14),
+            image=self.bolt_icon,
+            compound="right",
+            text_color="white",
+            justify="left"
+        )
+        self.battery_label.pack(side="top", anchor="w", padx=15, pady=0)
+
+        #ramme
+        self.battery_frame = ctk.CTkFrame(self.battery_container, height=150, width=170, fg_color=frame_color, corner_radius=20, border_color=frame_border_color, border_width=5)
+        self.battery_frame.pack(side="top", expand=True, padx=10, pady=0)
+
+        
+    #temperaturmålinger:
+        #område
+        self.temp_container = ctk.CTkFrame(self.mid_frame, fg_color=background_color)
+        self.temp_container.grid(row=1, column=1, rowspan=2, padx=10, pady=20)
+
+        #tittel
+        self.temp_label = ctk.CTkLabel(
+            self.temp_container, 
+            text="TEMPERATUR  ",
+            font=("Century Gothic", 14),
+            image=self.temp_icon,
+            compound="right",
+            text_color="white",
+            justify="left"
+        )
+        self.temp_label.pack(side="top", anchor="w", padx=15, pady=0)
+
+        #ramme
+        self.temp_frame = ctk.CTkFrame(self.temp_container, height=150, width=170, fg_color=frame_color, corner_radius=20, border_color=frame_border_color, border_width=5)
+        self.temp_frame.pack(side="top", expand=True, padx=10, pady=0)
+
+
+    #tilkoblingsstatus:
+        #område    
+        self.connection_containter = ctk.CTkFrame(self.mid_frame, fg_color=background_color)
+        self.connection_containter.grid(row=1, column=2, columnspan=2, sticky="sew")
+
+        #tittel
+        self.connection_label = ctk.CTkLabel(
+            self.connection_containter, 
+            text="TILKOBLING  ",
+            font=("Century Gothic", 14),
+            image=self.signal_icon,
+            compound="right",
+            text_color="white",
+            justify="left"
+        )
+        self.connection_label.pack(side="top", anchor="w", padx=35, pady=0)
+
+        #ramme
+        self.temp_frame = ctk.CTkFrame(self.connection_containter, height=65, width=300, fg_color=frame_color, corner_radius=20, border_color=frame_border_color, border_width=5)
+        self.temp_frame.pack(side="top", expand=True, padx=30, pady=(0, 10))
+
+
+    #sensormåling:
+        #område
+        self.sensor_container = ctk.CTkFrame(self.mid_frame, fg_color=background_color)
+        self.sensor_container.grid(row=2, column=2, columnspan=2, sticky="new")
+
+        #tittel
+        self.sensor_label = ctk.CTkLabel(
+            self.sensor_container, 
+            text="SENSORMÅLINGER  ",
+            font=("Century Gothic", 14),
+            image=self.sensor_icon,
+            compound="right",
+            text_color="white",
+            justify="left"
+        )
+        self.sensor_label.pack(side="top", anchor="w", padx=35, pady=0)
+
+        #ramme
+        self.sensor_frame = ctk.CTkFrame(self.sensor_container, height=65, width=300, fg_color=frame_color, corner_radius=20, border_color=frame_border_color, border_width=5)
+        self.sensor_frame.pack(side="top", expand=True, padx=30, pady=(0, 5))
+
+
+    def bot_section(self):  
+    #ramme for bunn-seksjon
+        self.bot_frame = ctk.CTkFrame(self, fg_color=background_color, height=120)
+        self.bot_frame.grid(row=3, column=0, columnspan=4, sticky="nsew")
+        self.bot_frame.grid_propagate(False)
+
+    #Ikoner:
+
+        #Advarseltegn
+        warning_image = Image.open("warning.png")
+        self.warning_icon = ctk.CTkImage(light_image=warning_image, size=(17, 17))
+
+    #feilmeldinger:
+        #område
+        self.error_container = ctk.CTkFrame(self.bot_frame, fg_color=background_color)
+        self.error_container.grid(row=3, column=0, columnspan=4, sticky="nsew")
+
+        #tittel
+        self.error_label = ctk.CTkLabel(
+            self.error_container, 
+            text="FEILMELDINGER  ",
+            image=self.warning_icon,
+            compound="right", 
+            font=("Century Gothic", 14),
+            text_color="white",
+            justify="left"
+        )
+        self.error_label.pack(side="top", anchor="w", padx=15, pady=0)
+       
+        #ramme
+        self.error_frame = ctk.CTkFrame(self.error_container, height=80, width=750, fg_color=error_section, corner_radius=20, border_color=frame_border_color, border_width=5)
+        self.error_frame.pack(side="top", expand=True, padx=10, pady=5)
+
+       
+
+# Start GUI
+app = ProwlTechApp()
+app.mainloop()
