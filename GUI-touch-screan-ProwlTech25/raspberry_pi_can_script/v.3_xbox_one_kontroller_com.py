@@ -1,14 +1,11 @@
-import pygame
-import RPi.GPIO as GPIO
+import pygame # Importer pygame library
+import RPi.GPIO as GPIO # Importer GPIO library
 import time
 import os
 
 # GPIO set up pin
 GPIO.setmode(GPIO.BCM)
 GPIO.setup(25, GPIO.OUT)  # Sett opp pinnen du vil bruke
-
-def open_terminal():
-    os.system("x-terminal-emulator -e python3 -c 'print(\"Joystick Status Window\")'")
 
 def find_controller():
     pygame.joystick.quit()
@@ -36,7 +33,7 @@ def main():
         num_axes = joystick.get_numaxes() # Henter alle aksene kontrollen har
         siste_akse = [0.0] * num_axes  # Lager en liste for å lagre den forrige verdien til aksen
         terskel = 0.05  # Terskelverdi for hvor mye aksen må endre seg før den kan skrives ut
-        dødssone = 0.1  # Dødssone på 10% for å unngå små bevegelser
+        dødssone = 0.15  # Dødssone på 15% for å unngå små bevegelser
         
         try:
             while True:
@@ -122,7 +119,7 @@ def main():
                 left_stick_x = joystick.get_axis(0)
                 left_stick_y = joystick.get_axis(1)
                 
-                time.sleep(0.1)
+                time.sleep(0.05)
         
         except KeyboardInterrupt:
             print("Avslutter...")
