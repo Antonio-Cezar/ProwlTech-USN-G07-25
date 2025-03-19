@@ -63,9 +63,19 @@ def main():
                     print("Kontroller frakoblet. Søker igjen...")
                     break
 
+                button_names = {
+                    0: "A",  # Xbox button A
+                    1: "B",  # Xbox button B
+                    2: "X",  # Xbox button X
+                    3: "Y",  # Xbox button Y
+                    9: "LB",  # Left Bumper
+                    10: "RB",  # Right Bumper
+                }
+                
                 # Read button presses and send CAN messages
                 for button_index in range(joystick.get_numbuttons()):
                     if joystick.get_button(button_index):
+                        button_name = button_names.get(button_index, f"Button {button_index}")
                         print(f"Button {button_index} pressed")
                         send_can_message(button_index)  # Send CAN message with the button index
 
