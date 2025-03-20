@@ -6,6 +6,7 @@
 		<meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no" />
 		<link rel="stylesheet" href="assets/css/main.css" />
 		<noscript><link rel="stylesheet" href="assets/css/noscript.css" /></noscript>
+		<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
 	</head>
 
 
@@ -51,7 +52,12 @@
 					<section class="spotlight style1 orient-right content-align-left image-position-center onscroll-image-fade-in" id="first">
 						<div class="content">
 							<h2>ProwlTech Mecanum Bil</h2>
-							<p>Dette er .....</p>
+							<p>Bilen som er utviklet gjennom dette bachelorprosjektet er en mekanum-drevet, 
+								fjernstyrt/autonom bil med elektrisk drivlinje, designet for å kunne demonstrere 
+								avansert teknologi og presisjon i mobilitet. Bilen benytter et system med 
+								fire motorer som driver de fire mekanumhjulene, noe som gir bilen muligheten 
+								til å bevege seg i alle retninger uten å endre retning. Dette gir et stort 
+								potensial for presisjonskjøring, særlig i trange rom og ved komplekse manøvrer.</p>
 						</div>
 						<div class="image">
 							<img src="images/Januar_PworlTech_bil.jpeg" alt="" />
@@ -61,8 +67,13 @@
 				<!-- Three -->
 					<section class="spotlight style1 orient-left content-align-left image-position-center onscroll-image-fade-in">
 						<div class="content">
-							<h2>USN oppdragsiver og Electronics & energy solutions AS</h2>
-							<p>USN og ....</p>
+							<h2>USN oppdragsgiver og Electronics & Energy Solutions AS</h2>
+							<p>USN er vår oppdragsgiver i dette prosjektet og spiller en sentral 
+								rolle i utviklingen av bilen. Electronics & Energy Solutions AS er 
+								vår samarbeidspartner og bidrar med ekspertise innen elektronikk og 
+								energisystemer. Sammen jobber vi for å skape en avansert og funksjonell 
+								bil med innovative løsninger innen data, maskin og elektro.</p>
+
 							<ul class="actions stacked">
 								<li><a href="https://www.usn.no/om-usn/campusene/kongsberg/" target="_blank" class="button">USN</a> </li>
 							</ul>
@@ -71,7 +82,7 @@
 							</ul>
 						</div>
 						<div class="image">
-							<img src="images/spotlight02.jpg" alt="" />
+							<img src="images/Logo-sirkel-ProwlTech.png" alt="" />
 						</div>
 					</section>
 
@@ -79,13 +90,31 @@
 					<section class="spotlight style1 orient-right content-align-left image-position-center onscroll-image-fade-in">
 						<div class="content">
 							<h2>Målet</h2>
-							<p>Målet er å utvikle et avansert bilsystem med integrerte funksjonaliteter som sikrer bevegelsesfleksibilitet, presis hastighetskontroll, et moderne brukergrensesnitt og en rekke sikkerhets- og sensorfunksjoner.</p>
+								<p>Videreutviklingen av bilen innebærer forbedringer innen dataområdet. 
+									Bevegelsesfunksjonaliteten skal tillate kjøring i alle retninger, 
+									og hastighetskontrollen skal forbedres ned til 5 mm/s. Et GUI festet 
+									til bilen skal vise batteri- og ladestatus, samt sanntidsposisjon via 
+									GPS. I tillegg skal et sensorsystem implementeres, og AI-basert 
+									objektgjenkjenning integreres for anti-kollisjon.</p>
+
+								<p>Maskindelen skal være mer presis og modulær. Drivlinjen skal være 
+									uten slark, og designet skal ha høy presisjon. 3D-printing vil 
+									benyttes der det er mulig, og rammeverket med Alu T-slot-profiler 
+									videreføres. Hjulopphenget skal være utbyttbart, og batteriet skal 
+									få en ny, stroppeløs festemetode. Demping og stabilitet forbedres for trygg kjøring.</p>
+
+								<p>Elektrodelen fokuserer på sikkerhet og brukervennlighet. Ladesystemet 
+									skal ha automatisk feilsikring, og ledningsnettet skal forbedres. En 
+									integrert skjerm med sikre fester og hengsler skal monteres, slik at 
+									vedlikehold blir enklere. Disse forbedringene gjør bilen mer funksjonell, 
+									sikker og forberedt for videre utvikling.</p>
+
 							<ul class="actions stacked">
 								<li><a href="teknisk_side.html" class="button">Teknisk</a> </li>
 							</ul>
 						</div>
 						<div class="image">
-							<img src="images/spotlight03.jpg" alt="" />
+							<img src="images/teknisk/Controller_kjøreretninger-Modell.jpg" alt="" />
 						</div>
 					</section>
 
@@ -170,89 +199,148 @@
 					<div class="inner">
 					  <h2>Målet</h2>
 					  <p>
-						Målet er å videreutvikle kjøretøyets funksjoner med fokus på bevegelighet, brukergrensesnitt (GUI), oppheng og sikkerhet i ladesystemet. Systemet skal legges til rette for fremtidig utvikling slik at neste gruppe kan bygge videre på en solid plattform.
+						Målet er å videreutvikle kjøretøyets funksjoner innen data, elektro og maskin. Systemet skal legges til rette for fremtidig utvikling slik at neste gruppe kan bygge videre på en solid plattform.
 					  </p>
 					  <div class="items style1 medium onscroll-fade-in">
+				  
+						<!-- Data A -->
 						<section>
-						  <span class="icon style2 major fa-car"></span>
-						  <h3>Bevegelsesfunksjonaliteter</h3>
-						  <p>
-							Implementer bevegelsesfunksjonaliteter som tillater bilen å kjøre i alle retninger.
-						  </p>
+						  <span class="icon solid style2 major fa-arrows-alt"></span>
+						  <h3>Bevegelsesfunksjonaliteter (Data)</h3>
+						  <p>Implementer bevegelsesfunksjonaliteter som tillater bilen å kjøre i alle retninger.</p>
 						</section>
 						<section>
-						  <span class="icon style2 major fa-tachometer-alt"></span>
-						  <h3>Hastighetsfunksjonalitet</h3>
-						  <p>
-							Utvikle funksjonalitet som gjør det mulig å senke hastigheten ned til 5 mm/s.
-						  </p>
+						  <span class="icon style2 major fa-wind"></span>
+						  <h3>Hastighetsfunksjonalitet (Data)</h3>
+						  <p>Utvikle funksjonalitet som gjør det mulig å senke hastigheten ned til 5 mm/s.</p>
 						</section>
 						<section>
 						  <span class="icon solid style2 major fa-desktop"></span>
-						  <h3>Grafisk Brukergrensesnitt</h3>
-						  <p>
-							Design et grafisk brukergrensesnitt (GUI) som er festet til bilen.
-						  </p>
+						  <h3>Grafisk Brukergrensesnitt (Data)</h3>
+						  <p>Design et grafisk brukergrensesnitt (GUI) som er festet til bilen.</p>
 						</section>
+				  
+						<!-- Elektro A -->
 						<section>
 						  <span class="icon solid style2 major fa-shield-alt"></span>
-						  <h3>Ladesystemets Sikkerhet</h3>
-						  <p>
-							Ladesystemet skal ha et sikkerhetssystem som bryter prosessen automatisk ved eventuelle feil.
-						  </p>
+						  <h3>Ladesystemets Sikkerhet (Elektro)</h3>
+						  <p>Ladesystemet skal ha et sikkerhetssystem som bryter prosessen automatisk ved eventuelle feil.</p>
 						</section>
 						<section>
 						  <span class="icon solid style2 major fa-battery-full"></span>
-						  <h3>Batteri- og Ladestatus</h3>
-						  <p>
-							Batteristatus og ladestatus skal vises på display på bilen.
-						  </p>
+						  <h3>Batteri- og Ladestatus (Elektro)</h3>
+						  <p>Batteristatus og ladestatus skal vises på display på bilen.</p>
+						</section>
+				  
+						<!-- Maskin A -->
+						<section>
+						  <span class="icon solid style2 major fa-cogs"></span>
+						  <h3>Drivlinjepresisjon (Maskin)</h3>
+						  <p>Drivlinjen skal være uten slark mellom motor og hjul og ha høy presisjon.</p>
 						</section>
 						<section>
-						  <span class="icon style2 major fa-plug"></span>
-						  <h3>Sensorsystem</h3>
-						  <p>
-							Utvikle et sensorsystem for å overvåke bilens omgivelser og tilstand.
-						  </p>
+						  <span class="icon solid style2 major fa-th"></span>
+						  <h3>Modulært Design (Maskin)</h3>
+						  <p>Utvikle et modulært design som muliggjør fleksibel videreutvikling.</p>
+						</section>
+						<section>
+						  <span class="icon solid style2 major fa-cube"></span>
+						  <h3>3D-Printede Komponenter (Maskin)</h3>
+						  <p>Mest mulig av komponentene skal produseres ved hjelp av 3D-printing.</p>
+						</section>
+						<section>
+						  <span class="icon solid style2 major fa-align-center"></span>
+						  <h3>Rammeverk med Alu T-slot profiler (Maskin)</h3>
+						  <p>Videreføre eksisterende rammeverk for stabilitet og enkel montering.</p>
+						</section>
+						<section>
+						  <span class="icon solid style2 major fa-wheelchair"></span>
+						  <h3>Utbyttbart Hjuloppheng (Maskin)</h3>
+						  <p>Hjulopphenget skal være enkelt å bytte for vedlikehold og oppgraderinger.</p>
+						</section>
+						<section>
+						  <span class="icon solid style2 major fa-ruler"></span>
+						  <h3>Beholde Eksisterende Bredde (Maskin)</h3>
+						  <p>Bilens nåværende bredde skal opprettholdes.</p>
+						</section>
+						<section>
+						  <span class="icon solid style2 major fa-grip-horizontal"></span>
+						  <h3>Kontaktflate mellom hjul og bakke (Maskin)</h3>
+						  <p>Kontaktflaten skal være i kvadratisk fasong, som dagens løsning.</p>
+						</section>
+						<section>
+						  <span class="icon solid style2 major fa-laptop-code"></span>
+						  <h3>3D-Modell av Bilen (Maskin)</h3>
+						  <p>Prosjektet skal ha en fungerende 3D-modell ved prosjektslutt.</p>
+						</section>
+				  
+						<!-- Data B -->
+						<section>
+						  <span class="icon solid style2 major fa-desktop"></span>
+						  <h3>Sensorsystem (Data)</h3>
+						  <p>Utvikle et sensorsystem for å overvåke bilens omgivelser og tilstand.</p>
 						</section>
 						<section>
 						  <span class="icon solid style2 major fa-sliders-h"></span>
-						  <h3>Hastighetsmodus-knapper</h3>
-						  <p>
-							Implementer hastighetsmodus-knapper som gir akselerasjon basert på valg av ulike hastighetsmoduser.
-						  </p>
+						  <h3>Hastighetsmodus-knapper (Data)</h3>
+						  <p>Implementer knapper for valg av ulike hastighetsmoduser.</p>
 						</section>
+				  
+						<!-- Elektro B -->
 						<section>
 						  <span class="icon solid style2 major fa-wrench"></span>
-						  <h3>Forbedret Ledningsnett</h3>
-						  <p>
-							Forbedre ledningsnettet for å sikre effektiv strømfordeling og redusere potensielle feil.
-						  </p>
+						  <h3>Forbedret Ledningsnett (Elektro)</h3>
+						  <p>Forbedre ledningsnettet for å sikre effektiv strømfordeling og redusere potensielle feil.</p>
+						</section>
+				  
+						<!-- Maskin B -->
+						<section>
+						  <span class="icon solid style2 major fa-compress-arrows-alt"></span>
+						  <h3>Demping og Fjæring (Maskin)</h3>
+						  <p>Demping og fjæring skal være sterk nok til å holde bilen oppe.</p>
 						</section>
 						<section>
+						  <span class="icon solid style2 major fa-battery-half"></span>
+						  <h3>Feste til Batteri (Maskin)</h3>
+						  <p>Lage nye festemetoder til batteriet uten bruk av stropper.</p>
+						</section>
+				  
+						<!-- Data C -->
+						<section>
 						  <span class="icon solid style2 major fa-map-marker-alt"></span>
-						  <h3>Sanntidsposisjon (GPS)</h3>
-						  <p>
-							Vis bilens sanntidsposisjon (GPS-data) i GUI.
-						  </p>
+						  <h3>Sanntidsposisjon (GPS) (Data)</h3>
+						  <p>Vis bilens sanntidsposisjon (GPS-data) i GUI.</p>
 						</section>
 						<section>
 						  <span class="icon solid style2 major fa-brain"></span>
-						  <h3>AI-basert Objektgjenkjenning</h3>
-						  <p>
-							Implementer kameraer og utvikle AI-basert objektgjenkjenning for anti-kollisjonsystemet.
-						  </p>
+						  <h3>AI-basert Objektgjenkjenning (Data)</h3>
+						  <p>Implementer kameraer og utvikle AI-basert objektgjenkjenning for anti-kollisjonssystemet.</p>
 						</section>
+				  
+						<!-- Elektro C -->
 						<section>
 						  <span class="icon solid style2 major fa-lock"></span>
-						  <h3>Sikkerhetsfunksjon for Knapper</h3>
-						  <p>
-							Implementer sikkerhetsfunksjoner for knapper og brytere for å forhindre utilsiktede operasjoner.
-						  </p>
+						  <h3>Sikkerhetsfunksjon for Knapper (Elektro)</h3>
+						  <p>Implementer sikkerhetsfunksjoner for knapper og brytere for å forhindre utilsiktede operasjoner.</p>
 						</section>
+				  
+						<!-- Maskin C -->
+						<section>
+						  <span class="icon solid style2 major fa-tv"></span>
+						  <h3>Integrert Skjerm (Maskin)</h3>
+						  <p>Montere en integrert skjerm med sikre fester og et presentabelt utseende.</p>
+						</section>
+						<section>
+						  <span class="icon solid style2 major fa-exchange-alt"></span>
+						  <h3>Hengsler på Skjerm (Maskin)</h3>
+						  <p>Hengsler skal gjøre det enkelt å få tilgang til komponentene under skjermen.</p>
+						</section>
+				  
 					  </div>
 					</div>
 				  </section>
+				  
+				  
 				  
 				<!-- Footer -->
 				<footer class="wrapper style1 align-center">
@@ -271,7 +359,7 @@
 						  </a>
 						</li>
 						<li>
-						  <a href="https://www.linkedin.com/in/dag-ove-christiansen" target="_blank" rel="noopener">
+						  <a href="https://www.linkedin.com/in/dag-ove-christiansen-48219724b/" target="_blank" rel="noopener">
 							<span class="icon brands style2 fa-linkedin-in"></span>
 							<span class="link-text">Dag-Ove LinkedIn</span>
 						  </a>
@@ -283,7 +371,7 @@
 						  </a>
 						</li>
 						<li>
-						  <a href="https://www.linkedin.com/in/ida-linnea-larsen" target="_blank" rel="noopener">
+						  <a href="https://www.linkedin.com/in/ida-larsen-49871030b" target="_blank" rel="noopener">
 							<span class="icon brands style2 fa-linkedin-in"></span>
 							<span class="link-text">Ida LinkedIn</span>
 						  </a>
