@@ -121,7 +121,7 @@ class ProwlTechApp(ctk.CTk):
         self.update_icon = ctk.CTkImage(light_image=update_image, size=(15, 15))
 
         # Ytre ramme av popup-vindu
-        self.popup_border =ctk.CTkFrame(self, fg_color=border_color, corner_radius=0)
+        self.popup_border =ctk.CTkFrame(self, fg_color=frame_border_color, corner_radius=0)
         self.popup_border.place(relx=0.5, rely=0.5, anchor="center", relwidth=0.9, relheight=0.9)
         self.popup_border.grid_propagate(False)
 
