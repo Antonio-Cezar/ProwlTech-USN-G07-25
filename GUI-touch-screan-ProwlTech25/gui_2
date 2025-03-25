@@ -5,14 +5,15 @@ from PIL import Image
 ctk.set_appearance_mode("dark")
 
 # Definerer farger brukt i designet for konsistens og enkel endring
-text_color = "#b1b1b1"
-background_color = "#3c0077"
-top_panel_color = "#1a0539"
-button_color = "#5d3996"
-frame_color = "#1a0539"
-frame_border_color = "#250852"
-button_border_color = "#472b73"
-error_section = "#240146"
+text_color = "#BDBDBD"
+background_color = "#140520"
+top_panel_color = "#2F0B63"
+button_color = "#4C1A92"
+frame_color = "#583092"
+frame_border_color = "#3A0C7D"
+button_border_color = "black"
+error_section = "#311C42"
+border_size = 8
 
 # Hovedklasse for GUI-et
 class ProwlTechApp(ctk.CTk):
@@ -69,7 +70,7 @@ class ProwlTechApp(ctk.CTk):
             self.top_frame, 
             text="ProwlTech\nKontrollpanel",
             font=("Helvetica", 40),
-            text_color="white",
+            text_color="#E4E4E4",
             justify="center",
             anchor="center"
         )
@@ -80,7 +81,7 @@ class ProwlTechApp(ctk.CTk):
         self.connect_button = ctk.CTkButton(
             self.top_frame,
             width=50,
-            height=50,
+            height=40,
             text="Koble til kontroller",
             image=self.bluetooth_icon,
             compound="right",                          
@@ -88,26 +89,24 @@ class ProwlTechApp(ctk.CTk):
             fg_color=button_color,
             text_color="white",
             corner_radius=10,
-            border_width=1,
-            border_color=button_border_color,
             command=self.open_connection_window      
         )
-        self.connect_button.grid(row=0, column=0, padx=30, pady=45)
+        self.connect_button.grid(row=0, column=0, padx=40, pady=45)
 
         # Av/på-knapp (ingen funksjon definert enda)
         self.power_button = ctk.CTkButton(
             self.top_frame,
-            width=25,
-            height=60,
-            text="",
-            image=self.power_icon,
-            compound="right",
+            width=85,
+            height=40,
+            text="Info",
+            font=("Century Gothic", 16),
+            text_color="white",
+            #image=self.power_icon,
+            #compound="right",
             fg_color=button_color,
-            corner_radius=90,
-            border_width=1,
-            border_color=button_border_color
+            corner_radius=10
         )
-        self.power_button.grid(row=0, column=3, padx=(320, 10), pady=45)
+        self.power_button.grid(row=0, column=3, padx=(350, 10), pady=45)
 
 
     # Pop-up vindu som vises når "Koble til kontroller" trykkes på
@@ -228,16 +227,16 @@ class ProwlTechApp(ctk.CTk):
         self.battery_label = ctk.CTkLabel(
             self.battery_container, 
             text="BATTERISTATUS  ",
-            font=("Century Gothic", 14),
+            font=("Century Gothic", 13),
             image=self.bolt_icon,
             compound="right",
-            text_color="white",
+            text_color=text_color,
             justify="left"
         )
         self.battery_label.pack(side="top", anchor="w", padx=15, pady=0)
 
         # Ramme
-        self.battery_frame = ctk.CTkFrame(self.battery_container, height=150, width=170, fg_color=frame_color, corner_radius=20, border_color=frame_border_color, border_width=5)
+        self.battery_frame = ctk.CTkFrame(self.battery_container, height=150, width=160, fg_color=frame_color, corner_radius=25, border_color=frame_border_color, border_width=border_size)
         self.battery_frame.pack(side="top", expand=True, padx=10, pady=0)
 
         
@@ -249,16 +248,16 @@ class ProwlTechApp(ctk.CTk):
         self.temp_label = ctk.CTkLabel(
             self.temp_container, 
             text="TEMPERATUR  ",
-            font=("Century Gothic", 14),
+            font=("Century Gothic", 13),
             image=self.temp_icon,
             compound="right",
-            text_color="white",
+            text_color=text_color,
             justify="left"
         )
         self.temp_label.pack(side="top", anchor="w", padx=15, pady=0)
 
         # Ramme
-        self.temp_frame = ctk.CTkFrame(self.temp_container, height=150, width=170, fg_color=frame_color, corner_radius=20, border_color=frame_border_color, border_width=5)
+        self.temp_frame = ctk.CTkFrame(self.temp_container, height=150, width=160, fg_color=frame_color, corner_radius=25, border_color=frame_border_color, border_width=border_size)
         self.temp_frame.pack(side="top", expand=True, padx=10, pady=0)
 
 
@@ -270,16 +269,16 @@ class ProwlTechApp(ctk.CTk):
         self.connection_label = ctk.CTkLabel(
             self.connection_containter, 
             text="TILKOBLING  ",
-            font=("Century Gothic", 14),
+            font=("Century Gothic", 13),
             image=self.signal_icon,
             compound="right",
-            text_color="white",
+            text_color=text_color,
             justify="left"
         )
         self.connection_label.pack(side="top", anchor="w", padx=35, pady=0)
 
         # Ramme
-        self.temp_frame = ctk.CTkFrame(self.connection_containter, height=65, width=300, fg_color=frame_color, corner_radius=20, border_color=frame_border_color, border_width=5)
+        self.temp_frame = ctk.CTkFrame(self.connection_containter, height=75, width=300, fg_color=frame_color, corner_radius=30, border_color=frame_border_color, border_width=border_size)
         self.temp_frame.pack(side="top", expand=True, padx=30, pady=(0, 10))
 
 
@@ -291,17 +290,17 @@ class ProwlTechApp(ctk.CTk):
         self.sensor_label = ctk.CTkLabel(
             self.sensor_container, 
             text="SENSORMÅLINGER  ",
-            font=("Century Gothic", 14),
+            font=("Century Gothic", 13),
             image=self.sensor_icon,
             compound="right",
-            text_color="white",
+            text_color=text_color,
             justify="left"
         )
         self.sensor_label.pack(side="top", anchor="w", padx=35, pady=0)
 
         #ramme
-        self.sensor_frame = ctk.CTkFrame(self.sensor_container, height=65, width=300, fg_color=frame_color, corner_radius=20, border_color=frame_border_color, border_width=5)
-        self.sensor_frame.pack(side="top", expand=True, padx=30, pady=(0, 5))
+        self.sensor_frame = ctk.CTkFrame(self.sensor_container, height=75, width=300, fg_color=frame_color, corner_radius=30, border_color=frame_border_color, border_width=border_size)
+        self.sensor_frame.pack(side="top", expand=True, padx=30, pady=(0, 0))
 
     # Bunnseksjon: viser feilmeldinger
     def bot_section(self):  
@@ -324,13 +323,13 @@ class ProwlTechApp(ctk.CTk):
             image=self.warning_icon,
             compound="right", 
             font=("Century Gothic", 14),
-            text_color="white",
+            text_color=text_color,
             justify="left"
         )
         self.error_label.pack(side="top", anchor="w", padx=15, pady=0)
        
         # Ramme
-        self.error_frame = ctk.CTkFrame(self.error_container, height=80, width=750, fg_color=error_section, corner_radius=20, border_color=frame_border_color, border_width=5)
+        self.error_frame = ctk.CTkFrame(self.error_container, height=80, width=750, fg_color=error_section, corner_radius=20)
         self.error_frame.pack(side="top", expand=True, padx=10, pady=5)
 
        
