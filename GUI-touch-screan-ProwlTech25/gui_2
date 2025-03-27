@@ -149,7 +149,7 @@ class ProwlTechApp(ctk.CTk):
         self.update_button = ctk.CTkButton(
             self.top,
             text="Oppdater",
-            width=150,
+            width=180,
             height=50,
             image=self.update_icon,
             compound="right",  
