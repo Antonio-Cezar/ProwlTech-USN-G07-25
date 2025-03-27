@@ -142,9 +142,11 @@ class ProwlTechApp(ctk.CTk):
 
         self.bottom = ctk.CTkFrame(self.popup_panel, fg_color=background_color)
         self.bottom.grid(row=1, column=0, columnspan=3, sticky="nsew")
+        self.bottom.grid_rowconfigure(0, weight=1)
+        self.bottom.grid_columnconfigure(0, weight=1)
         
-        # Knapp for å søke etter tilgjengelige kontroller
-        search_button = ctk.CTkButton(
+        # Knapp for å oppdatere søket etter tilgjengelige kontrollere
+        self.update_button = ctk.CTkButton(
             self.top,
             text="Oppdater",
             width=150,
@@ -155,10 +157,16 @@ class ProwlTechApp(ctk.CTk):
             fg_color=button_color,
             text_color="white",
             corner_radius=70,
-            border_width=1,
-            border_color=button_border_color,
+            command=self.start_update
         )
-        search_button.grid(row=0, column=0, padx=(10, 50), pady=30)
+        self.update_button.grid(row=0, column=0, padx=(10, 50), pady=30)
+
+        # Prosessbar (skjult når inaktiv)
+        self.progress = ctk.CTkProgressBar(self.bottom, progress_color=frame_color)
+        self.progress.grid(row=0, column=0, padx=10, pady=10, sticky="nsew")
+        self.progress.configure(mode="indeterminate")
+        self.progress.set(0)
+        self.progress.grid_forget()
 
         # Titteltekst i popup-vindu
         self.label = ctk.CTkLabel(
@@ -183,11 +191,22 @@ class ProwlTechApp(ctk.CTk):
             fg_color=button_color,
             text_color="white",
             corner_radius=70,
-            border_width=1,
-            border_color=button_border_color,
             command=self.close_connection_popup
         )
         close_button.grid(row=0, column=2, padx=(50, 25), pady=30)
+
+    # Oppdaterer søk etter kontrollere
+    def start_update(self):
+        self.update_button.configure(text="Oppdaterer...", state="disabled")
+        self.progress.grid()
+        self.progress.start()
+        self.after(3000, self.finish_update)
+
+    # Avslutter søk etter kontrollere
+    def finish_update(self):
+        self.progress.stop()
+        self.update_button.configure(text="Oppdater", state="normal")
+        self.progress.grid_forget()
 
     # Lukker popup-vindu når lukk-knappen trykkes
     def close_connection_popup(self):
