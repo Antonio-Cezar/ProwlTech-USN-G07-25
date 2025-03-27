@@ -93,8 +93,8 @@ class ProwlTechApp(ctk.CTk):
         )
         self.connect_button.grid(row=0, column=0, padx=40, pady=45)
 
-        # Av/på-knapp (ingen funksjon definert enda)
-        self.power_button = ctk.CTkButton(
+        # Info-knapp (skal vise informasjon om bilen)
+        self.info_button = ctk.CTkButton(
             self.top_frame,
             width=85,
             height=40,
@@ -106,7 +106,7 @@ class ProwlTechApp(ctk.CTk):
             fg_color=button_color,
             corner_radius=10
         )
-        self.power_button.grid(row=0, column=3, padx=(320, 10), pady=45)
+        self.info_button.grid(row=0, column=3, padx=(320, 10), pady=45)
 
 
     # Pop-up vindu som vises når "Koble til kontroller" trykkes på
