@@ -159,7 +159,7 @@ class ProwlTechApp(ctk.CTk):
             corner_radius=70,
             command=self.start_update
         )
-        self.update_button.grid(row=0, column=0, padx=(10, 50), pady=30)
+        self.update_button.grid(row=0, column=0, padx=(30, 30), pady=30)
 
         # Prosessbar (skjult når inaktiv)
         self.progress = ctk.CTkProgressBar(self.bottom, progress_color=frame_color)
@@ -193,7 +193,7 @@ class ProwlTechApp(ctk.CTk):
             corner_radius=70,
             command=self.close_connection_popup
         )
-        close_button.grid(row=0, column=2, padx=(50, 25), pady=30)
+        close_button.grid(row=0, column=2, padx=(30, 40), pady=30)
 
     # Oppdaterer søk etter kontrollere
     def start_update(self):
