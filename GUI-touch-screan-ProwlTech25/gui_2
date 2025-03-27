@@ -61,10 +61,6 @@ class ProwlTechApp(ctk.CTk):
         bluetooth_image = Image.open("bluetooth.png")
         self.bluetooth_icon = ctk.CTkImage(light_image=bluetooth_image, size=(20, 20))
 
-        # Ikon: av/på
-        power_image = Image.open("power.png")
-        self.power_icon = ctk.CTkImage(light_image=power_image, size=(25, 25))
-
         # Titteltekst i midten av toppseksjonen
         self.title_label = ctk.CTkLabel(
             self.top_frame, 
@@ -104,7 +100,8 @@ class ProwlTechApp(ctk.CTk):
             #image=self.power_icon,
             #compound="right",
             fg_color=button_color,
-            corner_radius=10
+            corner_radius=10,
+            command=self.open_info_window
         )
         self.info_button.grid(row=0, column=3, padx=(320, 10), pady=45)
 
@@ -191,7 +188,7 @@ class ProwlTechApp(ctk.CTk):
             fg_color=button_color,
             text_color="white",
             corner_radius=70,
-            command=self.close_connection_popup
+            command=self.close_connection_window
         )
         close_button.grid(row=0, column=2, padx=(30, 40), pady=30)
 
@@ -209,11 +206,64 @@ class ProwlTechApp(ctk.CTk):
         self.progress.grid_forget()
 
     # Lukker popup-vindu når lukk-knappen trykkes
-    def close_connection_popup(self):
+    def close_connection_window(self):
         self.popup_border.destroy()
         self.popup_panel.destroy()
 
+    # Popup-vindu som vises når "Info"-knappen trykkes
+    def open_info_window(self):
+        # Ytre ramme av popup-vindu
+        self.popup_border =ctk.CTkFrame(self, fg_color=frame_border_color, corner_radius=0)
+        self.popup_border.place(relx=0.5, rely=0.5, anchor="center", relwidth=0.9, relheight=0.9)
+        self.popup_border.grid_propagate(False)
 
+        # Indre ramme av popup-vindu
+        self.popup_panel = ctk.CTkFrame(self.popup_border, fg_color=background_color, corner_radius=20)
+        self.popup_panel.place(relx=0.5, rely=0.5, anchor="center", relwidth=0.98, relheight=0.98)
+
+        # Grid-oppsett i popup-vindu
+        self.popup_panel.grid_rowconfigure(0, minsize=80)
+        self.popup_panel.grid_rowconfigure(1, weight=1)
+        self.popup_panel.grid_columnconfigure(0, weight=1)
+        self.popup_panel.grid_columnconfigure(1, weight=1)
+        self.popup_panel.grid_columnconfigure(2, weight=1)
+
+        # Ikon: kryss 
+        cross_image = Image.open("cross.png")
+        self.cross_icon = ctk.CTkImage(light_image=cross_image, size=(15, 15))
+
+        # Øvre og nedre seksjon i popup-vindu
+        self.top = ctk.CTkFrame(self.popup_panel, fg_color=top_panel_color)
+        self.top.grid(row=0, column=0, columnspan=3, sticky="nsew")
+
+         # Titteltekst i popup-vindu
+        self.label = ctk.CTkLabel(
+            self.top, 
+            text="Informasjon", 
+            font=("Century Gothic", 24),
+            justify="center",
+            anchor="center"
+            )
+        self.label.grid(row=0, column=1, padx=95, pady=30)
+
+        close_button = ctk.CTkButton(
+            self.top,
+            text="Lukk",
+            width=150,
+            height=50,
+            image=self.cross_icon,
+            compound="right",  
+            font=("Century Gothic", 16),
+            fg_color=button_color,
+            text_color="white",
+            corner_radius=70,
+            command=self.close_info_window
+        )
+        close_button.grid(row=0, column=2, padx=(30, 40), pady=30)
+
+    def close_info_window(self):
+        self.popup_border.destroy()
+        self.popup_panel.destroy()
 
     # Midtseksjon: viser batteri, temperatur, tilkobling og sensor
     def mid_section(self):
