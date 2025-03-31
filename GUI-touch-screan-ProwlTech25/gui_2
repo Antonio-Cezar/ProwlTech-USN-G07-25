@@ -24,6 +24,7 @@ class ProwlTechApp(ctk.CTk):
         #self.resizable(False,False)                     # Hindrer at vinduet kan skaleres
         self.attributes("-fullscreen", True)
         self.bind("<Escape>", self.exit_fullscreen)     # ESC lukker programmet
+        self.config(cursor="none")                      # Skjuler musepeker når GUI er i gang
 
         # Konfigurerer rutenett(grid) for layout
         self.grid_rowconfigure(0, minsize=130)
