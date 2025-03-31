@@ -10,6 +10,7 @@ const struct device *const get_can_dev(void); // Function for getting the CAN de
 //(FENRIS24) can_receive
 #define RECEIVE_ID_STR 0x0000002 //(FENRIS24) RECEIVE ID matching the message ID of the motor frame
 #define RECEIVE_ID_BYTE 0x0000003 //(FENRIS24) RECEIVE ID matching the message ID of the sensor frame
+#define RECEIVE_ID_STR 0x0000004 //(PROWLTECH25) Receive id matching the message id for the Raspberry Pi 4 (GUI) 
 
 int setup_can_filter(const struct device *dev, can_rx_callback_t rx_cb, void *cb_data); //(FENRIS24) Function for setting up the CAN filter
 
