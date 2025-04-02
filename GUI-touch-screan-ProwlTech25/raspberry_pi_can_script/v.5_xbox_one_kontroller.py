@@ -44,12 +44,14 @@ def skaler_akse(verdi):
 
 #main
 def main():
+    print("Starter script...")
     # Starter opp CAN-bus sending
     try:
+        print("Starter CAN-bus...")
         bus = can.interface.Bus(channel=CHANNEL, bustype='socketcan', bitrate=BITRATE)
         print("CAN er på")
     except Exception  as e:
-        print("FEIL: Kan IKKE på")
+        print("FEIL: CAN er IKKE på")
         return
 
     kontroller = None
@@ -78,6 +80,8 @@ def main():
         # Hoved loop som regristrer kontroller verdier
         while True:
             pygame.event.pump() # Den oppdaterer interne verdier for kontrolleren (og andre input-enheter).
+            print("Looping...")n60p+-å¨
+
 
         try:
             # Joystick
@@ -91,8 +95,8 @@ def main():
             rt = kontroller.get_axis(5)
 
             # Knapper over skulder
-            lb = kontroller.get_button(4)
-            rb = kontroller.get_button(5)
+            lb = kontroller.get_button(8)
+            rb = kontroller.get_button(9)
 
             # Knapper a, b, x og y
             a = kontroller.get_button(0)
@@ -134,4 +138,6 @@ def main():
             break
 
         time.sleep(0.2)
+if __name__=="__main__":
+    main()
 #================================================================

@@ -4,10 +4,10 @@
 
 //(FENRIS24) Commented and coded by OA
 
-//(FENRIS24) can_dev
+// Can_dev
 const struct device *const get_can_dev(void); // Function for getting the CAN device
 
-//(FENRIS24) can_receive
+// Can_receive
 #define RECEIVE_ID_STR 0x0000002 //(FENRIS24) RECEIVE ID matching the message ID of the motor frame
 #define RECEIVE_ID_BYTE 0x0000003 //(FENRIS24) RECEIVE ID matching the message ID of the sensor frame
 #define RECEIVE_ID_PI 0x0000004 //(PROWLTECH25) Receive id matching the message id for the Raspberry Pi 4 (GUI) 
