@@ -3,7 +3,9 @@ import RPi.GPIO as GPIO
 import time
 import os
 import spidev
+import struct
 from mcp2515 import MCP2515  # Import MCP2515 library (if you don't have it, you'll need to install it)
+import spidev
 
 # GPIO setup for interrupt pin (GPIO 25)
 GPIO.setmode(GPIO.BCM)
