@@ -24,7 +24,7 @@ class ProwlTechApp(ctk.CTk):
         #self.resizable(False,False)                     # Hindrer at vinduet kan skaleres
         #self.attributes("-fullscreen", True)
         self.bind("<Escape>", self.exit_fullscreen)     # ESC lukker programmet
-        self.config(cursor="none")                      # Skjuler musepeker når GUI er i gang
+        #self.config(cursor="none")                      # Skjuler musepeker når GUI er i gang
 
         # Konfigurerer rutenett(grid) for layout
         self.grid_rowconfigure(0, minsize=130)
@@ -47,8 +47,13 @@ class ProwlTechApp(ctk.CTk):
 
     # Startside
     def front_page(self):
-        self.front_frame = ctk.CTkFrame(self, fg_color=background_color)
+        self.front_frame = ctk.CTkFrame(self, fg_color=frame_color)
         self.front_frame.grid(row=0, column=0, rowspan=4, columnspan=4, sticky="nsew")
+
+        prowltech_logo = Image.open("prowltech_logo2.png")
+        self.prowltech_logo_icon = ctk.CTkImage(light_image=prowltech_logo, size=(550, 550))
+        self.logo_label = ctk.CTkLabel(self.front_frame, image=self.prowltech_logo_icon, text="")
+        self.logo_label.place(relx=0.5, rely=0.45, anchor="center")
 
         # Start-knapp
         self.start_button = ctk.CTkButton(
@@ -62,7 +67,12 @@ class ProwlTechApp(ctk.CTk):
             corner_radius=15,
             command=self.open_control_panel
         )
-        self.start_button.pack(pady=20)
+        self.start_button.place(relx=0.5, rely=0.9, anchor="center")
+
+
+        
+
+        
 
     def open_control_panel(self):
         self.front_frame.destroy()
