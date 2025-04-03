@@ -21,12 +21,12 @@ MSG_ID = 0x0000004
 # Kontroller verdi sending.
 
 # Funksjonen for pakken som blir sendt
-def send_data(bus, knapper, status, venstre_y, høyre_y, lt, rt):
+def send_data(bus, knapper, status, venstre_y, høyre_y):
     try:
-         data = struct.pack('<BBhhhh', knapper, status, venstre_y, høyre_y, lt, rt) # Pakken som sendes.
+        data = struct.pack('<BBhh', knapper, status, venstre_y, høyre_y) # Pakken som sendes.
         melding = can.Message(arbitration_id=MSG_ID, data=data, is_extended_id=EXTENDED_ID)
         bus.send(melding)
-        print("Sendt:", knapper, status, venstre_y, høyre_y, lt, rt)
+        print("Sendt:", knapper, status, venstre_y, høyre_y)
 
     except Exception as e:
         print("Feil ved sending! :", e)
@@ -130,14 +130,14 @@ while True:
         # Sjekk om det skal sende
         noe_aktivt = knapper > 0 or status > 0 or lt_sca > 0 or rt_sca > 0
         if noe_aktivt:
-            send_data(bus, knapper, status, venstre_y_sca, høyre_y_sca, lt_sca, rt_sca)
+            send_data(bus, knapper, status, venstre_y_sca, høyre_y_sca)
         else:
             print("[IDLE] Ingen sending")
 
-        except pygame.error:
-            print("Kontroller frakoblet. Søker igjen...")
-            time.sleep(1)
+    except pygame.error:
+        print("Kontroller frakoblet. Søker igjen...")
+        time.sleep(1)
 
-        time.sleep(0.2)
+    time.sleep(0.2)
 
 #================================================================
