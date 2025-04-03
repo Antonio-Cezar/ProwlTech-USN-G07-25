@@ -51,10 +51,17 @@ int setup_can_filter(const struct device *dev, can_rx_callback_t rx_cb, void *cb
 	    .mask = CAN_EXT_ID_MASK //(FENRIS24) Filter bit mask for an extended 29-bit CAN ID
     };
 
+    struct can_filter filter_pi = { //(PROWLTECH25) CAN filter for PI
+        .flags = CAN_FILTER_DATA | CAN_FILTER_IDE,
+        .id = RECEIVE_ID_PI,
+        .mask = CAN_EXT_ID_MASK
+    };
+
     int filter_id_str = can_add_rx_filter(dev, rx_cb, cb_data, &filter_str); //(FENRIS24) Setting the filter for the string as a variable
     int filter_id_byte = can_add_rx_filter(dev, rx_cb, cb_data, &filter_byte); //(FENRIS24) Setting the filter for the byte as a variable
+    int filter_id_pi = can_add_rx_filter(dev, rx_cb, cb_data, &filter_pi); //(PROWLTECH25) filter for kontroller values from PI 
 
-    return (filter_id_str >= 0 && filter_id_byte >= 0) ? 0 : -1;  //(FENRIS24) Return 0 if both filters are added successfully
+    return (filter_id_str >= 0 && filter_id_byte >= 0 && filter_id_pi >= 0) ? 0 : -1;  //(FENRIS24) Return 0 if both filters are added successfully //(PROWLTECH25) Pi also return to 0
 }
 
 void can_rx_callback(const struct device *dev, struct can_frame *frame, void *user_data) { //(FENRIS24) Function for checking CAN frames on the bus
@@ -69,6 +76,9 @@ void can_rx_callback(const struct device *dev, struct can_frame *frame, void *us
         received_byte = frame->data[0];
         //(FENRIS24) printk("Received byte from ID 0x%X: %02X\n", frame->id, received_byte);
     } 
+    //(PROWLTECH25) Sjekker fis frame fra BUS har den samme ID og frame data som blir sendt
+    else if (frame->id == RECEIVE_ID_PI) {
+        handle_pi_controller_data(frame); 
     else {
         printk("Unexpected data format or ID\n");
     }
@@ -109,4 +119,26 @@ void send_custom_data (const struct device *can_dev, uint8_t js_bool, int16_t js
         } /*else {
             printk("Frame sent\n");
         }*/
+}
+
+void get_pi_controller_data(struct can_frame *frame) {
+    if (frame->dlc != 8) {
+        printk("Feil: Forventet 8 byte fra Pi, fikk %d\n", frame->dlc);
+        return;
+    }
+
+    uint8_t knapper = frame->data[0];
+    uint8_t status = frame->data[1];
+    int16_t venstre_y, høyre_y;
+    uint8_t lt = frame->data[6];
+    uint8_t rt = frame->data[7];
+
+    memcpy(&venstre_y, &frame->data[2], sizeof(int16_t));
+    memcpy(&høyre_y, &frame->data[4], sizeof(int16_t));
+
+    // Print or handle
+    printk("[PI] Knapper: 0x%02X, Status: 0x%02X\n", knapper, status);
+    printk("[PI] Venstre Y: %d, Høyre Y: %d, LT: %u, RT: %u\n", venstre_y, høyre_y, lt, rt);
+
+    // TODO: Use values to control motors, LEDs, etc.
 }
