@@ -22,7 +22,7 @@ class ProwlTechApp(ctk.CTk):
         self.title("ProwlTech Kontrollpanel")           # Setter vindutittel
         self.geometry("800x450")                        # Setter størrelse 
         #self.resizable(False,False)                     # Hindrer at vinduet kan skaleres
-        self.attributes("-fullscreen", True)
+        #self.attributes("-fullscreen", True)
         self.bind("<Escape>", self.exit_fullscreen)     # ESC lukker programmet
         self.config(cursor="none")                      # Skjuler musepeker når GUI er i gang
 
