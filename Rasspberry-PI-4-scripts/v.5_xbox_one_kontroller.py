@@ -22,33 +22,102 @@ MSG_ID = 0x0000004
 # Kontroller verdi sending.
 
 # Funksjonen for pakken som blir sendt
-def send_data(bus, fart, vinkel):
+def send_data(bus, fart, vinkel, rotasjon=0.0):
     try:
-        data = struct.pack('<ff', fart, vinkel) # Pakken som sendes. (<ff) er slik den pakkes.
+        data = struct.pack('<fff', fart, vinkel, rotasjon) # Pakken som sendes. (<ff) er slik den pakkes.
         melding = can.Message(arbitration_id=MSG_ID, data=data, is_extended_id=EXTENDED_ID)
         bus.send(melding)
-        print(f"SENDT Fart: {fart:.2f}, Vinkel (rad): {vinkel:.2f}")
+        print(" ")
+        print(" ")
+        print("-----------------------")
+        print(f"SENDT Fart: {fart:.2f}, Vinkel (rad): {vinkel:.2f}, Rotasjon: {rotasjon:+.2f}")
+        print(f"SENDT Fart: {fart:.2f}, Vinkel: {radianer_til_grader(vinkel):.1f}°, Rotasjon: {rotasjon:+.2f}") #Brukte chat til å lage meg en print for debugg
+        print("-----------------------")
+        print(" ")
+        print(" ")
+
 
 
     except Exception as e:
+        print(" ")
+        print(" ")
+        print("-----------------------")
         print("Feil ved sending! :", e)
+        print(f"Fart: {fart:.2f}, Vinkel (rad): {vinkel:.2f}, Rotasjon: {rotasjon:+.2f}")
+        print(f"Fart: {fart:.2f}, Vinkel: {radianer_til_grader(vinkel):.1f}°, Rotasjon: {rotasjon:+.2f}") #Brukte chat til å lage meg en print for debugg
+        print("-----------------------")
+        print(" ")
+        print(" ")
+
+def send_rotasjon(bus, retning, fart):
+    vinkel = 0.0  # placeholder vinkel for rotasjon
+    try:
+        send_data(bus, fart, vinkel, rotasjon=retning)
+        print(" ")
+        print(" ")
+        print("-----------------------")
+        print(f"[ROTASJON] Sendt → Retning: {retning:+.1f}, Fart: {fart:.2f}")
+        print("-----------------------")
+        print(" ")
+        print(" ")
+    except Exception as e:
+        print(" ")
+        print(" ")
+        print("-----------------------")
+        print("[ROTASJON] Feil ved sending:", e)
+        print(f"Fart: {fart:.2f}, Vinkel: {radianer_til_grader(vinkel):.1f}°, Rotasjon: {retning:+.1f}")
+        print("-----------------------")
+        print(" ")
+        print(" ")
+
 
 # Funksjon for å beregne fart og vinkel.
 def beregn_fart_og_vinkel(x, y):
-    # Deadzone for å ignorere små bevegelser
-    if abs(x) < 0.05:
+    # dodsone – ignorer små bevegelser
+    if abs(x) < 0.1:
         x = 0.0
-    if abs(y) < 0.05:
+    if abs(y) < 0.1:
         y = 0.0
 
-    fart = math.hypot(x, y)
+    fart = math.sqrt(x ** 2 + y ** 2)
     fart = min(fart, 1.0)
 
-    vinkel = math.atan2(-y, x)
-    vinkel = (vinkel + math.pi / 2) % (2 * math.pi)
+    if fart < 0.1:
+        fart = 0.0
+
+    # Vinkel: 0° = opp, 90° = høyre, 180° = ned, 270° = venstre
+    vinkel = math.atan2(x, -y)  # OBS: bytt rekkefølge og tegn
+    if vinkel < 0:
+        vinkel += 2 * math.pi
 
     return fart, vinkel
 
+# Bestem fart basert på valgt profil
+def skaler_fart(fart, profil):
+    if profil == 1:
+        return fart * 0.3
+    elif profil == 2:
+        return (fart * 0.3) + (0.3 if fart > 0 else 0.0)
+    elif profil == 3:
+        return (fart * 0.6) + (0.4 if fart > 0 else 0.0)
+    return 0.0
+
+
+# Funksjon for vibrasjon av kontroller
+def rumble_ganger(joystick, antall, varighet=50, mellomrom=0.1):
+    for _ in range(antall):
+        try:
+            joystick.rumble(1.0, 1.0, varighet)
+            time.sleep(mellomrom)
+            joystick.rumble(0.0, 0.0, 0)  # Stopp
+            time.sleep(mellomrom)
+        except Exception:
+            print("Rumble ikke støttet av kontrolleren.")
+            break
+
+
+def radianer_til_grader(rad):
+    return (math.degrees(rad) + 360) % 360
 
 # Starter opp CAN-bus sending
 def initialize_bus():
@@ -92,7 +161,9 @@ joystick = None
 sist_sendte_fart = None # Husk forrige vinkel for å sjekke endring
 sist_sendte_vinkel = None  # Husk forrige vinkel for å sjekke endring
 aktiv_joystick = False
+hastighetsprofil = 1
 
+#================================================================
 # Loop som registrerer verdier og sender verdier til pakke funsjonene (send_data)
 while True:
 
@@ -105,13 +176,94 @@ while True:
 
     try:
         pygame.event.pump() # Den oppdaterer interne verdier for kontrolleren (og andre input-enheter).
+        rotasjon = 0.0
+        rotasjon_aktiv = False
+
+        # === Knapper ===
+        a = joystick.get_button(0)  # A-knapp
+        b = joystick.get_button(1)  # B-knapp
+        y = joystick.get_button(3)  # Y-knapp
+
+        # === Endre hastighetsprofil ===
+        if y:
+            hastighetsprofil = 1
+            print("Hastighetsprofil 1 valgt (0.0-0.3)")
+            rumble_ganger(joystick, 1)
+
+        elif b:
+            hastighetsprofil = 2
+            print("Hastighetsprofil 2 valgt (0.3-0.6)")
+            rumble_ganger(joystick, 2)
+
+        elif a:
+            hastighetsprofil = 3
+            print("Hastighetsprofil 3 valgt (0.4-1.0)")
+            rumble_ganger(joystick, 3)
+
+        # === Trigger RT og LT ===
+        rt = joystick.get_axis(5)  # Høyre trigger (RT)
+        lt = joystick.get_axis(4)  # Venstre trigger (LT)
+
+        rt = (rt + 1.0) / 2.0
+        lt = (lt + 1.0) / 2.0
+
+
+        # Håndter RT (fremover)
+        if rt > 0.05:
+            fart = skaler_fart(rt, hastighetsprofil)
+            vinkel = 0.0  # Radianer
+            fart_r = round(fart, 2)
+            vinkel_r = round(vinkel, 2)
+            send_data(bus, fart_r, vinkel_r)
+            aktiv_joystick = True
+            continue  # hopp over resten av loopen
+
+        # Håndter LT (bakover)
+        if lt > 0.05:
+            fart = skaler_fart(lt, hastighetsprofil)
+            vinkel = math.pi  # 180°
+            fart_r = round(fart, 2)
+            vinkel_r = round(vinkel, 2)
+            send_data(bus, fart_r, vinkel_r)
+            aktiv_joystick = True
+            continue # hopp over resten av loopen
+
+        # === kanpper for rotasjon LB og RB ===
+        rb = joystick.get_button(4)  # Høyre bumper
+        lb = joystick.get_button(5)  # Venstre bumper
+
+        # Håndter rotasjon (RB og LB)
+        if rb:
+            rotasjon = +1.0
+            rotasjon_aktiv = True
+
+        elif lb:
+            rotasjon = -1.0
+            rotasjon_aktiv = True
+
+        if rotasjon_aktiv:
+            rotasjon_fart = {1: 0.2, 2: 0.5, 3: 0.7}.get(hastighetsprofil, 0.2)
+            send_data(bus, rotasjon_fart, 0.0, rotasjon=rotasjon)
+            aktiv_joystick = True
+            continue
+
 
         # Joystick
-        venstre_x = joystick.get_axis(3)
-        venstre_y = joystick.get_axis(4)
+        venstre_x = joystick.get_axis(2)
+        venstre_y = joystick.get_axis(3)
 
         # Beregn fart og vinkel
         fart, vinkel = beregn_fart_og_vinkel(venstre_x, venstre_y)
+
+        # === Skaler fart i henhold til valgt hastighetsprofil ===
+        if hastighetsprofil == 1:
+            fart = fart * 0.3
+        elif hastighetsprofil == 2:
+            fart = (fart * 0.3) + (0.3 if fart > 0 else 0.0)
+        elif hastighetsprofil == 3:
+            fart = (fart * 0.6) + (0.4 if fart > 0 else 0.0)
+
+        # Rund av og send
         fart_r = round(fart, 2)
         vinkel_r = round(vinkel, 2)
 
@@ -124,14 +276,25 @@ while True:
         else:
             if aktiv_joystick:
                 # Send null-pakke når den slippes
-                send_data(bus, 0.0, 0.0)
+                send_data(bus, 0.0, 0.0, rotasjon=0.0)
                 aktiv_joystick = False
+
+            print(" ")
+            print(" ")
+            print("-----------------------")
             print("[IDLE] Joystick i ro - fart for lav")
+            print(f"Fart: {fart:.2f}, Vinkel (rad): {vinkel:.2f}, Rotasjon: {rotasjon:+.2f}")
+            print(f"Fart: {fart:.2f}, Vinkel: {radianer_til_grader(vinkel):.1f}°, Rotasjon: {rotasjon:+.2f}")
+            print(f"Aktiv profil: {hastighetsprofil}")
+            print("-----------------------")
+            print(" ")
+            print(" ")
+
 
     except pygame.error:
         print("Kontroller frakoblet. Søker igjen...")
         time.sleep(1)
 
-    time.sleep(0.2)
-
+    time.sleep(0.1)
+#================================================================
 #================================================================
