@@ -2,6 +2,7 @@ import can
 import struct
 import time
 import pygame
+import math
 
 
 #================================================================
@@ -21,23 +22,33 @@ MSG_ID = 0x0000004
 # Kontroller verdi sending.
 
 # Funksjonen for pakken som blir sendt
-def send_data(bus, knapper, status, venstre_y, høyre_y):
+def send_data(bus, fart, vinkel):
     try:
-        data = struct.pack('<BBhh', knapper, status, venstre_y, høyre_y) # Pakken som sendes.
+        data = struct.pack('<ff', fart, vinkel) # Pakken som sendes. (<ff) er slik den pakkes.
         melding = can.Message(arbitration_id=MSG_ID, data=data, is_extended_id=EXTENDED_ID)
         bus.send(melding)
-        print("Sendt:", knapper, status, venstre_y, høyre_y)
+        print(f"SENDT Fart: {fart:.2f}, Vinkel (rad): {vinkel:.2f}")
+
 
     except Exception as e:
         print("Feil ved sending! :", e)
 
-# Funksjonen for å skalere joystick-verdiene fra(-1.0 ril 1.0) til int16
-def skaler_trigger(verdi):
-    # Fra -1.0 til 1.0 → 0 til 255
-    return int((verdi + 1) * 127.5)
+# Funksjon for å beregne fart og vinkel.
+def beregn_fart_og_vinkel(x, y):
+    # Deadzone for å ignorere små bevegelser
+    if abs(x) < 0.05:
+        x = 0.0
+    if abs(y) < 0.05:
+        y = 0.0
 
-def skaler_akse(verdi):
-    return int(verdi * 32767)
+    fart = math.hypot(x, y)
+    fart = min(fart, 1.0)
+
+    vinkel = math.atan2(-y, x)
+    vinkel = (vinkel + math.pi / 2) % (2 * math.pi)
+
+    return fart, vinkel
+
 
 # Starter opp CAN-bus sending
 def initialize_bus():
@@ -52,15 +63,23 @@ def initialize_bus():
 
 def initialize_joystick():
     pygame.joystick.init()
-    if pygame.joystick.get_count() > 0:
+    antall = pygame.joystick.get_count()
+    print(f"Antall kontrollere funnet: {antall}")
+    
+    if antall > 0:
+        for i in range(antall):
+            js = pygame.joystick.Joystick(i)
+            js.init()
+            print(f"Joystick {i}: {js.get_name()}")
         joystick = pygame.joystick.Joystick(0)
         joystick.init()
-        print("Kontroller koblet til")
+        print(f"Bruker joystick 0: {joystick.get_name()}")
         return joystick
     else:
-        print("Feil ved tilkobling av kontroller:")
+        print("Feil: ingen kontroller funnet.")
         time.sleep(1)
         return None
+
 
 # bibliotek pygame og kontroller
 pygame.init()
@@ -70,6 +89,9 @@ if bus is None:
     exit()
 
 joystick = None
+sist_sendte_fart = None # Husk forrige vinkel for å sjekke endring
+sist_sendte_vinkel = None  # Husk forrige vinkel for å sjekke endring
+aktiv_joystick = False
 
 # Loop som registrerer verdier og sender verdier til pakke funsjonene (send_data)
 while True:
@@ -83,56 +105,28 @@ while True:
 
     try:
         pygame.event.pump() # Den oppdaterer interne verdier for kontrolleren (og andre input-enheter).
-        print("Looping...")
 
         # Joystick
-        venstre_x = joystick.get_axis(0)
-        venstre_y = joystick.get_axis(1)
-        høyre_x = joystick.get_axis(3)
-        høyre_y = joystick.get_axis(4)
+        venstre_x = joystick.get_axis(3)
+        venstre_y = joystick.get_axis(4)
 
-        # Trigger
-        lt = joystick.get_axis(2)
-        rt = joystick.get_axis(5)
+        # Beregn fart og vinkel
+        fart, vinkel = beregn_fart_og_vinkel(venstre_x, venstre_y)
+        fart_r = round(fart, 2)
+        vinkel_r = round(vinkel, 2)
 
-        # Knapper over skulder
-        lb = joystick.get_button(8)
-        rb = joystick.get_button(9)
-
-        # Knapper a, b, x og y
-        a = joystick.get_button(0)
-        b = joystick.get_button(1)
-        x = joystick.get_button(2)
-        y = joystick.get_button(3)
-
-        # Bitmaske for knapper
-        knapper = 0
-        if a: knapper |= 0b00000001
-        if b: knapper |= 0b00000010
-        if x: knapper |= 0b00000100
-        if y: knapper |= 0b00001000
-        if lb: knapper |= 0b00010000
-        if rb: knapper |= 0b00100000
-
-        # Status for joystick
-        status = 0
-        if abs(venstre_x) > 0.1 or abs(venstre_y) > 0.1:
-            status |= 0b00000001  # Venstre joystick aktiv
-        if abs(høyre_x) > 0.1 or abs(høyre_y) > 0.1:
-            status |= 0b00000010  # Høyre joystick aktiv
-
-        # Skaler verdier
-        venstre_y_sca = skaler_akse(venstre_y)
-        høyre_y_sca = skaler_akse(høyre_y)
-        lt_sca = skaler_trigger(lt)
-        rt_sca = skaler_trigger(rt)
-
-        # Sjekk om det skal sende
-        noe_aktivt = knapper > 0 or status > 0 or lt_sca > 0 or rt_sca > 0
-        if noe_aktivt:
-            send_data(bus, knapper, status, venstre_y_sca, høyre_y_sca)
+        # Bare send hvis joystick røres (fart) og vinkelendring er stor nok
+        if fart_r > 0.01:
+            send_data(bus, fart_r, vinkel_r)
+            sist_sendte_fart = fart_r
+            sist_sendte_vinkel = vinkel_r
+            aktiv_joystick = True  # Nå er joystick aktiv
         else:
-            print("[IDLE] Ingen sending")
+            if aktiv_joystick:
+                # Send null-pakke når den slippes
+                send_data(bus, 0.0, 0.0)
+                aktiv_joystick = False
+            print("[IDLE] Joystick i ro - fart for lav")
 
     except pygame.error:
         print("Kontroller frakoblet. Søker igjen...")
