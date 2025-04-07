@@ -30,8 +30,8 @@ def send_data(bus, fart, vinkel, rotasjon=0.0):
         print(" ")
         print(" ")
         print("-----------------------")
-        print(f"SENDT Fart: {fart:.2f}, Vinkel (rad): {vinkel:.2f}, Rotasjon: {rotasjon:+.2f}")
-        print(f"SENDT Fart: {fart:.2f}, Vinkel: {radianer_til_grader(vinkel):.1f}°, Rotasjon: {rotasjon:+.2f}") #Brukte chat til å lage meg en print for debugg
+        print(f"SENDT → Fart: {fart:.2f}, Vinkel (rad): {vinkel:.2f}, Rotasjon: {rotasjon:+.2f}")
+        print(f"SENDT → Fart: {fart:.2f}, Vinkel: {radianer_til_grader(vinkel):.1f}°, Rotasjon: {rotasjon:+.2f}")
         print("-----------------------")
         print(" ")
         print(" ")
@@ -40,33 +40,11 @@ def send_data(bus, fart, vinkel, rotasjon=0.0):
         print(" ")
         print("-----------------------")
         print("Feil ved sending! :", e)
-        print(f"Fart: {fart:.2f}, Vinkel (rad): {vinkel:.2f}, Rotasjon: {rotasjon:+.2f}")
-        print(f"Fart: {fart:.2f}, Vinkel: {radianer_til_grader(vinkel):.1f}°, Rotasjon: {rotasjon:+.2f}") #Brukte chat til å lage meg en print for debugg
+        print(f"→ Fart: {fart:.2f}, Vinkel (rad): {vinkel:.2f}, Rotasjon: {rotasjon:+.2f}")
+        print(f"→ Fart: {fart:.2f}, Vinkel: {radianer_til_grader(vinkel):.1f}°, Rotasjon: {rotasjon:+.2f}")
         print("-----------------------")
         print(" ")
         print(" ")
-
-def send_rotasjon(bus, retning, fart):
-    vinkel = 0.0  # placeholder vinkel for rotasjon
-    try:
-        send_data(bus, fart, vinkel, rotasjon=retning)
-        print(" ")
-        print(" ")
-        print("-----------------------")
-        print(f"[ROTASJON] Sendt → Retning: {retning:+.1f}, Fart: {fart:.2f}")
-        print("-----------------------")
-        print(" ")
-        print(" ")
-    except Exception as e:
-        print(" ")
-        print(" ")
-        print("-----------------------")
-        print("[ROTASJON] Feil ved sending:", e)
-        print(f"Fart: {fart:.2f}, Vinkel: {radianer_til_grader(vinkel):.1f}°, Rotasjon: {retning:+.1f}")
-        print("-----------------------")
-        print(" ")
-        print(" ")
-
 
 # Funksjon for å beregne fart og vinkel.
 def beregn_fart_og_vinkel(x, y):
@@ -158,7 +136,7 @@ joystick = None
 sist_sendte_fart = None # Husk forrige vinkel for å sjekke endring
 sist_sendte_vinkel = None  # Husk forrige vinkel for å sjekke endring
 aktiv_joystick = False
-hastighetsprofil = 1
+Hastighetsmodus = 1
 
 #================================================================
 # Loop som registrerer verdier og sender verdier til pakke funsjonene (send_data)
@@ -176,113 +154,111 @@ while True:
         rotasjon = 0.0
         rotasjon_aktiv = False
 
-        # === Knapper ===
+        # === Input Knapper ===
         a = joystick.get_button(0)  # A-knapp
         b = joystick.get_button(1)  # B-knapp
         y = joystick.get_button(3)  # Y-knapp
 
-        # === Endre hastighetsprofil ===
-        if y:
-            hastighetsprofil = 1
-            print("Hastighetsprofil 1 valgt (0.0-0.3)")
-            rumble_ganger(joystick, 1)
+        # === Input kanpper for rotasjon LB og RB ===
+        rb = joystick.get_button(4)  # Høyre bumper
+        lb = joystick.get_button(5)  # Venstre bumper
 
-        elif b:
-            hastighetsprofil = 2
-            print("Hastighetsprofil 2 valgt (0.3-0.6)")
-            rumble_ganger(joystick, 2)
+        # == Input Joystick ===
+        venstre_x = joystick.get_axis(2)
+        venstre_y = joystick.get_axis(3)
 
-        elif a:
-            hastighetsprofil = 3
-            print("Hastighetsprofil 3 valgt (0.4-1.0)")
-            rumble_ganger(joystick, 3)
-
-        # === Trigger RT og LT ===
+        # === Input Trigger RT og LT ===
         rt = joystick.get_axis(5)  # Høyre trigger (RT)
         lt = joystick.get_axis(4)  # Venstre trigger (LT)
 
         rt = (rt + 1.0) / 2.0
         lt = (lt + 1.0) / 2.0
 
+        # Håndter rotasjon (RB og LB)
+        # Bestem rotasjon basert på bumpere
+        rotasjon = 0.0
+        if rb:
+            rotasjon = +1.0
+        elif lb:
+            rotasjon = -1.0
+
+        # === Endre hastighetsmoduser ===
+        if y:
+            Hastighetsmodus = 1
+            print("Hastighetsmodus 1 valgt (0.0-0.3)")
+            rumble_ganger(joystick, 1)
+
+        elif b:
+            Hastighetsmodus = 2
+            print("Hastighetsmodus 2 valgt (0.3-0.6)")
+            rumble_ganger(joystick, 2)
+
+        elif a:
+            Hastighetsmodus = 3
+            print("Hastighetsmodus 3 valgt (0.4-1.0)")
+            rumble_ganger(joystick, 3)
+
+        # Velg rotasjonsfart som faktor
+        rotasjon_faktor = {1: 0.2, 2: 0.5, 3: 0.7}.get(Hastighetsmodus, 0.2)
 
         # Håndter RT (fremover)
         if rt > 0.05:
-            fart = skaler_fart(rt, hastighetsprofil)
+            fart = skaler_fart(rt, Hastighetsmodus)
             vinkel = 0.0  # Radianer
             fart_r = round(fart, 2)
             vinkel_r = round(vinkel, 2)
-            send_data(bus, fart_r, vinkel_r)
+            send_data(bus, fart_r, vinkel_r, rotasjon=rotasjon * rotasjon_faktor)
             aktiv_joystick = True
             continue  # hopp over resten av loopen
 
         # Håndter LT (bakover)
         if lt > 0.05:
-            fart = skaler_fart(lt, hastighetsprofil)
+            fart = skaler_fart(lt, Hastighetsmodus)
             vinkel = math.pi  # 180°
             fart_r = round(fart, 2)
             vinkel_r = round(vinkel, 2)
-            send_data(bus, fart_r, vinkel_r)
+            send_data(bus, fart_r, vinkel_r, rotasjon=rotasjon * rotasjon_faktor)
             aktiv_joystick = True
             continue # hopp over resten av loopen
-
-        # === kanpper for rotasjon LB og RB ===
-        rb = joystick.get_button(4)  # Høyre bumper
-        lb = joystick.get_button(5)  # Venstre bumper
-
-        # Håndter rotasjon (RB og LB)
-        if rb:
-            rotasjon = +1.0
-            rotasjon_aktiv = True
-
-        elif lb:
-            rotasjon = -1.0
-            rotasjon_aktiv = True
-
-        if rotasjon_aktiv:
-            rotasjon_fart = {1: 0.2, 2: 0.5, 3: 0.7}.get(hastighetsprofil, 0.2)
-            send_data(bus, rotasjon_fart, 0.0, rotasjon=rotasjon)
-            aktiv_joystick = True
-            continue
-
-
-        # Joystick
-        venstre_x = joystick.get_axis(2)
-        venstre_y = joystick.get_axis(3)
 
         # Beregn fart og vinkel
         fart, vinkel = beregn_fart_og_vinkel(venstre_x, venstre_y)
 
-        # === Skaler fart i henhold til valgt hastighetsprofil ===
-        if hastighetsprofil == 1:
+        # === Skaler fart i henhold til valgt Hastighetsmodus ===
+        if Hastighetsmodus == 1:
             fart = fart * 0.3
-        elif hastighetsprofil == 2:
+        elif Hastighetsmodus == 2:
             fart = (fart * 0.3) + (0.3 if fart > 0 else 0.0)
-        elif hastighetsprofil == 3:
+        elif Hastighetsmodus == 3:
             fart = (fart * 0.6) + (0.4 if fart > 0 else 0.0)
 
         # Rund av og send
         fart_r = round(fart, 2)
         vinkel_r = round(vinkel, 2)
 
-        # Bare send hvis joystick røres (fart) og vinkelendring er stor nok
+        # Bare send hvis fart er stor nok så vil den sende til bus
         if fart_r > 0.01:
-            send_data(bus, fart_r, vinkel_r)
-            sist_sendte_fart = fart_r
-            sist_sendte_vinkel = vinkel_r
-            aktiv_joystick = True  # Nå er joystick aktiv
+            if fart_r != sist_sendte_fart or vinkel_r != sist_sendte_vinkel:
+                send_data(bus, fart_r, vinkel_r, rotasjon=rotasjon * rotasjon_faktor)
+                sist_sendte_fart = fart_r
+                sist_sendte_vinkel = vinkel_r
+                aktiv_joystick = True
         else:
             if aktiv_joystick:
-                # Send null-pakke når den slippes
+                # Kun send stopp én gang når fart går til null
                 send_data(bus, 0.0, 0.0, rotasjon=0.0)
                 aktiv_joystick = False
+                sist_sendte_fart = 0.0
+                sist_sendte_vinkel = 0.0
+
 
             print(" ")
             print(" ")
             print("-----------------------")
-            print("[IDLE] Joystick i ro - fart for lav")
-            print(f"Fart: {fart:.2f}, Vinkel (rad): {vinkel:.2f}, Rotasjon: {rotasjon:+.2f}")
-            print(f"Fart: {fart:.2f}, Vinkel: {radianer_til_grader(vinkel):.1f}°, Rotasjon: {rotasjon:+.2f}")
-            print(f"Aktiv profil: {hastighetsprofil}")
+            print("[IDLE] Joystick i ro – fart for lav")
+            print(f"→ Fart: {fart:.2f}, Vinkel (rad): {vinkel:.2f}, Rotasjon: {rotasjon:+.2f}")
+            print(f"→ Fart: {fart:.2f}, Vinkel: {radianer_til_grader(vinkel):.1f}°, Rotasjon: {rotasjon:+.2f}")
+            print(f"Aktiv hastighetsmodus: {Hastighetsmodus}")
             print("-----------------------")
             print(" ")
             print(" ")
