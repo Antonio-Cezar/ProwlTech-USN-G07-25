@@ -8,12 +8,19 @@ ctk.set_appearance_mode("dark")
 text_color = "#BDBDBD"
 background_color = "#140520"
 top_panel_color = "#2F0B63"
-button_color = "#4C1A92"
+error_section = "#311C42"
 frame_color = "#583092"
 frame_border_color = "#3A0C7D"
+
+button_color = "#4C1A92"
 button_border_color = "black"
-error_section = "#311C42"
-border_size = 8
+button_hover_color = "#6C578A"
+
+popup_background_color = "#200F2D"
+popup_top_color = "#3A2557"
+popup_button_color = "#6C3DAF"
+
+border_size = 9
 
 # Hovedklasse for GUI-et
 class ProwlTechApp(ctk.CTk):
@@ -47,7 +54,7 @@ class ProwlTechApp(ctk.CTk):
 
     # Startside
     def front_page(self):
-        self.front_frame = ctk.CTkFrame(self, fg_color=frame_color)
+        self.front_frame = ctk.CTkFrame(self, fg_color="#CDB9FC")
         self.front_frame.grid(row=0, column=0, rowspan=4, columnspan=4, sticky="nsew")
 
         prowltech_logo = Image.open("prowltech_logo2.png")
@@ -60,11 +67,12 @@ class ProwlTechApp(ctk.CTk):
             self.front_frame,
             text="Start",
             font=("Century Gothic", 20),
-            width=200,
-            height=50,
-            fg_color=button_color,
+            width=150,
+            height=40,
+            fg_color="#6F48A6",
+            hover_color=button_hover_color,
             text_color="white",
-            corner_radius=15,
+            corner_radius=10,
             command=self.open_control_panel
         )
         self.start_button.place(relx=0.5, rely=0.9, anchor="center")
@@ -125,6 +133,7 @@ class ProwlTechApp(ctk.CTk):
             compound="right",                          
             font=("Century Gothic", 16),
             fg_color=button_color,
+            hover_color=button_hover_color,
             text_color="white",
             corner_radius=10,
             command=self.open_connection_window      
@@ -142,6 +151,7 @@ class ProwlTechApp(ctk.CTk):
             #image=self.power_icon,
             #compound="right",
             fg_color=button_color,
+            hover_color=button_hover_color,
             corner_radius=10,
             command=self.open_info_window
         )
@@ -160,13 +170,14 @@ class ProwlTechApp(ctk.CTk):
         self.update_icon = ctk.CTkImage(light_image=update_image, size=(15, 15))
 
         # Ytre ramme av popup-vindu
-        self.popup_border =ctk.CTkFrame(self, fg_color=frame_border_color, corner_radius=0)
-        self.popup_border.place(relx=0.5, rely=0.5, anchor="center", relwidth=0.9, relheight=0.9)
-        self.popup_border.grid_propagate(False)
+        #self.popup_border =ctk.CTkFrame(self, fg_color=popup_top_color, corner_radius=0)
+        #self.popup_border.place(relx=0.5, rely=0.5, anchor="center", relwidth=0.9, relheight=0.9)
+        #self.popup_border.grid_propagate(False)
 
         # Indre ramme av popup-vindu
-        self.popup_panel = ctk.CTkFrame(self.popup_border, fg_color=background_color, corner_radius=20)
-        self.popup_panel.place(relx=0.5, rely=0.5, anchor="center", relwidth=0.98, relheight=0.98)
+        self.popup_panel = ctk.CTkFrame(self, fg_color=popup_background_color, corner_radius=0)
+        self.popup_panel.place(relx=0.5, rely=0.5, anchor="center", relwidth=0.85, relheight=0.85)
+        self.popup_panel.grid_propagate(False)
 
         # Grid-oppsett i popup-vindu
         self.popup_panel.grid_rowconfigure(0, minsize=80)
@@ -176,10 +187,10 @@ class ProwlTechApp(ctk.CTk):
         self.popup_panel.grid_columnconfigure(2, weight=1)
 
         # Øvre og nedre seksjon i popup-vindu
-        self.top = ctk.CTkFrame(self.popup_panel, fg_color=top_panel_color)
+        self.top = ctk.CTkFrame(self.popup_panel, fg_color=popup_top_color)
         self.top.grid(row=0, column=0, columnspan=3, sticky="nsew")
 
-        self.bottom = ctk.CTkFrame(self.popup_panel, fg_color=background_color)
+        self.bottom = ctk.CTkFrame(self.popup_panel, fg_color=popup_background_color)
         self.bottom.grid(row=1, column=0, columnspan=3, sticky="nsew")
         self.bottom.grid_rowconfigure(0, weight=1)
         self.bottom.grid_columnconfigure(0, weight=1)
@@ -188,14 +199,15 @@ class ProwlTechApp(ctk.CTk):
         self.update_button = ctk.CTkButton(
             self.top,
             text="Oppdater",
-            width=180,
-            height=50,
+            width=100,
+            height=40,
             image=self.update_icon,
             compound="right",  
             font=("Century Gothic", 16),
-            fg_color=button_color,
+            fg_color=popup_button_color,
+            hover_color=button_hover_color,
             text_color="white",
-            corner_radius=70,
+            corner_radius=10,
             command=self.start_update
         )
         self.update_button.grid(row=0, column=0, padx=(30, 30), pady=30)
@@ -222,17 +234,18 @@ class ProwlTechApp(ctk.CTk):
         close_button = ctk.CTkButton(
             self.top,
             text="Lukk",
-            width=150,
-            height=50,
+            width=100,
+            height=40,
             image=self.cross_icon,
             compound="right",  
             font=("Century Gothic", 16),
-            fg_color=button_color,
+            fg_color=popup_button_color,
+            hover_color=button_hover_color,
             text_color="white",
-            corner_radius=70,
+            corner_radius=10,
             command=self.close_connection_window
         )
-        close_button.grid(row=0, column=2, padx=(30, 40), pady=30)
+        close_button.grid(row=0, column=2, padx=(90, 0), pady=30)
 
     # Oppdaterer søk etter kontrollere
     def start_update(self):
@@ -249,19 +262,20 @@ class ProwlTechApp(ctk.CTk):
 
     # Lukker popup-vindu når lukk-knappen trykkes
     def close_connection_window(self):
-        self.popup_border.destroy()
         self.popup_panel.destroy()
 
     # Popup-vindu som vises når "Info"-knappen trykkes
     def open_info_window(self):
+
         # Ytre ramme av popup-vindu
-        self.popup_border =ctk.CTkFrame(self, fg_color=frame_border_color, corner_radius=0)
-        self.popup_border.place(relx=0.5, rely=0.5, anchor="center", relwidth=0.9, relheight=0.9)
-        self.popup_border.grid_propagate(False)
+        #self.popup_border =ctk.CTkFrame(self, fg_color=popup_border_color, corner_radius=0)
+        #self.popup_border.place(relx=0.5, rely=0.5, anchor="center", relwidth=0.9, relheight=0.9)
+        #self.popup_border.grid_propagate(False)
 
         # Indre ramme av popup-vindu
-        self.popup_panel = ctk.CTkFrame(self.popup_border, fg_color=background_color, corner_radius=20)
-        self.popup_panel.place(relx=0.5, rely=0.5, anchor="center", relwidth=0.98, relheight=0.98)
+        self.popup_panel = ctk.CTkFrame(self, fg_color=popup_background_color, corner_radius=0)
+        self.popup_panel.place(relx=0.5, rely=0.5, anchor="center", relwidth=0.85, relheight=0.85)
+        self.popup_panel.grid_propagate(False)
 
         # Grid-oppsett i popup-vindu
         self.popup_panel.grid_rowconfigure(0, minsize=80)
@@ -275,8 +289,13 @@ class ProwlTechApp(ctk.CTk):
         self.cross_icon = ctk.CTkImage(light_image=cross_image, size=(15, 15))
 
         # Øvre og nedre seksjon i popup-vindu
-        self.top = ctk.CTkFrame(self.popup_panel, fg_color=top_panel_color)
+        self.top = ctk.CTkFrame(self.popup_panel, fg_color=popup_top_color)
         self.top.grid(row=0, column=0, columnspan=3, sticky="nsew")
+
+        self.bottom = ctk.CTkFrame(self.popup_panel, fg_color=popup_background_color)
+        self.bottom.grid(row=1, column=0, columnspan=3, sticky="nsew")
+        self.bottom.grid_rowconfigure(0, weight=1)
+        self.bottom.grid_columnconfigure(0, weight=1)
 
          # Titteltekst i popup-vindu
         self.label = ctk.CTkLabel(
@@ -286,25 +305,34 @@ class ProwlTechApp(ctk.CTk):
             justify="center",
             anchor="center"
             )
-        self.label.grid(row=0, column=1, padx=95, pady=30)
+        self.label.place(relx=0.5, rely=0.5, anchor=ctk.CENTER)
 
         close_button = ctk.CTkButton(
             self.top,
             text="Lukk",
-            width=150,
-            height=50,
+            width=100,
+            height=40,
             image=self.cross_icon,
             compound="right",  
             font=("Century Gothic", 16),
-            fg_color=button_color,
+            fg_color=popup_button_color,
+            hover_color=button_hover_color,
             text_color="white",
-            corner_radius=70,
+            corner_radius=10,
             command=self.close_info_window
         )
-        close_button.grid(row=0, column=2, padx=(30, 40), pady=30)
+        close_button.grid(row=0, column=2, padx=550, pady=30)
+
+        self.info_text = ctk.CTkLabel(
+            self.bottom,
+            text="Kort beskrivelse av hvordan bilen fungerer.",
+            font=("Century Gothic", 16),
+            text_color="white",
+            justify="left"
+        )
+        self.info_text.pack(padx=80, pady=20)
 
     def close_info_window(self):
-        self.popup_border.destroy()
         self.popup_panel.destroy()
 
     # Midtseksjon: viser batteri, temperatur, tilkobling og sensor
@@ -347,7 +375,7 @@ class ProwlTechApp(ctk.CTk):
         self.battery_label.pack(side="top", anchor="w", padx=15, pady=0)
 
         # Ramme
-        self.battery_frame = ctk.CTkFrame(self.battery_container, height=150, width=160, fg_color=frame_color, corner_radius=25, border_color=frame_border_color, border_width=border_size)
+        self.battery_frame = ctk.CTkFrame(self.battery_container, height=130, width=130, fg_color=frame_color, corner_radius=25, border_color=frame_border_color, border_width=border_size)
         self.battery_frame.pack(side="top", expand=True, padx=10, pady=0)
 
         
@@ -368,7 +396,7 @@ class ProwlTechApp(ctk.CTk):
         self.temp_label.pack(side="top", anchor="w", padx=15, pady=0)
 
         # Ramme
-        self.temp_frame = ctk.CTkFrame(self.temp_container, height=150, width=160, fg_color=frame_color, corner_radius=25, border_color=frame_border_color, border_width=border_size)
+        self.temp_frame = ctk.CTkFrame(self.temp_container, height=130, width=130, fg_color=frame_color, corner_radius=25, border_color=frame_border_color, border_width=border_size)
         self.temp_frame.pack(side="top", expand=True, padx=10, pady=0)
 
 
@@ -376,7 +404,7 @@ class ProwlTechApp(ctk.CTk):
         self.connection_containter = ctk.CTkFrame(self.mid_frame, fg_color=background_color)
         self.connection_containter.grid(row=1, column=2, columnspan=2, sticky="sew")
 
-        # Titteltekst
+        # Tilkoblingsstatus - Titteltekst
         self.connection_label = ctk.CTkLabel(
             self.connection_containter, 
             text="TILKOBLING  ",
@@ -388,16 +416,16 @@ class ProwlTechApp(ctk.CTk):
         )
         self.connection_label.pack(side="top", anchor="w", padx=35, pady=0)
 
-        # Ramme
-        self.temp_frame = ctk.CTkFrame(self.connection_containter, height=75, width=300, fg_color=frame_color, corner_radius=30, border_color=frame_border_color, border_width=border_size)
-        self.temp_frame.pack(side="top", expand=True, padx=30, pady=(0, 10))
+        # Tilkoblingsstatus - Ramme
+        self.temp_frame = ctk.CTkFrame(self.connection_containter, height=70, width=300, fg_color=frame_color, corner_radius=20, border_color=frame_border_color, border_width=7)
+        self.temp_frame.pack(side="top", expand=True, padx=20, pady=(0, 10))
 
 
         # Sensormåling:
         self.sensor_container = ctk.CTkFrame(self.mid_frame, fg_color=background_color)
         self.sensor_container.grid(row=2, column=2, columnspan=2, sticky="new")
 
-        #tittel
+        # Sensormåling - Tittel
         self.sensor_label = ctk.CTkLabel(
             self.sensor_container, 
             text="SENSORMÅLINGER  ",
@@ -409,8 +437,8 @@ class ProwlTechApp(ctk.CTk):
         )
         self.sensor_label.pack(side="top", anchor="w", padx=35, pady=0)
 
-        #ramme
-        self.sensor_frame = ctk.CTkFrame(self.sensor_container, height=75, width=300, fg_color=frame_color, corner_radius=30, border_color=frame_border_color, border_width=border_size)
+        # Sensormåling - Ramme
+        self.sensor_frame = ctk.CTkFrame(self.sensor_container, height=70, width=300, fg_color=frame_color, corner_radius=20, border_color=frame_border_color, border_width=8)
         self.sensor_frame.pack(side="top", expand=True, padx=30, pady=(0, 0))
 
     # Bunnseksjon: viser feilmeldinger
@@ -440,7 +468,7 @@ class ProwlTechApp(ctk.CTk):
         self.error_label.pack(side="top", anchor="w", padx=15, pady=0)
        
         # Ramme
-        self.error_frame = ctk.CTkFrame(self.error_container, height=80, width=750, fg_color=error_section, corner_radius=20)
+        self.error_frame = ctk.CTkFrame(self.error_container, height=80, width=750, fg_color=error_section, corner_radius=30)
         self.error_frame.pack(side="top", expand=True, padx=10, pady=5)
 
        
