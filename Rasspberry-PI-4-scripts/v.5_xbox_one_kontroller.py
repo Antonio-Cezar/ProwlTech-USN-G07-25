@@ -35,9 +35,6 @@ def send_data(bus, fart, vinkel, rotasjon=0.0):
         print("-----------------------")
         print(" ")
         print(" ")
-
-
-
     except Exception as e:
         print(" ")
         print(" ")
