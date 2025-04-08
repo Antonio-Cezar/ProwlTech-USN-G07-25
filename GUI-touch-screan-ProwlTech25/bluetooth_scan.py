@@ -4,48 +4,46 @@ import time
 
 def scan_bluetooth_devices(name_filter=""):
     """
-    Søker etter Bluetooth-enheter i nærheten som er synlige (typisk i pairing-modus).
-    Returnerer en dictionary med {adresse: navn}.
+    Søker etter Bluetooth-enheter i pairing-modus (synlige enheter).
+    Returnerer dict: {adresse: navn}
     """
 
     devices = {}
 
     try:
-        # Start bluetoothctl i interaktivt shell
+        # Start bluetoothctl
         child = pexpect.spawn("bluetoothctl", echo=False)
-        child.expect("#", timeout=2)
+        child.expect("#", timeout=5)  # Økt timeout for første respons
 
-        # Start scanning etter enheter
         child.sendline("scan on")
-        scan_duration = 5  # sekunder
-        end_time = time.time() + scan_duration
+        time.sleep(1)  # Gi scanningen tid til å starte
 
-        while time.time() < end_time:
+        start_time = time.time()
+        scan_duration = 10  # Økt til 10 sekunder
+
+        while time.time() - start_time < scan_duration:
             try:
-                # Matcher linjer som: Device XX:XX:XX:XX:XX:XX ControllerName
-                child.expect(r'Device ([0-9A-F:]{17}) (.+)', timeout=1)
+                # Vent på en linje med enhetsdata
+                child.expect(r"Device ([0-9A-F:]{17}) (.+)", timeout=3)
                 addr, name = child.match.groups()
                 addr = addr.decode()
                 name = name.decode()
 
-                # Hvis navnefilter er satt, sjekk det
-                if name_filter.lower() in name.lower():
-                    devices[addr] = name
-                elif name_filter == "":
+                if name_filter.lower() in name.lower() or name_filter == "":
                     devices[addr] = name
 
             except pexpect.exceptions.TIMEOUT:
-                continue  # Ingen enhet funnet akkurat nå, prøv videre
+                # Fortsett å vente på neste enhet
+                continue
 
-        # Avslutt scanning og bluetoothctl
+        # Stopp scanning
         child.sendline("scan off")
         child.sendline("quit")
         child.close()
 
     except Exception as e:
-        print("Feil under Bluetooth-søk:", e)
+        print("Bluetooth-feil:", e)
 
     return devices
-
 
 
