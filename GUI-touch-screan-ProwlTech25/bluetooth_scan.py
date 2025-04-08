@@ -1,7 +1,7 @@
 import subprocess
 import re
 
-def scan_bluetooth_devices(name_filter=""):
+def scan_bluetooth_devices(name_filter="Controller"):
     """
     Henter både parrede og kjente enheter (fra bluetoothctl).
     Filtrerer med navn hvis angitt.
