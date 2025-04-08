@@ -1,5 +1,6 @@
 import customtkinter as ctk
 from PIL import Image
+from bluetooth_scan import scan_bluetooth_devices   # Funksjon til å scanne etter enheter via bluetooth
 
 # Setter mørkt tema for hele GUI-et
 ctk.set_appearance_mode("dark")
@@ -32,6 +33,9 @@ class ProwlTechApp(ctk.CTk):
         #self.attributes("-fullscreen", True)
         self.bind("<Escape>", self.exit_fullscreen)     # ESC lukker programmet
         #self.config(cursor="none")                      # Skjuler musepeker når GUI er i gang
+
+        self.bluetooth_devices = []                      # Liste for bluetooth-enheter
+        self.device_menu = None 
 
         # Konfigurerer rutenett(grid) for layout
         self.grid_rowconfigure(0, minsize=130)
@@ -212,6 +216,15 @@ class ProwlTechApp(ctk.CTk):
         )
         self.update_button.grid(row=0, column=0, padx=(30, 30), pady=30)
 
+        self.device_menu = ctk.CTkOptionMenu(
+            self.bottom, 
+            values=["Ingen enheter funnet"],
+            fg_color=popup_button_color,
+            text_color="white",
+            width=300
+        )
+        self.device_menu.grid(row=1, column=0, padx=20, pady=(0,20))
+
         # Prosessbar (skjult når inaktiv)
         self.progress = ctk.CTkProgressBar(self.bottom, progress_color=frame_color)
         self.progress.grid(row=0, column=0, padx=10, pady=10, sticky="nsew")
@@ -256,9 +269,19 @@ class ProwlTechApp(ctk.CTk):
 
     # Avslutter søk etter kontrollere
     def finish_update(self):
-        self.progress.stop()
-        self.update_button.configure(text="Oppdater", state="normal")
-        self.progress.grid_forget()
+        self.progress.stop()                                                # Stopper prosess-animasjon
+        self.update_button.configure(text="Oppdater", state="normal")       # Endrer teksten på knappen
+        self.progress.grid_forget()                                         # Fjerner prosessbaren 
+
+        devices = scan_bluetooth_devices()      # Funksjon til å scanne etter enheter
+
+        if devices:
+            self.bluetooth_devices = [f"{name} ({addr})" for addr, name in devices.items()]     # Lager en liste "Navn (MAC-adresse)"
+            self.device_menu.configure(values=self.bluetooth_devices)   # Oppdaterer dropdown-menu
+            self.device_menu.set(self.bluetooth_devices[0])     # Velger første enhet i listen
+        else:
+            self.device_menu.configure(values=["Ingen enheter funnet"])
+            self.device_menu.set("Ingen enheter funnet")
 
     # Lukker popup-vindu når lukk-knappen trykkes
     def close_connection_window(self):
