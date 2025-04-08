@@ -1,15 +1,22 @@
-import subprocess
-import time
-import re
+import subprocess   # Kunne kjøre kommandoer i terminalen
+import time     # Brukes til å vente
+import re       # Kunne finne mønstre i tekst
 
-def scan_bluetooth_devices(scan_time=5):
+def scan_bluetooth_devices(scan_time=5, name_filter="Controller"):      # Søk etter enheter med navn som matcher filter
+
     # Start bluetoothctl
-    process = subprocess.Popen(['bluetoothctl'], stdin=subprocess.PIPE, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True)
+    process = subprocess.Popen(
+        ['bluetoothctl'], 
+        stdin=subprocess.PIPE,  # Sende kommandoer
+        stdout=subprocess.PIPE, # Lese ut data
+        stderr=subprocess.PIPE, 
+        text=True       # Får tekst istedenfor bytes
+    )
 
     # Aktiver agent og scanning
     process.stdin.write('agent on\n')
     process.stdin.write('scan on\n')
-    process.stdin.flush()
+    process.stdin.flush()   # Sender kommandoer
 
     # Vent litt mens den skanner
     time.sleep(scan_time)
@@ -19,15 +26,19 @@ def scan_bluetooth_devices(scan_time=5):
     process.stdin.write('quit\n')
     process.stdin.flush()
 
-    output, _ = process.communicate()
+    output, _ = process.communicate()   # Laser output fra prosessen
 
-    # Finn navn og adresser i output
-    devices = {}
+    devices = {}    # Tom liste for enheter
+
+    # Går gjennom hver linje og ser etter linjer som matcher: Device <MAC> <Navn>
     for line in output.split('\n'):
         match = re.search(r'Device ([0-9A-F:]+) (.+)', line)
         if match:
             address, name = match.groups()
-            devices[address] = name
+
+            # Filter
+            if name_filter.lower() in name.lower():
+                devices[address] = name     # Legg til i resultater
 
     return devices
 
