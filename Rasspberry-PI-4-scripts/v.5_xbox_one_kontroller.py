@@ -24,7 +24,12 @@ MSG_ID = 0x0000004
 # Funksjonen for pakken som blir sendt
 def send_data(bus, fart, vinkel, rotasjon=0.0):
     try:
-        data = struct.pack('<fff', fart, vinkel, rotasjon) # Pakken som sendes. (<ff) er slik den pakkes.
+        # Skaler verdier fra float til int8 eller int16
+        fart_i = int(fart * 100)         # f.eks. 0.5 → 50
+        vinkel_i = int(vinkel * 100)     # f.eks. 3.14 → 314
+        rotasjon_i = int(rotasjon * 100) # f.eks. 0.7 → 70
+
+        data = struct.pack('<hhh', fart_i, vinkel_i, rotasjon_i)  # 6 byte
         melding = can.Message(arbitration_id=MSG_ID, data=data, is_extended_id=EXTENDED_ID)
         bus.send(melding)
         print(" ")
@@ -32,6 +37,11 @@ def send_data(bus, fart, vinkel, rotasjon=0.0):
         print("-----------------------")
         print(f"SENDT → Fart: {fart:.2f}, Vinkel (rad): {vinkel:.2f}, Rotasjon: {rotasjon:+.2f}")
         print(f"SENDT → Fart: {fart:.2f}, Vinkel: {radianer_til_grader(vinkel):.1f}°, Rotasjon: {rotasjon:+.2f}")
+        print(" ")
+        print(" ")
+        print(f"[DEBUG] Skal sende → Fart: {fart}, Vinkel: {vinkel}, Rotasjon: {rotasjon}")
+        print(f"[DEBUG] RB: {rb}, LB: {lb}, rotasjon: {rotasjon}")
+        print(f"[DEBUG] Data-lengde: {len(data)} byte")
         print("-----------------------")
         print(" ")
         print(" ")
@@ -42,6 +52,11 @@ def send_data(bus, fart, vinkel, rotasjon=0.0):
         print("Feil ved sending! :", e)
         print(f"→ Fart: {fart:.2f}, Vinkel (rad): {vinkel:.2f}, Rotasjon: {rotasjon:+.2f}")
         print(f"→ Fart: {fart:.2f}, Vinkel: {radianer_til_grader(vinkel):.1f}°, Rotasjon: {rotasjon:+.2f}")
+        print(" ")
+        print(" ")
+        print(f"[DEBUG] Skal sende → Fart: {fart}, Vinkel: {vinkel}, Rotasjon: {rotasjon}")
+        print(f"[DEBUG] RB: {rb}, LB: {lb}, rotasjon: {rotasjon}")
+        print(f"[DEBUG] Data-lengde: {len(data)} byte")
         print("-----------------------")
         print(" ")
         print(" ")
@@ -163,6 +178,12 @@ while True:
         rb = joystick.get_button(4)  # Høyre bumper
         lb = joystick.get_button(5)  # Venstre bumper
 
+        rotasjon = 0.0
+        if rb:
+            rotasjon = +1.0
+        elif lb:
+            rotasjon = -1.0
+
         # == Input Joystick ===
         venstre_x = joystick.get_axis(2)
         venstre_y = joystick.get_axis(3)
@@ -176,11 +197,6 @@ while True:
 
         # Håndter rotasjon (RB og LB)
         # Bestem rotasjon basert på bumpere
-        rotasjon = 0.0
-        if rb:
-            rotasjon = +1.0
-        elif lb:
-            rotasjon = -1.0
 
         # === Endre hastighetsmoduser ===
         if y:
@@ -236,6 +252,27 @@ while True:
         fart_r = round(fart, 2)
         vinkel_r = round(vinkel, 2)
 
+        # Hvis vi har rotasjon, så skal vi sende – uansett fart
+        if rotasjon != 0.0:
+            if fart_r < 0.01:
+                # Sett default fart for rotasjon
+                if Hastighetsmodus == 1:
+                    fart_r = 0.3
+                elif Hastighetsmodus == 2:
+                    fart_r = 0.6
+                elif Hastighetsmodus == 3:
+                    fart_r = 1.0
+                else:
+                    fart_r = 0.3
+
+            vinkel_r = 0.0  # fast retning for rotasjon
+            send_data(bus, fart_r, vinkel_r, rotasjon=rotasjon * rotasjon_faktor)
+            aktiv_joystick = True
+            sist_sendte_fart = fart_r
+            sist_sendte_vinkel = vinkel_r
+            continue
+
+
         # Bare send hvis fart er stor nok så vil den sende til bus
         if fart_r > 0.01:
             if fart_r != sist_sendte_fart or vinkel_r != sist_sendte_vinkel:
@@ -244,8 +281,15 @@ while True:
                 sist_sendte_vinkel = vinkel_r
                 aktiv_joystick = True
         else:
-            if aktiv_joystick:
-                # Kun send stopp én gang når fart går til null
+            if rotasjon != 0.0:
+                vinkel = 0.0  # Kan være hva som helst egentlig
+                send_data(bus, fart, vinkel, rotasjon=rotasjon * rotasjon_faktor)
+                aktiv_joystick = True
+                sist_sendte_fart = fart
+                sist_sendte_vinkel = vinkel
+
+            elif aktiv_joystick:
+                # Stoppbevegelse kun én gang
                 send_data(bus, 0.0, 0.0, rotasjon=0.0)
                 aktiv_joystick = False
                 sist_sendte_fart = 0.0
@@ -259,6 +303,10 @@ while True:
             print(f"→ Fart: {fart:.2f}, Vinkel (rad): {vinkel:.2f}, Rotasjon: {rotasjon:+.2f}")
             print(f"→ Fart: {fart:.2f}, Vinkel: {radianer_til_grader(vinkel):.1f}°, Rotasjon: {rotasjon:+.2f}")
             print(f"Aktiv hastighetsmodus: {Hastighetsmodus}")
+            print(" ")
+            print(" ")
+            print(f"[DEBUG] Skal sende → Fart: {fart}, Vinkel: {vinkel}, Rotasjon: {rotasjon}")
+            print(f"[DEBUG] RB: {rb}, LB: {lb}, rotasjon: {rotasjon}")
             print("-----------------------")
             print(" ")
             print(" ")
@@ -268,6 +316,6 @@ while True:
         print("Kontroller frakoblet. Søker igjen...")
         time.sleep(1)
 
-    time.sleep(0.1)
+    time.sleep(0.8)
 #================================================================
 #================================================================
