@@ -1,56 +1,31 @@
-import subprocess   # Kunne kjøre kommandoer i terminalen
-import time     # Brukes til å vente
-import re       # Kunne finne mønstre i tekst
+def scan_bluetooth_devices(name_filter=""):
+    """
+    Returnerer tidligere parrede Bluetooth-enheter som matcher et valgfritt navn-filter.
+    """
+    import subprocess
+    import re
 
-def scan_bluetooth_devices(scan_time=5, name_filter="Controller"):      # Søk etter enheter med navn som matcher filter
-
-    '''
-    # Start bluetoothctl
     process = subprocess.Popen(
-        ['bluetoothctl'], 
-        stdin=subprocess.PIPE,  # Sende kommandoer
-        stdout=subprocess.PIPE, # Lese ut data
-        stderr=subprocess.PIPE, 
-        text=True       # Får tekst istedenfor bytes
+        ['bluetoothctl'],
+        stdin=subprocess.PIPE,
+        stdout=subprocess.PIPE,
+        stderr=subprocess.PIPE,
+        text=True
     )
 
-    # Aktiver agent og scanning
-    process.stdin.write('agent on\n')
-    process.stdin.write('scan on\n')
-    process.stdin.flush()   # Sender kommandoer
-
-    # Vent litt mens den skanner
-    time.sleep(scan_time)
-
-    # Slå av scanning
-    process.stdin.write('scan off\n')
+    process.stdin.write('paired-devices\n')
     process.stdin.write('quit\n')
     process.stdin.flush()
-    '''
-    result = subprocess.run(['bluetoothctl', 'paired-devices'], capture_output=True, text=True)
 
-    output = result.stdout
-    #output, _ = process.communicate()   # Laser output fra prosessen
+    output, _ = process.communicate()
 
-    print("Bluetooth-rådata:\n", output)
-
-    devices = {}    # Tom liste for enheter
-
-    # Går gjennom hver linje og ser etter linjer som matcher: Device <MAC> <Navn>
+    devices = {}
     for line in output.split('\n'):
         match = re.search(r'Device ([0-9A-F:]+) (.+)', line)
         if match:
             address, name = match.groups()
-
-            # Filter
-            if name_filter.lower() in name.lower():
-                devices[address] = name     # Legg til i resultater
+            if name_filter.lower() in name.lower():  # tomt filter = vis alt
+                devices[address] = name
 
     return devices
 
-# Test
-if __name__ == "__main__":
-    print("Skanner etter enheter...")
-    found_devices = scan_bluetooth_devices()
-    for addr, name in found_devices.items():
-        print(f"{name} ({addr})")
