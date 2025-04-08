@@ -278,15 +278,13 @@ class ProwlTechApp(ctk.CTk):
 
     # Avslutter søk etter kontrollere
     def finish_update(self):
-        from bluetooth_scan import scan_bluetooth_devices
-
         self.progress.stop()                                                # Stopper prosess-animasjon
         self.update_button.configure(text="Oppdater", state="normal")       # Endrer teksten på knappen
         self.progress.pack_forget()                                         # Fjerner prosessbaren 
 
         # Fjerner gamle synlige enheter om det er noen
         for widget in self.bottom.winfo_children():
-                if isinstance(widget, ctk.CTkButton) or isinstance(widget, ctk.CTkLabel):
+                if isinstance(widget, ctk.CTkButton) or isinstance((widget, ctk.CTkLabel) and widget != self.status_label):
                     widget.destroy()
 
         devices = scan_bluetooth_devices()
