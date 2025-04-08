@@ -1,6 +1,15 @@
 import customtkinter as ctk
 from PIL import Image
-from bluetooth_scan import scan_bluetooth_devices   # Funksjon til å scanne etter enheter via bluetooth
+import platform
+
+if platform.system() != "Linux":
+    def scan_bluetooth_devices():
+        return {
+            "00:11:22:33:44:55": "TestController A",
+            "66:77:88:99:AA:BB": "TestController B"
+        }
+else:
+    from bluetooth_scan import scan_bluetooth_devices # Funksjon til å scanne etter enheter via bluetooth
 
 # Setter mørkt tema for hele GUI-et
 ctk.set_appearance_mode("dark")
@@ -30,9 +39,9 @@ class ProwlTechApp(ctk.CTk):
         self.title("ProwlTech Kontrollpanel")           # Setter vindutittel
         self.geometry("800x450")                        # Setter størrelse 
         #self.resizable(False,False)                     # Hindrer at vinduet kan skaleres
-        #self.attributes("-fullscreen", True)
+        self.attributes("-fullscreen", True)
         self.bind("<Escape>", self.exit_fullscreen)     # ESC lukker programmet
-        #self.config(cursor="none")                      # Skjuler musepeker når GUI er i gang
+        self.config(cursor="none")                      # Skjuler musepeker når GUI er i gang
 
         self.bluetooth_devices = []                      # Liste for bluetooth-enheter
         self.device_menu = None 
@@ -216,14 +225,14 @@ class ProwlTechApp(ctk.CTk):
         )
         self.update_button.grid(row=0, column=0, padx=(30, 30), pady=30)
 
-        self.device_menu = ctk.CTkOptionMenu(
-            self.bottom, 
-            values=["Ingen enheter funnet"],
-            fg_color=popup_button_color,
-            text_color="white",
-            width=300
-        )
-        self.device_menu.grid(row=1, column=0, padx=20, pady=(0,20))
+        #self.device_menu = ctk.CTkOptionMenu(
+        #    self.bottom, 
+        #    values=["Ingen enheter funnet"],
+        #    fg_color=popup_button_color,
+        #    text_color="white",
+        #    width=300
+        #)
+        #self.device_menu.grid(row=1, column=0, padx=20, pady=(0,20))
 
         # Prosessbar (skjult når inaktiv)
         self.progress = ctk.CTkProgressBar(self.bottom, progress_color=frame_color)
@@ -263,7 +272,7 @@ class ProwlTechApp(ctk.CTk):
     # Oppdaterer søk etter kontrollere
     def start_update(self):
         self.update_button.configure(text="Oppdaterer...", state="disabled")
-        self.progress.grid()
+        self.progress.pack(pady=10)
         self.progress.start()
         self.after(3000, self.finish_update)
 
@@ -271,17 +280,42 @@ class ProwlTechApp(ctk.CTk):
     def finish_update(self):
         self.progress.stop()                                                # Stopper prosess-animasjon
         self.update_button.configure(text="Oppdater", state="normal")       # Endrer teksten på knappen
-        self.progress.grid_forget()                                         # Fjerner prosessbaren 
+        self.progress.pack_forget()                                         # Fjerner prosessbaren 
 
         devices = scan_bluetooth_devices()      # Funksjon til å scanne etter enheter
 
+        for widget in self.bottom.winfo_children():
+                if isinstance(widget, ctk.CTkButton) or isinstance(widget, ctk.CTkLabel):
+                    widget.destroy()
+
         if devices:
-            self.bluetooth_devices = [f"{name} ({addr})" for addr, name in devices.items()]     # Lager en liste "Navn (MAC-adresse)"
-            self.device_menu.configure(values=self.bluetooth_devices)   # Oppdaterer dropdown-menu
-            self.device_menu.set(self.bluetooth_devices[0])     # Velger første enhet i listen
+            
+            for addr, name in devices.items():
+                device_str = f"{name} ({addr})"
+
+                btn = ctk.CTkButton(
+                    self.bottom,
+                    text=device_str,
+                    fg_color=popup_button_color,
+                    hover_color=button_hover_color,
+                    text_color="white",
+                    corner_radius=10,
+                    command=lambda a=addr, n=name: self.connect_to_device(a, n)
+                )
+                btn.pack(pady=5, padx=20, fill="x")
+
         else:
-            self.device_menu.configure(values=["Ingen enheter funnet"])
-            self.device_menu.set("Ingen enheter funnet")
+            no_devices_label = ctk.CTkLabel(
+                self.bottom,
+                text="Ingen enheter funnet",
+                text_color="white",
+                font=("Century Gothic", 16)
+            )
+            no_devices_label.pack(pady=10)
+
+    def connect_to_device(self, address, name):
+        print(f"Prøver å koble til: {name} ({address})")
+        self.label.configure(text=f"Kobler til {name}...")
 
     # Lukker popup-vindu når lukk-knappen trykkes
     def close_connection_window(self):
