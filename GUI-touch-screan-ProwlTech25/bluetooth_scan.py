@@ -39,8 +39,7 @@ def scan_bluetooth_devices(scan_time=5, name_filter=""):      # Søk etter enhet
             address, name = match.groups()
 
             # Filter
-            #if name_filter.lower() in name.lower():
-            if name:
+            if name_filter.lower() in name.lower():
                 devices[address] = name     # Legg til i resultater
 
     return devices
