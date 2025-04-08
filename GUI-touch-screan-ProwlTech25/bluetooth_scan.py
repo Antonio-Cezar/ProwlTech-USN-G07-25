@@ -4,6 +4,7 @@ import re       # Kunne finne mønstre i tekst
 
 def scan_bluetooth_devices(scan_time=5, name_filter="Controller"):      # Søk etter enheter med navn som matcher filter
 
+    '''
     # Start bluetoothctl
     process = subprocess.Popen(
         ['bluetoothctl'], 
@@ -25,8 +26,11 @@ def scan_bluetooth_devices(scan_time=5, name_filter="Controller"):      # Søk e
     process.stdin.write('scan off\n')
     process.stdin.write('quit\n')
     process.stdin.flush()
+    '''
+    result = subprocess.run(['bluetoothctl', 'paired-devices'], capture_output=True, text=True)
 
-    output, _ = process.communicate()   # Laser output fra prosessen
+    output = result.stdout
+    #output, _ = process.communicate()   # Laser output fra prosessen
 
     print("Bluetooth-rådata:\n", output)
 
