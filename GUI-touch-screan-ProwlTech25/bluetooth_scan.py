@@ -28,6 +28,8 @@ def scan_bluetooth_devices(scan_time=5, name_filter=""):      # Søk etter enhet
 
     output, _ = process.communicate()   # Laser output fra prosessen
 
+    print("Bluetooth-rådata:\n", output)
+
     devices = {}    # Tom liste for enheter
 
     # Går gjennom hver linje og ser etter linjer som matcher: Device <MAC> <Navn>
@@ -37,7 +39,8 @@ def scan_bluetooth_devices(scan_time=5, name_filter=""):      # Søk etter enhet
             address, name = match.groups()
 
             # Filter
-            if name_filter.lower() in name.lower():
+            #if name_filter.lower() in name.lower():
+            if name:
                 devices[address] = name     # Legg til i resultater
 
     return devices
