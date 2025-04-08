@@ -291,7 +291,7 @@ class ProwlTechApp(ctk.CTk):
         if devices:
             
             for addr, name in devices.items():
-                device_str = f"{name} ({addr})"
+                device_str = name
 
                 btn = ctk.CTkButton(
                     self.bottom,
