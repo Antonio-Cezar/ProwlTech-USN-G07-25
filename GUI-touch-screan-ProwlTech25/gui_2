@@ -90,19 +90,12 @@ class ProwlTechApp(ctk.CTk):
         )
         self.start_button.place(relx=0.5, rely=0.9, anchor="center")
 
-
-        
-
-        
-
     def open_control_panel(self):
         self.front_frame.destroy()
 
         self.top_section()
         self.mid_section()
         self.bot_section()
-
-
 
     # Funksjon for å avslutte programmet (ESC)
     def exit_fullscreen(self, event=None):
@@ -169,7 +162,6 @@ class ProwlTechApp(ctk.CTk):
             command=self.open_info_window
         )
         self.info_button.grid(row=0, column=3, padx=(320, 10), pady=45)
-
 
     # Pop-up vindu som vises når "Koble til kontroller" trykkes på
     def open_connection_window(self):
@@ -269,6 +261,14 @@ class ProwlTechApp(ctk.CTk):
         )
         close_button.grid(row=0, column=2, padx=(90, 0), pady=30)
 
+        self.status_label = ctk.CTkLabel(
+            self.bottom,
+            text="",
+            font=("Century Gothic", 16),
+            text_color="white"
+        )
+        self.status_label.pack(pady=(10, 0))
+
     # Oppdaterer søk etter kontrollere
     def start_update(self):
         self.update_button.configure(text="Oppdaterer...", state="disabled")
@@ -278,15 +278,18 @@ class ProwlTechApp(ctk.CTk):
 
     # Avslutter søk etter kontrollere
     def finish_update(self):
+        from bluetooth_scan import scan_bluetooth_devices
+
         self.progress.stop()                                                # Stopper prosess-animasjon
         self.update_button.configure(text="Oppdater", state="normal")       # Endrer teksten på knappen
         self.progress.pack_forget()                                         # Fjerner prosessbaren 
 
-        devices = scan_bluetooth_devices()      # Funksjon til å scanne etter enheter
-
+        # Fjerner gamle synlige enheter om det er noen
         for widget in self.bottom.winfo_children():
                 if isinstance(widget, ctk.CTkButton) or isinstance(widget, ctk.CTkLabel):
                     widget.destroy()
+
+        devices = scan_bluetooth_devices()
 
         if devices:
             
@@ -314,8 +317,23 @@ class ProwlTechApp(ctk.CTk):
             no_devices_label.pack(pady=10)
 
     def connect_to_device(self, address, name):
-        print(f"Prøver å koble til: {name} ({address})")
-        self.label.configure(text=f"Kobler til {name}...")
+        import subprocess
+
+        result = subprocess.run(
+            ['bluetoothctl'],
+            input=f'connect {address}\nquit\n',
+            stdout=subprocess.PIPE,
+            stderr=subprocess.PIPE,
+            text=True
+        )
+
+        output = result.stdout
+
+        if "Connection successful" in output:
+            self.status_label.configure(text=f"Koblet til {name}", text_color="green")
+        else:
+            self.status_label.configure(text=f"Kunne ikke koble til {name}", text_color="red")
+
 
     # Lukker popup-vindu når lukk-knappen trykkes
     def close_connection_window(self):
