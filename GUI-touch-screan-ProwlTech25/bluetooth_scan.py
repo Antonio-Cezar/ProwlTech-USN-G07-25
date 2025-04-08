@@ -2,7 +2,7 @@ import subprocess   # Kunne kjøre kommandoer i terminalen
 import time     # Brukes til å vente
 import re       # Kunne finne mønstre i tekst
 
-def scan_bluetooth_devices(scan_time=5, name_filter=""):      # Søk etter enheter med navn som matcher filter
+def scan_bluetooth_devices(scan_time=5, name_filter="Controller"):      # Søk etter enheter med navn som matcher filter
 
     # Start bluetoothctl
     process = subprocess.Popen(
