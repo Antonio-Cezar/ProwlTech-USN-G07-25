@@ -284,7 +284,7 @@ class ProwlTechApp(ctk.CTk):
 
         # Fjerner gamle synlige enheter om det er noen
         for widget in self.bottom.winfo_children():
-                if isinstance(widget, ctk.CTkButton) or isinstance((widget, ctk.CTkLabel) and widget != self.status_label):
+                if isinstance(widget, ctk.CTkButton) or (isinstance(widget, ctk.CTkLabel) and widget != self.status_label):
                     widget.destroy()
 
         devices = scan_bluetooth_devices()
