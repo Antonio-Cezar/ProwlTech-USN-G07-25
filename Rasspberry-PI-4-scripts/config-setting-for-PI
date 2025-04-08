@@ -1,0 +1,2 @@
+dtoverlay=mcp2515-can0,oscillator=1600 0000,interrupt=25
+dtoverlay=spi-bcm2835
