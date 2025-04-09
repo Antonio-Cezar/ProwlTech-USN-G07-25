@@ -10,19 +10,19 @@ adapter = bus.get("org.bluez", "/org/bluez/hci0")
 found_devices = {}
 
 # Start Bluetooth-skanning via BlueZ
-print("🔍 Starter søket...")
+print("Starter søket...")
 try:
     adapter.StartDiscovery()
-    print("🔄 Søker i 10 sekunder...")
+    print("Søker...")
     time.sleep(10)
     adapter.StopDiscovery()
 except Exception as e:
-    print(f"🚫 Feil ved skanning: {e}")
+    print(f"Feil ved skanning: {e}")
 
-print("✅ Skanning avsluttet.\n")
+print("Skanning avsluttet.\n")
 
 # Fase 1 – Hent enheter via D-Bus ObjectManager
-print("📡 Enheter funnet via D-Bus:")
+print("Enheter funnet via D-Bus:")
 managed_objects = mngr.GetManagedObjects()
 
 for path, interfaces in managed_objects.items():
@@ -34,6 +34,8 @@ for path, interfaces in managed_objects.items():
             continue
         found_devices[address] = name
         print(f"🔹 {name} ({address})")
+
+'''
 
 # Fase 2 – Fallback: bluetoothctl devices
 print("\n🔧 Fallback-sjekk via bluetoothctl:")
@@ -52,4 +54,4 @@ if found_devices:
         print(f" - {name} ({addr})")
 else:
     print("🚫 Ingen enheter funnet.")
-
+'''
