@@ -35,6 +35,15 @@ for path, interfaces in managed_objects.items():
         found_devices[address] = name
         print(f"🔹 {name} ({address})")
 
+def get_devices():
+    return found_devices
+
+def get_device(name):
+    for addr, dev_name in found_devices.items():
+        if dev_name == name:
+            return addr
+    return None
+
 '''
 
 # Fase 2 – Fallback: bluetoothctl devices

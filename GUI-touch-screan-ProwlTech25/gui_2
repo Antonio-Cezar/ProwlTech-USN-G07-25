@@ -1,7 +1,7 @@
 import customtkinter as ctk
 from PIL import Image
 import platform
-import bluetooth_scan
+import bluetooth_dbus
 import threading
     
 
@@ -273,7 +273,7 @@ class ProwlTechApp(ctk.CTk):
         threading.Thread(target=self.scan_and_show).start() # Kjører skanning i egen tråd slik at GUI ikke fryser
 
     def scan_and_show(self):
-        devices = bluetooth_scan.get_devices()
+        devices = bluetooth_dbus.get_devices()
         self.bottom.after(0, lambda: self.show_devices(devices))
 
     def show_devices(self, devices):
