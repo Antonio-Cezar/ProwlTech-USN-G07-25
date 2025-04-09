@@ -29,7 +29,9 @@ for path, interfaces in managed_objects.items():
     if "org.bluez.Device1" in interfaces:
         dev = interfaces["org.bluez.Device1"]
         address = dev.get("Address", "ukjent")
-        name = dev.get("Name", "ukjent navn")
+        name = dev.get("Name")
+        if not name:
+            continue
         found_devices[address] = name
         print(f"🔹 {name} ({address})")
 
