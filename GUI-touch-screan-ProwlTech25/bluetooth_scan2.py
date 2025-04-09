@@ -19,7 +19,9 @@ def live_scan(timeout=10):
             # Fang linjer som viser nye enheter
             child.expect(r"Device ([0-9A-F:]{17}) (.+)", timeout=2)
             mac, name = child.match.groups()
-            devices[mac] = name
+            label = f"{name} ({mac})"
+            if label not in devices:
+                devices[label] = mac
         except pexpect.exceptions.TIMEOUT:
             continue  # Fortsett å vente hvis ingen ny linje
 
@@ -29,11 +31,11 @@ def live_scan(timeout=10):
 
 # Testskanning
 if __name__ == "__main__":
-    print("🔍 Skanner etter Bluetooth-enheter...\n")
+    print("Skanner etter Bluetooth-enheter...\n")
     found_devices = live_scan(10)
     if found_devices:
         print("Enheter funnet:")
-        for addr, name in found_devices.items():
-            print(f"  - {name} ({addr})")
+        for label, mac in found_devices.items():
+            print(f"  - {label}")
     else:
         print("Fant ingen enheter.")
