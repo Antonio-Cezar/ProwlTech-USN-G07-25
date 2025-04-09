@@ -13,7 +13,7 @@ BITRATE = 500000           # Bitrate
 EXTENDED_ID = True         # Brukes fordi Zephyr bruker 29-bit ID (IDE flag satt definert fra før)
 
 # ID til scriptet for sending av kontroller verdier
-MSG_ID = 0x0000004
+MSG_ID = 0x0000001  # samme som RECEIVE_ID hos motor-MB
 #================================================================
 
 
@@ -30,7 +30,11 @@ def send_data(bus, fart, vinkel, rotasjon=0.0):
         rotasjon_i = int(rotasjon * 100) # f.eks. 0.7 → 70
 
         data = struct.pack('<hhh', fart_i, vinkel_i, rotasjon_i)  # 6 byte
-        melding = can.Message(arbitration_id=MSG_ID, data=data, is_extended_id=EXTENDED_ID)
+        melding = can.Message(
+            arbitration_id=MSG_ID,
+            data=data,
+            is_extended_id=EXTENDED_ID
+        )
         bus.send(melding)
         print(" ")
         print(" ")
@@ -42,6 +46,7 @@ def send_data(bus, fart, vinkel, rotasjon=0.0):
         print(f"[DEBUG] Skal sende → Fart: {fart}, Vinkel: {vinkel}, Rotasjon: {rotasjon}")
         print(f"[DEBUG] RB: {rb}, LB: {lb}, rotasjon: {rotasjon}")
         print(f"[DEBUG] Data-lengde: {len(data)} byte")
+        print("RAW DATA (hex):", data.hex())
         print("-----------------------")
         print(" ")
         print(" ")
@@ -57,6 +62,7 @@ def send_data(bus, fart, vinkel, rotasjon=0.0):
         print(f"[DEBUG] Skal sende → Fart: {fart}, Vinkel: {vinkel}, Rotasjon: {rotasjon}")
         print(f"[DEBUG] RB: {rb}, LB: {lb}, rotasjon: {rotasjon}")
         print(f"[DEBUG] Data-lengde: {len(data)} byte")
+        print("RAW DATA (hex):", data.hex())
         print("-----------------------")
         print(" ")
         print(" ")
@@ -316,6 +322,6 @@ while True:
         print("Kontroller frakoblet. Søker igjen...")
         time.sleep(1)
 
-    time.sleep(0.8)
+    time.sleep(0.1)
 #================================================================
 #================================================================
