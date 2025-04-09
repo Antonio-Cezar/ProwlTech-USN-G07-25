@@ -4,9 +4,9 @@ import time
 def live_scan(timeout=10):
     devices = {}
 
-    # Start bluetoothctl som en interaktiv sesjon
+    # Start bluetoothctl som interaktiv sesjon
     child = pexpect.spawn("bluetoothctl", encoding="utf-8", timeout=5)
-    child.expect("#")  # Vent til bluetoothctl er klar
+    child.expect("#")  # Vent til klar prompt
 
     child.sendline("agent on")
     child.expect("#")
@@ -16,14 +16,15 @@ def live_scan(timeout=10):
     start_time = time.time()
     while time.time() - start_time < timeout:
         try:
-            # Fang linjer som viser nye enheter
+            # Fang bare nye enheter mens scanning er aktiv
             child.expect(r"Device ([0-9A-F:]{17}) (.+)", timeout=2)
             mac, name = child.match.groups()
-            # Unngå å legge til samme navn flere ganger
-            if name not in devices.values():
+
+            # Hvis enheten er ny (basert på MAC), legg den til
+            if mac not in devices:
                 devices[mac] = name
         except pexpect.exceptions.TIMEOUT:
-            continue  # Fortsett å vente hvis ingen ny linje
+            continue  # Hvis ingen ny linje – prøv igjen
 
     child.sendline("scan off")
     child.sendline("exit")
@@ -31,12 +32,11 @@ def live_scan(timeout=10):
 
 # Testskanning
 if __name__ == "__main__":
-    print("Skanner etter Bluetooth-enheter...\n")
+    print("🔍 Skanner etter Bluetooth-enheter...\n")
     found_devices = live_scan(10)
     if found_devices:
-        print("Enheter funnet:")
+        print("🎮 Enheter funnet:")
         for addr, name in found_devices.items():
             print(f"  - {name} ({addr})")
     else:
-        print("Fant ingen enheter.")
-
+        print("🚫 Fant ingen enheter.")
