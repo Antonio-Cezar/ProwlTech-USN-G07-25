@@ -1,56 +1,53 @@
 from pydbus import SystemBus
 import time
+import subprocess
 
-# Koble til systembussen og BlueZ-adapteren
+# Koble til systembus
 bus = SystemBus()
+mngr = bus.get("org.bluez", "/")
 adapter = bus.get("org.bluez", "/org/bluez/hci0")
 
-# Lagrer funnede enheter
 found_devices = {}
 
-# Kalles når et nytt Bluetooth-signal dukker opp
-def device_found(sender, object, iface, signal, params):
-    print("Mottok signal fra D-Bus")
-    print(f"   ↳ object path: {object}")
-    interface, changed, _ = params
-    print(f"   ↳ Interface: {interface}")
-    print(f"   ↳ Changed: {changed}")
-
-    # Hvis signalet gjelder en enhet
-    if interface == "org.bluez.Device1":
-        address = object.split("/")[-1].replace("_", ":")
-        name = changed.get("Name", "(ukjent navn)")
-        if address not in found_devices:
-            found_devices[address] = name
-            print(f"🔹 Ny enhet: {name} ({address})")
-
-# Abonner på signaler fra BlueZ
-bus.subscribe(
-    iface="org.freedesktop.DBus.Properties",
-    signal="PropertiesChanged",
-    signal_fired=device_found
-)
-
-# Start scanning
-print("🔍 Starter Bluetooth-skanning med pydbus...")
+# Start Bluetooth-skanning via BlueZ
+print("🔍 Starter søket...")
 try:
     adapter.StartDiscovery()
-except Exception as e:
-    print(f"Klarte ikke starte skanning: {e}")
-    exit(1)
-
-# Vent og logg
-try:
-    time.sleep(30)
-finally:
+    print("🔄 Søker i 10 sekunder...")
+    time.sleep(10)
     adapter.StopDiscovery()
-    print("Skanning avsluttet.\n")
+except Exception as e:
+    print(f"🚫 Feil ved skanning: {e}")
 
-# Skriv ut resultat
+print("✅ Skanning avsluttet.\n")
+
+# Fase 1 – Hent enheter via D-Bus ObjectManager
+print("📡 Enheter funnet via D-Bus:")
+managed_objects = mngr.GetManagedObjects()
+
+for path, interfaces in managed_objects.items():
+    if "org.bluez.Device1" in interfaces:
+        dev = interfaces["org.bluez.Device1"]
+        address = dev.get("Address", "ukjent")
+        name = dev.get("Name", "ukjent navn")
+        found_devices[address] = name
+        print(f"🔹 {name} ({address})")
+
+# Fase 2 – Fallback: bluetoothctl devices
+print("\n🔧 Fallback-sjekk via bluetoothctl:")
+output = subprocess.run(["bluetoothctl", "devices"], capture_output=True, text=True)
+for line in output.stdout.strip().split("\n"):
+    if line.startswith("Device"):
+        _, addr, name = line.split(" ", 2)
+        if addr not in found_devices:
+            found_devices[addr] = name
+            print(f"🔸 {name} ({addr})")
+
+# Resultat
+print("\n🎯 Totalt funnet enheter:")
 if found_devices:
-    print("Enheter funnet:")
     for addr, name in found_devices.items():
         print(f" - {name} ({addr})")
 else:
-    print("Fant ingen enheter.")
+    print("🚫 Ingen enheter funnet.")
 
