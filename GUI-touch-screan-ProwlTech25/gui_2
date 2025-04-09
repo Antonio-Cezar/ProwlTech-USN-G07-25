@@ -265,47 +265,28 @@ class ProwlTechApp(ctk.CTk):
 
     # Oppdaterer søk etter kontrollere
     def start_update(self):
-        #self.update_button.configure(text="Oppdaterer...", state="disabled")
-        self.update_button.configure(text="Stopper...", state="normal", command=self.finish_update)
+        self.update_button.configure(text="Søker...", state="disabled")
         self.progress.pack(pady=10)
         self.progress.start()
         #self.after(3000, self.finish_update)
 
-        threading.Thread(
-            target=lambda: bluetooth_scan.start_scan(
-                [""],
-                self.update_device_buttons,
-                self.set_status
-            )
-        ).start()
+        threading.Thread(target=self.scan_and_show).start() # Kjører skanning i egen tråd slik at GUI ikke fryser
 
-    # Avslutter søk etter kontrollere
-    def finish_update(self):
-        bluetooth_scan.stop_scan()
-        self.progress.stop()                                                # Stopper prosess-animasjon
-       # self.update_button.configure(text="Oppdater", state="normal")       # Endrer teksten på knappen
-        self.progress.pack_forget()                                         # Fjerner prosessbaren 
-        self.update_button.configure(text="Oppdater", command=self.start_update)
+    def scan_and_show(self):
+        devices = bluetooth_scan.get_devices()
+        self.bottom.after(0, lambda: self.show_devices(devices))
 
-
-
-    def set_status(self, text):
-        self.status_label.configure(text=text)
-
-    def update_device_buttons(self):
-        self.bottom.after(0, self._update_buttons)
-
-    def _update_buttons(self):
+    def show_devices(self, devices):
+        self.progress.stop() 
+        self.progress.pack_forget() 
 
         # Fjerner gamle synlige enheter om det er noen
         for widget in self.bottom.winfo_children():
                 if isinstance(widget, ctk.CTkButton) or (isinstance(widget, ctk.CTkLabel) and widget != self.status_label):
                     widget.destroy()
-       
-        devices = bluetooth_scan.get_devices()
 
         if devices:
-            for name in devices:
+            for name in devices.values():
                 btn = ctk.CTkButton(
                     self.bottom,
                     text=name,
@@ -313,7 +294,7 @@ class ProwlTechApp(ctk.CTk):
                     hover_color=button_hover_color,
                     text_color="white",
                     corner_radius=10,
-                    command=lambda n=name: self.connect_to_named_device(n)
+                    command=None
                 )
                 btn.pack(pady=5, padx=20, fill="x")
 
@@ -326,12 +307,15 @@ class ProwlTechApp(ctk.CTk):
             )
             no_devices_label.pack(pady=10)
 
-    def connect_to_named_device(self, name):
-        success = bluetooth_scan.connect_to_device(name)
-        if success:
-            self.status_label.configure(text=f"Koblet til {name}", text_color="green")
-        else:
-            self.status_label.configure(text=f"Kunne ikke koble til {name}", text_color="red")
+    '''
+    # Avslutter søk etter kontrollere
+    def finish_update(self):
+        bluetooth_scan.stop_scan()
+        self.progress.stop()                                                # Stopper prosess-animasjon
+       # self.update_button.configure(text="Oppdater", state="normal")       # Endrer teksten på knappen
+        self.progress.pack_forget()                                         # Fjerner prosessbaren 
+        self.update_button.configure(text="Oppdater", command=self.start_update)
+    '''
 
     '''
     def connect_to_device(self, name):
