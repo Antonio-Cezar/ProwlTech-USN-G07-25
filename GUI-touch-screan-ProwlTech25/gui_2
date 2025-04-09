@@ -3,14 +3,6 @@ from PIL import Image
 import platform
 import bluetooth_scan
 import threading
-
-if platform.system() != "Linux":
-    def scan_bluetooth_devices():
-        return {
-            "00:11:22:33:44:55": "TestController A",
-            "66:77:88:99:AA:BB": "TestController B"
-        }
-else:
     
 
 # Setter mørkt tema for hele GUI-et
