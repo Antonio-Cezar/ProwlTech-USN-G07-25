@@ -2,38 +2,44 @@ from pydbus import SystemBus
 import time
 import subprocess
 
-# Koble til systembus
-bus = SystemBus()
-mngr = bus.get("org.bluez", "/")
-adapter = bus.get("org.bluez", "/org/bluez/hci0")
-
 found_devices = {}
 
-# Start Bluetooth-skanning via BlueZ
-print("Starter søket...")
-try:
-    adapter.StartDiscovery()
-    print("Søker...")
-    time.sleep(10)
-    adapter.StopDiscovery()
-except Exception as e:
-    print(f"Feil ved skanning: {e}")
+def scan_devices():
+    global found_devices
+    found_devices.clear()
 
-print("Skanning avsluttet.\n")
+    # Koble til systembus
+    bus = SystemBus()
+    mngr = bus.get("org.bluez", "/")
+    adapter = bus.get("org.bluez", "/org/bluez/hci0")
 
-# Fase 1 – Hent enheter via D-Bus ObjectManager
-print("Enheter funnet via D-Bus:")
-managed_objects = mngr.GetManagedObjects()
 
-for path, interfaces in managed_objects.items():
-    if "org.bluez.Device1" in interfaces:
-        dev = interfaces["org.bluez.Device1"]
-        address = dev.get("Address", "ukjent")
-        name = dev.get("Name")
-        if not name:
-            continue
-        found_devices[address] = name
-        print(f"🔹 {name} ({address})")
+
+    # Start Bluetooth-skanning via BlueZ
+    print("Starter søket...")
+    try:
+        adapter.StartDiscovery()
+        print("Søker...")
+        time.sleep(10)
+        adapter.StopDiscovery()
+    except Exception as e:
+        print(f"Feil ved skanning: {e}")
+
+    print("Skanning avsluttet.\n")
+
+    # Fase 1 – Hent enheter via D-Bus ObjectManager
+    print("Enheter funnet via D-Bus:")
+    managed_objects = mngr.GetManagedObjects()
+
+    for path, interfaces in managed_objects.items():
+        if "org.bluez.Device1" in interfaces:
+            dev = interfaces["org.bluez.Device1"]
+            address = dev.get("Address", "ukjent")
+            name = dev.get("Name")
+            if not name:
+                continue
+            found_devices[address] = name
+            print(f"🔹 {name} ({address})")
 
 def get_devices():
     return found_devices
