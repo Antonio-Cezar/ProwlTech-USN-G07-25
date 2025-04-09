@@ -273,7 +273,7 @@ class ProwlTechApp(ctk.CTk):
 
         threading.Thread(
             target=lambda: bluetooth_scan.start_scan(
-                ["controller", "joystick"],
+                [""],
                 self.update_device_buttons,
                 self.set_status
             )
