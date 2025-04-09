@@ -1,6 +1,8 @@
 import customtkinter as ctk
 from PIL import Image
 import platform
+import bluetooth_scan
+import threading
 
 if platform.system() != "Linux":
     def scan_bluetooth_devices():
@@ -9,7 +11,7 @@ if platform.system() != "Linux":
             "66:77:88:99:AA:BB": "TestController B"
         }
 else:
-    from bluetooth_scan import scan_bluetooth_devices # Funksjon til å scanne etter enheter via bluetooth
+    
 
 # Setter mørkt tema for hele GUI-et
 ctk.set_appearance_mode("dark")
@@ -271,37 +273,55 @@ class ProwlTechApp(ctk.CTk):
 
     # Oppdaterer søk etter kontrollere
     def start_update(self):
-        self.update_button.configure(text="Oppdaterer...", state="disabled")
+        #self.update_button.configure(text="Oppdaterer...", state="disabled")
+        self.update_button.configure(text="Stopper...", state="normal", command=self.finish_update)
         self.progress.pack(pady=10)
         self.progress.start()
-        self.after(3000, self.finish_update)
+        #self.after(3000, self.finish_update)
+
+        threading.Thread(
+            target=lambda: bluetooth_scan.start_scan(
+                ["controller", "joystick"],
+                self.update_device_buttons,
+                self.set_status
+            )
+        ).start()
 
     # Avslutter søk etter kontrollere
     def finish_update(self):
+        bluetooth_scan.stop_scan()
         self.progress.stop()                                                # Stopper prosess-animasjon
-        self.update_button.configure(text="Oppdater", state="normal")       # Endrer teksten på knappen
+       # self.update_button.configure(text="Oppdater", state="normal")       # Endrer teksten på knappen
         self.progress.pack_forget()                                         # Fjerner prosessbaren 
+        self.update_button.configure(text="Oppdater", command=self.start_update)
+
+
+
+    def set_status(self, text):
+        self.status_label.configure(text=text)
+
+    def update_device_buttons(self):
+        self.bottom.after(0, self._update_buttons)
+
+    def _update_buttons(self):
 
         # Fjerner gamle synlige enheter om det er noen
         for widget in self.bottom.winfo_children():
                 if isinstance(widget, ctk.CTkButton) or (isinstance(widget, ctk.CTkLabel) and widget != self.status_label):
                     widget.destroy()
-
-        devices = scan_bluetooth_devices()
+       
+        devices = bluetooth_scan.get_devices()
 
         if devices:
-            
-            for addr, name in devices.items():
-                device_str = name
-
+            for name in devices:
                 btn = ctk.CTkButton(
                     self.bottom,
-                    text=device_str,
+                    text=name,
                     fg_color=popup_button_color,
                     hover_color=button_hover_color,
                     text_color="white",
                     corner_radius=10,
-                    command=lambda a=addr, n=name: self.connect_to_device(a, n)
+                    command=lambda n=name: self.connect_to_named_device(n)
                 )
                 btn.pack(pady=5, padx=20, fill="x")
 
@@ -314,7 +334,15 @@ class ProwlTechApp(ctk.CTk):
             )
             no_devices_label.pack(pady=10)
 
-    def connect_to_device(self, address, name):
+    def connect_to_named_device(self, name):
+        success = bluetooth_scan.connect_to_device(name)
+        if success:
+            self.status_label.configure(text=f"Koblet til {name}", text_color="green")
+        else:
+            self.status_label.configure(text=f"Kunne ikke koble til {name}", text_color="red")
+
+    '''
+    def connect_to_device(self, name):
         import subprocess
 
         result = subprocess.run(
@@ -331,7 +359,7 @@ class ProwlTechApp(ctk.CTk):
             self.status_label.configure(text=f"Koblet til {name}", text_color="green")
         else:
             self.status_label.configure(text=f"Kunne ikke koble til {name}", text_color="red")
-
+    '''
 
     # Lukker popup-vindu når lukk-knappen trykkes
     def close_connection_window(self):

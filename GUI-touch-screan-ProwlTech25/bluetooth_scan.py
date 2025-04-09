@@ -1,49 +1,85 @@
-import pexpect
-import re
+import subprocess
 import time
+import threading
 
-def scan_bluetooth_devices(name_filter=""):
-    """
-    Søker etter Bluetooth-enheter i pairing-modus (synlige enheter).
-    Returnerer dict: {adresse: navn}
-    """
+device_dict = {}    # Liste for å lagre navn og MAC-adresser
 
-    devices = {}
+# Holde styr på scanning-status
+scanning = False
+stop_scan_flag = False
 
-    try:
-        # Start bluetoothctl
-        child = pexpect.spawn("bluetoothctl", echo=False)
-        child.expect("#", timeout=5)  # Økt timeout for første respons
+# Kjør bluetoothctl-kommandoer
+def run_bluetoothctl_commands(commands):
+    process = subprocess.Popen(
+        ['bluetoothctl'],
+        stdin=subprocess.PIPE,
+        stdout=subprocess.PIPE,
+        stderr=subprocess.PIPE,
+        text=True
+    )
 
-        child.sendline("scan on")
-        time.sleep(1)  # Gi scanningen tid til å starte
+    output, _ = process.communicate(commands)
+    return output
 
-        start_time = time.time()
-        scan_duration = 10  # Økt til 10 sekunder
+# Starter skanning i bakgrunnen
+def start_scan(device_filter, update_callback, status_callback):
+    # update: oppdaterer GUI med nye enheter. status: oppdaterer status i GUI
 
-        while time.time() - start_time < scan_duration:
-            try:
-                # Vent på en linje med enhetsdata
-                child.expect(r"Device ([0-9A-F:]{17}) (.+)", timeout=3)
-                addr, name = child.match.groups()
-                addr = addr.decode()
-                name = name.decode()
+    global device_dict, scanning, stop_scan_flag
 
-                if name_filter.lower() in name.lower() or name_filter == "":
-                    devices[addr] = name
+    # Tilbakestiller og klargjør
+    device_dict.clear()
+    scanning = True
+    stop_scan_flag = False
 
-            except pexpect.exceptions.TIMEOUT:
-                # Fortsett å vente på neste enhet
-                continue
+    # Starter skanning
+    run_bluetoothctl_commands("scan on\n")
+    status_callback("Søker etter enheter...")
 
-        # Stopp scanning
-        child.sendline("scan off")
-        child.sendline("quit")
-        child.close()
+    while not stop_scan_flag:
+        # Oversikt over kjente enheter
+        output = run_bluetoothctl_commands("devices\n")
+        new_found = False
 
-    except Exception as e:
-        print("Bluetooth-feil:", e)
+        for line in output.split("\n"):
+            if line.startswith("Device"):
+                parts = line.split(" ", 2)
+                if len(parts) == 3:
+                    mac, name = parts[1], parts[2]
 
-    return devices
+                    # Filtrer
+                    if any(keyword in name.lower() for keyword in device_filter):
+                        if name not in device_dict:
+                            device_dict[name] = macnew_found = True
+
+
+        # Oppdater GUI
+        if new_found:
+            update_callback()
+
+        time.sleep(2)
+
+    run_bluetoothctl_commands("scan off\n")
+    scanning = False
+    status_callback("Søk avbrutt")
+
+# GUI kan stoppe skanning
+def stop_scan():
+    global stop_scan_flag
+    stop_scan_flag = True
+
+# Returnerer navnene
+def get_devices(device_name):
+    mac = device_dict.get(device_name)
+    if not mac:
+        return False 
+    
+    # Pair, trust og connect
+    run_bluetoothctl_commands(f"pair {mac}\n")
+    time.sleep(1)
+    run_bluetoothctl_commands(f"trust {mac}\n")
+    time.sleep(1)
+    run_bluetoothctl_commands(f"connect {mac}\n")
+    return True
 
 
