@@ -129,7 +129,7 @@ class ProwlTechApp(ctk.CTk):
         )
         self.can_bus_button.place(relx=0.2, rely=0.9, anchor="center")
 
-    def run_can_script():
+    def run_can_script(self):
         subprocess.Popen(["bash", "start_canbus_meny_konsoll.sh"])
 
     # Popup-vindu som vises når "Info"-knappen trykkes
