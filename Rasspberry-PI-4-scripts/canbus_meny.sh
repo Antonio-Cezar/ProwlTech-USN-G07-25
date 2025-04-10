@@ -2,7 +2,23 @@
 
 CAN_INTERFACE="can0"
 BITRATE=125000
-LOADING_SCRIPT="./loading_animation.sh"
+
+loading_animation() {
+    spinner="/|\\-"
+    duration=1.5
+    interval=0.1
+    end_time=$(echo "$duration / $interval" | bc)
+
+    echo -n "Laster "
+
+    for ((i=0; i<$end_time; i++)); do
+        index=$((i % 4))
+        printf "\b${spinner:$index:1}"
+        sleep $interval
+    done
+
+    printf "\b Ferdig!\n"
+}
 
 start_canbus() {
     echo "Starter $CAN_INTERFACE med bitrate $BITRATE ..."
@@ -16,20 +32,6 @@ show_status() {
     echo ""
     echo "=== CAN-status ==="
     ip -details link show $CAN_INTERFACE | grep -A 5 "$CAN_INTERFACE"
-    echo ""
-}
-
-loading_run() {
-    echo ""
-    echo ""
-    echo ""
-    if [[ -x "$LOADING_SCRIPT" ]]; then
-        bash "$LOADING_SCRIPT"
-    else
-        echo "!Fant ikke loading scriptet: $LOADING_SCRIPT"
-    fi
-    sleep 0.3
-    echo ""
     echo ""
 }
 
@@ -53,33 +55,32 @@ while true; do
     case $valg in
         1)
             start_canbus
-            loading_run
             show_status
+            loading_animation
             ;;
         2)
             echo "Manuelt: Skru AV $CAN_INTERFACE ..."
             sudo ip link set $CAN_INTERFACE down
-            loading_run
             show_status
+            loading_animation
             ;;
         3)
             echo "Manuelt: Skru PÅ $CAN_INTERFACE ..."
             sudo ip link set $CAN_INTERFACE type can bitrate $BITRATE
             sudo ip link set $CAN_INTERFACE up
-            loading_run
             show_status
+            loading_animation
             ;;
         4)
             show_status
-            loading_run
+            loading_animation
             ;;
         5)
             echo "Starter CAN-dump... Trykk x + Enter for å avslutte."
-            # Start candump i bakgrunnen
+            loading_animation
             candump $CAN_INTERFACE &
             CANDUMP_PID=$!
 
-            # Vent på 'x' eller ctrl+c
             read -n 1 -s input
             if [[ $input == "x" || $input == "X" ]]; then
                 echo "Avslutter candump..."
@@ -90,11 +91,12 @@ while true; do
             ;;
         x)
             echo "Avslutter."
-            loading_run
+            loading_animation
             exit 0
             ;;
         *)
             echo "Ugyldig valg. Prøv igjen."
+            loading_animation
             ;;
     esac
 done

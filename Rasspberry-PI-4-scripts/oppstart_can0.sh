@@ -11,6 +11,13 @@ start_canbus() {
     sleep 1
 }
 
+show_status() {
+    echo ""
+    echo "=== CAN-status ==="
+    ip -details link show $CAN_INTERFACE | grep -A 5 "$CAN_INTERFACE"
+    echo ""
+}
+
 # Første oppstart
 start_canbus
 show_status
