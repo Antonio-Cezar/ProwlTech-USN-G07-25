@@ -77,33 +77,6 @@ int setup_can_filter(const struct device *dev, can_rx_callback_t rx_cb, void *cb
     return can_add_rx_filter(dev, rx_cb, cb_data, &filter); // Returning the rx filter
 }
 
-//RAS(PROWLTECH25) laget en ny funksjon for å sjekke CAN frames på bus ....
-void can_rx_callback(const struct device *dev, struct can_frame *frame, void *user_data){
-    printk("mottatt frame med ID: 0x%x\n", frame->id);
-
-    if(frame->id == RECEIVE_ID && frame->dlc == 8) {
-        struct can_ret_data data;
-        memcpy(&data.vinkel, &frame->data[0], sizeof(float));
-        memcpy(&data.fart, &frame->data[4], sizeof(uint16_t));
-        memcpy(&data.rotasjon, &frame->data[6], sizeof(int16_t));
-
-        //skalerer til float for motorstyringen.
-        struct can_ret_data scaled;
-        scaled.vinkel = data.vinkel;
-        scaled.fart = data.fart / 1000.0f;
-        scaled.rotasjon = data.rotasjon / 1000.0f;
-
-        printk("Mottatt: Fart=%.2f, Vinkel=%.2f, Rotasjon=%.2f\n", scaled.fart, scaled.vinkel, scaled.rotasjon);
-
-        if (k_msgq_put(&can_msgq, &scaled, K_NO_WAIT) != 0) {
-            printk("Nå er kø full, klarte ikke lagre Can-data\n");
-        }
-
-        
-    }
-}
-
-
 //can_send functions
 
 /* Function to convert CAN state to readable string */
@@ -141,7 +114,7 @@ void send_string(const struct device *can_dev, const char *str){ // Function for
 }
 
 // cezar husk å kommentere og endre
-void can_rx_callback_pi(const struct device *dev, struct can_frame *frame, void *user_data) {
+void can_rx_callback(const struct device *dev, struct can_frame *frame, void *user_data) {
     if (frame->id == RECEIVE_ID && frame->dlc == 6) {
         // Korrekt endian-konvertering
         int16_t fart_i     = sys_le16_to_cpu(*(int16_t *)&frame->data[0]);
@@ -155,9 +128,9 @@ void can_rx_callback_pi(const struct device *dev, struct can_frame *frame, void 
 
         // Print verdier
         printf("[PI → Motor-MB] Mottatt:\n");
-        printf("  Fart     : ", fart);
-        printf("  Vinkel   : ", vinkel, (vinkel * 180.0f / 3.14159f));
-        printf("  Rotasjon : ", rotasjon);
+        printf("  Fart     : %.2f\n", fart);
+        printf("  Vinkel   : %.2f\n", vinkel, (vinkel * 180.0f / 3.14159f));
+        printf("  Rotasjon : %.2f\n", rotasjon);
         printf("-----------------------------\n");
 
         // Velg joystick-modus ut ifra rotasjon
