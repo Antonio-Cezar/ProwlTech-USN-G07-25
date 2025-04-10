@@ -69,6 +69,14 @@ class ProwlTechApp(ctk.CTk):
         self.logo_label = ctk.CTkLabel(self.front_frame, image=self.prowltech_logo_icon, text="")
         self.logo_label.place(relx=0.5, rely=0.45, anchor="center")
 
+        # Ikon: info
+        info_image = Image.open("Image/info.png")
+        self.info_icon = ctk.CTkImage(light_image=info_image, size=(20, 20))
+
+        # Ikon: start
+        start_image = Image.open("Image/play.png")
+        self.start_icon = ctk.CTkImage(light_image=start_image, size=(20, 20))
+
         # Start-knapp
         self.start_button = ctk.CTkButton(
             self.front_frame,
@@ -79,10 +87,31 @@ class ProwlTechApp(ctk.CTk):
             fg_color="#6F48A6",
             hover_color=button_hover_color,
             text_color="white",
+            image=self.start_icon,
+            compound="right",
             corner_radius=10,
             command=self.open_control_panel
         )
         self.start_button.place(relx=0.5, rely=0.9, anchor="center")
+
+        # Info-knapp
+        self.info_button = ctk.CTkButton(
+            self.front_frame,
+            text="Info",
+            font=("Century Gothic", 20),
+            width=150,
+            height=40,
+            fg_color="#6F48A6",
+            hover_color=button_hover_color,
+            text_color="white",
+            image=self.info_icon,
+            compound="right",
+            corner_radius=10,
+            command=None
+        )
+        self.info_button.place(relx=0.8, rely=0.9, anchor="center")
+
+
 
     def open_control_panel(self):
         self.front_frame.destroy()
