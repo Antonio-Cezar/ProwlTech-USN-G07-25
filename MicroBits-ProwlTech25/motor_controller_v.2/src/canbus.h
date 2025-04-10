@@ -16,11 +16,17 @@ const struct device *const get_can_dev(void); // Function for getting the CAN de
 #define RECEIVE_ID 0x0000001 // RECEIVE ID
 #define CAN_MSGQ_SIZE 10 // Message queue size
 
-struct can_ret_data { // Struct for the received data
-    bool js_bool_data;     // Converted from uint8_t to bool
-    int js_deg_int_data;   // Converted from int16_t to int
-    int js_spd_int_data;   // Converted from int16_t to int
+// cezar husk å kommentere og endre
+void can_rx_callback_pi(const struct device *dev, struct can_frame *frame, void *user_data);
+
+//RAS(PROWLTECH) laget ny struct for å ta imot verdier på vår måte, fart, vinkel og rotasjon
+struct can_ret_data {  //struct for å motta data
+    float vinkel;
+    float fart;
+    float rotasjon;
+
 };
+
 
 extern struct k_msgq can_msgq; // Message queue structure
 

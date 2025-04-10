@@ -1,3 +1,7 @@
+#define M_PI 3.14159265358979323846
+#include <math.h>
+#include <stdio.h>
+
 #include <zephyr/kernel.h>
 #include <zephyr/drivers/can.h>
 #include <zephyr/drivers/spi.h>
@@ -7,6 +11,10 @@
 #include <string.h>
 #include "canbus.h"
 #include "motorkontroller.h"
+#include "motorstyring.h" 
+
+ //lagt til av RAS (PROWLTECH25)
+//Motorstyringen i denne filen er endret av RAS(PROWLTECH25)
 // Commented and coded by OA
 
 
@@ -36,21 +44,21 @@ void canState(const struct device *can_dev){ // Function for checking the CAN st
     if (can_get_state(can_dev, &state, &err_cnt) != 0) { // If test to check the state of the CAN controller
             printk("Failed to get CAN state\n");
         } else {
-        //printf("CAN State: %s\n", can_state_to_str(state));
-        //printf("TX Errors: %d, RX Errors: %d\n", err_cnt.tx_err_cnt, err_cnt.rx_err_cnt);
+        printf("CAN State: %s\n", can_state_to_str(state));
+        printf("TX Errors: %d, RX Errors: %d\n", err_cnt.tx_err_cnt, err_cnt.rx_err_cnt);
         }
 }
 
-void process_can_data(void) { // Function for processing the receievd CAN data 
-    struct can_ret_data received_data; // structure for received CAN data
-    if (k_msgq_get(&can_msgq, &received_data, K_FOREVER) == 0) { // If test that receives a message from the message queue, and if it is zero (successfull), it will then use said data
-        //printk("Processing CAN data: Bool=%d, Degree=%d, Speed=%d\n",
-        received_data.js_bool_data,
-        received_data.js_deg_int_data,
-        received_data.js_spd_int_data;
-        control_motors(received_data.js_deg_int_data, received_data.js_spd_int_data, received_data.js_bool_data); // Sends the received joystick data into the control_motors function
+//RAS(PROWLTECH25) Laget ny versjon for å håndtere ny data
+void process_can_data(void) {
+    struct can_ret_data received_data;
+    if (k_msgq_get(&can_msgq, &received_data, K_FOREVER) == 0) {
+        printk("Prosesserer CAN data: Fart=%.2f, Vinkel=%.2f, Rotasjon=%.2f\n", received_data.fart, received_data.vinkel, received_data.rotasjon);
+        kontroller_motorene(received_data.fart, received_data.vinkel, received_data.rotasjon);
     }
 }
+
+
 
 //can_dev functions
 const struct device *const get_can_dev(void){ // Fuction responsible for finding and accessing the CAN device
@@ -67,29 +75,6 @@ int setup_can_filter(const struct device *dev, can_rx_callback_t rx_cb, void *cb
 	    .mask = CAN_EXT_ID_MASK // Filter bit mask for an extended 29-bit CAN ID
     };
     return can_add_rx_filter(dev, rx_cb, cb_data, &filter); // Returning the rx filter
-}
-
-void can_rx_callback(const struct device *dev, struct can_frame *frame, void *user_data) { // Function for checking CAN frames on the bus
-    //printk("Received frame with ID: 0x%x\n", frame->id);
-    if (frame->id == RECEIVE_ID && frame->dlc == 5) { // If test for checking if the frame-ID matches the receive ID for the joystick frame, and if the size of the frame is equal to 5 byte in size
-        struct can_ret_data js_data; // Struct for the joystick data, set up in the header file
-        
-        js_data.js_bool_data = (frame->data[0] != 0);  // Puts the joystick data into the variable if the value in the first position is not NULL
-
-        int16_t js_deg_int, js_spd_int; // Convert int16_t to int 
-        memcpy(&js_deg_int, &frame->data[1], sizeof(js_deg_int)); // Copies the data from the received CAN frame in position 1 to the js_deg_int variable
-        memcpy(&js_spd_int, &frame->data[3], sizeof(js_spd_int)); // Copies the data from the received CAN frame in position 3 to the js_spd_int variable
-        
-        js_data.js_deg_int_data = js_deg_int;  // Automatically turnes the received variable into full int
-        js_data.js_spd_int_data = js_spd_int;  // Automatically turnes the received variable into full int
-
-        printk("Received data: js_bool=%d, js_deg=%d, js_spd=%d\n",
-               js_data.js_bool_data, js_data.js_deg_int_data, js_data.js_spd_int_data); // Printing the received joystick data to the Serial Monitor
-
-        if (k_msgq_put(&can_msgq, &js_data, K_NO_WAIT) != 0) {
-            printk("Failed to put data in queue\n"); // If test that checks if there is an error when putting the joystick values into the message queue
-        }
-    }
 }
 
 //can_send functions
@@ -126,5 +111,38 @@ void send_string(const struct device *can_dev, const char *str){ // Function for
         } /*else {
             printk("Frame sent\n");
         }*/
+}
+
+// cezar husk å kommentere og endre
+void can_rx_callback(const struct device *dev, struct can_frame *frame, void *user_data) {
+    if (frame->id == RECEIVE_ID && frame->dlc == 6) {
+        // Korrekt endian-konvertering
+        int16_t fart_i     = sys_le16_to_cpu(*(int16_t *)&frame->data[0]);
+        int16_t vinkel_i   = sys_le16_to_cpu(*(int16_t *)&frame->data[2]);
+        int16_t rotasjon_i = sys_le16_to_cpu(*(int16_t *)&frame->data[4]);
+
+        // Konverter til float
+        float fart     = fart_i / 100.0f;
+        float vinkel   = vinkel_i / 100.0f;
+        float rotasjon = rotasjon_i / 100.0f;
+
+        // Print verdier
+        printf("[PI → Motor-MB] Mottatt:\n");
+        printf("  Fart     : %.2f\n", fart);
+        printf("  Vinkel   : %.2f\n", vinkel, (vinkel * 180.0f / 3.14159f));
+        printf("  Rotasjon : %.2f\n", rotasjon);
+        printf("-----------------------------\n");
+
+        // Velg joystick-modus ut ifra rotasjon
+        bool joystick_mode = (rotasjon == 0.0f);
+
+        // Klargjør for motorstyring
+        int vinkel_deg = (int)(vinkel * 180.0f / 3.14159f);
+        int fart_int = (int)(fart * 100);
+
+        control_motors(vinkel_deg, fart_int, joystick_mode);
+    } else {
+        printf("CAN frame ignorert: ID 0x%X, DLC %d\n", frame->id, frame->dlc);
+    }
 }
 
