@@ -64,7 +64,7 @@ class ProwlTechApp(ctk.CTk):
         self.front_frame = ctk.CTkFrame(self, fg_color="#CDB9FC")
         self.front_frame.grid(row=0, column=0, rowspan=4, columnspan=4, sticky="nsew")
 
-        prowltech_logo = Image.open("prowltech_logo2.png")
+        prowltech_logo = Image.open("Image/prowltech_logo2.png")
         self.prowltech_logo_icon = ctk.CTkImage(light_image=prowltech_logo, size=(550, 550))
         self.logo_label = ctk.CTkLabel(self.front_frame, image=self.prowltech_logo_icon, text="")
         self.logo_label.place(relx=0.5, rely=0.45, anchor="center")
@@ -102,13 +102,13 @@ class ProwlTechApp(ctk.CTk):
         self.top_frame.grid_propagate(False)
 
         # Legger til USN-logo
-        logo_image = Image.open("USN_logo2.png")                                            
+        logo_image = Image.open("Image/USN_logo2.png")                                            
         self.logo_icon = ctk.CTkImage(light_image=logo_image, size=(60, 40))               
         self.logo_label = ctk.CTkLabel(self.top_frame, image=self.logo_icon, text="")      
         self.logo_label.place(x=720, y=25)                                               
 
         # Ikon: bluetooth
-        bluetooth_image = Image.open("bluetooth.png")
+        bluetooth_image = Image.open("Image/bluetooth.png")
         self.bluetooth_icon = ctk.CTkImage(light_image=bluetooth_image, size=(20, 20))
 
         # Titteltekst i midten av toppseksjonen
@@ -161,11 +161,11 @@ class ProwlTechApp(ctk.CTk):
     def open_connection_window(self):
 
         # Ikon: kryss 
-        cross_image = Image.open("cross.png")
+        cross_image = Image.open("Image/cross.png")
         self.cross_icon = ctk.CTkImage(light_image=cross_image, size=(15, 15))
 
         # Ikon: oppdatere 
-        update_image = Image.open("rotate.png")
+        update_image = Image.open("Image/rotate.png")
         self.update_icon = ctk.CTkImage(light_image=update_image, size=(15, 15))
 
         # Ytre ramme av popup-vindu
@@ -343,7 +343,7 @@ class ProwlTechApp(ctk.CTk):
         self.popup_panel.grid_columnconfigure(2, weight=1)
 
         # Ikon: kryss 
-        cross_image = Image.open("cross.png")
+        cross_image = Image.open("Image/cross.png")
         self.cross_icon = ctk.CTkImage(light_image=cross_image, size=(15, 15))
 
         # Øvre og nedre seksjon i popup-vindu
@@ -400,19 +400,19 @@ class ProwlTechApp(ctk.CTk):
         self.mid_frame.grid_propagate(False)
 
         # Ikon: bolt
-        bolt_image = Image.open("bolt.png")
+        bolt_image = Image.open("Image/bolt.png")
         self.bolt_icon = ctk.CTkImage(light_image=bolt_image, size=(15, 15))
 
         # Ikon: termometer
-        temp_image = Image.open("temperature.png")
+        temp_image = Image.open("Image/temperature.png")
         self.temp_icon = ctk.CTkImage(light_image=temp_image, size=(15, 15))
 
         # Ikon: tilkobling
-        signal_image = Image.open("signal-2.png")
+        signal_image = Image.open("Image/signal-2.png")
         self.signal_icon = ctk.CTkImage(light_image=signal_image, size=(15, 15))
 
         # Ikon: sensor
-        sensor_image = Image.open("signal.png")
+        sensor_image = Image.open("Image/signal.png")
         self.sensor_icon = ctk.CTkImage(light_image=sensor_image, size=(17, 17))
 
 
@@ -518,7 +518,7 @@ class ProwlTechApp(ctk.CTk):
         self.bot_frame.grid_propagate(False)
 
         # Ikon: advarseltegn
-        warning_image = Image.open("warning.png")
+        warning_image = Image.open("Image/warning.png")
         self.warning_icon = ctk.CTkImage(light_image=warning_image, size=(17, 17))
 
         # Feilmeldinger:
