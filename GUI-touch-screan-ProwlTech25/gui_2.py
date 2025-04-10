@@ -33,9 +33,9 @@ class ProwlTechApp(ctk.CTk):
         self.title("ProwlTech Kontrollpanel")           # Setter vindutittel
         self.geometry("800x450")                        # Setter størrelse 
         #self.resizable(False,False)                     # Hindrer at vinduet kan skaleres
-        self.attributes("-fullscreen", True)
+        #self.attributes("-fullscreen", True)
         self.bind("<Escape>", self.exit_fullscreen)     # ESC lukker programmet
-        self.config(cursor="none")                      # Skjuler musepeker når GUI er i gang
+        #self.config(cursor="none")                      # Skjuler musepeker når GUI er i gang
 
         self.bluetooth_devices = []                      # Liste for bluetooth-enheter
         self.device_menu = None 
@@ -311,40 +311,13 @@ class ProwlTechApp(ctk.CTk):
     def connect_to_device(self, name):
         success = bluetooth_dbus.connect_to_device(name)
         if success:
-            self.status_label.configure(text=f"Koblet til {name}", text_color="green")
+            self.status_label.configure(text=f"Koblet til {name}", text_color="white")
+            self.connection_status.configure(text=f"Tilkoblet: {name}", text_color="white")
         else:
             self.status_label.configure(text=f"Kunne ikke koble til {name}", text_color="red")
+            self.connection_status.configure(text=f"Ingen kontroller tilkoblet", text_color="red")
 
-    '''
-    # Avslutter søk etter kontrollere
-    def finish_update(self):
-        bluetooth_scan.stop_scan()
-        self.progress.stop()                                                # Stopper prosess-animasjon
-       # self.update_button.configure(text="Oppdater", state="normal")       # Endrer teksten på knappen
-        self.progress.pack_forget()                                         # Fjerner prosessbaren 
-        self.update_button.configure(text="Oppdater", command=self.start_update)
-    '''
-
-    '''
-    def connect_to_device(self, name):
-        import subprocess
-
-        result = subprocess.run(
-            ['bluetoothctl'],
-            input=f'connect {address}\nquit\n',
-            stdout=subprocess.PIPE,
-            stderr=subprocess.PIPE,
-            text=True
-        )
-
-        output = result.stdout
-
-        if "Connection successful" in output:
-            self.status_label.configure(text=f"Koblet til {name}", text_color="green")
-        else:
-            self.status_label.configure(text=f"Kunne ikke koble til {name}", text_color="red")
-    '''
-
+   
     # Lukker popup-vindu når lukk-knappen trykkes
     def close_connection_window(self):
         self.popup_panel.destroy()
@@ -502,8 +475,20 @@ class ProwlTechApp(ctk.CTk):
         self.connection_label.pack(side="top", anchor="w", padx=35, pady=0)
 
         # Tilkoblingsstatus - Ramme
-        self.temp_frame = ctk.CTkFrame(self.connection_containter, height=70, width=300, fg_color=frame_color, corner_radius=20, border_color=frame_border_color, border_width=7)
-        self.temp_frame.pack(side="top", expand=True, padx=20, pady=(0, 10))
+        self.connection_frame = ctk.CTkFrame(self.connection_containter, height=70, width=300, fg_color=frame_color, corner_radius=20, border_color=frame_border_color, border_width=7)
+        self.connection_frame.pack(side="top", expand=True, padx=20, pady=(0, 10))
+        self.connection_frame.pack_propagate(False)
+
+        # Tilkoblingsstatus - Innhold
+        self.connection_status = ctk.CTkLabel(
+            self.connection_frame,
+            text="Ingen kontroller tilkoblet",
+            font=("Century Gothic", 12),
+            text_color="white",
+            anchor="center",
+            justify="left"
+        )
+        self.connection_status.pack(expand=True)
 
 
         # Sensormåling:
