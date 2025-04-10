@@ -295,7 +295,7 @@ class ProwlTechApp(ctk.CTk):
                     hover_color=button_hover_color,
                     text_color="white",
                     corner_radius=10,
-                    command=None
+                    command=lambda n=name: self.connect_to_device(n)
                 )
                 btn.pack(pady=5, padx=20, fill="x")
 
@@ -307,6 +307,13 @@ class ProwlTechApp(ctk.CTk):
                 font=("Century Gothic", 16)
             )
             no_devices_label.pack(pady=10)
+
+    def connect_to_device(self, name):
+        success = bluetooth_dbus.connect_to_device(name)
+        if success:
+            self.status_label.configure(text=f"Koblet til {name}", text_color="green")
+        else:
+            self.status_label.configure(text=f"Kunne ikke koble til {name}", text_color="red")
 
     '''
     # Avslutter søk etter kontrollere
