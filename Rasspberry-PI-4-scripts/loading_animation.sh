@@ -4,11 +4,11 @@
 loading_animasjon() {
     local i=0
     local symboler=('|' '/' '-' '\\')
-    echo -n "Laster neste modul "
+    echo -n "Laster  "
     while [ $i -lt 10 ]; do
         for s in "${symboler[@]}"; do
-            echo -ne "\rLaster neste modul $s"
-            sleep 0.2
+            echo -ne "\rLaster $s"
+            sleep 0.1
         done
         ((i++))
     done
