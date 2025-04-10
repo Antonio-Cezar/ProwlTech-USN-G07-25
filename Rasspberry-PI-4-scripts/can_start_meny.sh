@@ -45,6 +45,7 @@ while true; do
     echo "2. Manuelt: Skru AV can0"
     echo "3. Manuelt: Skru PÅ can0"
     echo "4. Vis CAN-status"
+    echo "5. Vis CAN-dum (BUS info)"
     echo "x. Avslutt"
     echo "============================"
     echo -n "Velg et alternativ [1-4 / x]: "
@@ -75,6 +76,8 @@ while true; do
         4)
             show_status
             loading_run
+            ;;
+        5)
             ;;
         x)
             echo "Avslutter."
