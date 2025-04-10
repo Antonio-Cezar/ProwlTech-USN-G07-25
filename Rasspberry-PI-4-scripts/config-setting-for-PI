@@ -1,0 +1,50 @@
+can0 konfigurasjoner
+========================================================
+sudo nano /boot/frimware/config.txt
+
+dtparam=api=on
+dtoverlay=mcp2515-can0,oscillator=16000000,interrupt=25
+dtoverlay=spi-bcm2835
+========================================================
+
+
+
+
+
+For å åpne CAN_meny på egen consol
+========================================================
+mkdir -p ~/.config/autostart
+
+chmod +x /home/pi/can_start_meny.sh
+
+nano ~/.config/autostart/canbus_meny.desktop
+
+
+[Desktop Entry]
+Name=CAN-bus Kontrollmeny
+Exec=/home/pi/start_canbus_launcher.sh
+Type=Application
+Terminal=false
+X-GNOME-Autostart-enabled=true
+========================================================
+
+
+
+
+
+kjøre scriptet for oppstart av can0 ved ubunto oppstart
+========================================================
+chmod +x /home/pi/can_start_oppstart.sh
+
+nano ~/.config/autostart/can_start_oppstart.desktop
+
+
+[Desktop Entry]
+Type=Application
+Exec=/home/pi/can_start_oppstart.sh
+Hidden=false
+NoDisplay=false
+X-GNOME-Autostart-enabled=true
+Name=CAN Start Oppstart
+Comment=Starter CAN-bus automatisk ved oppstart
+========================================================
