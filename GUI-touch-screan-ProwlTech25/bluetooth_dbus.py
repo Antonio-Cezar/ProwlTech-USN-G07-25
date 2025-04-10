@@ -1,6 +1,3 @@
-from pydbus import SystemBus
-import time
-import subprocess
 import platform
 
 # Mock-versjon for å teste på Windows
@@ -28,6 +25,9 @@ if platform.system() != "Linux":
     
 # Ekte Linux versjon
 else:
+    from pydbus import SystemBus
+    import time
+    import subprocess
 
     found_devices = {}
 
