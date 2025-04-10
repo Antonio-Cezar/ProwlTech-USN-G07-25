@@ -47,9 +47,8 @@ while true; do
     echo "4. Vis CAN-status"
     echo "5. Vis CAN-dum (BUS info)"
     echo "x. Avslutt"
-    echo "============================"
-    echo -n "Velg et alternativ [1-4 / x]: "
     echo "===================================="
+    echo -n "Velg et alternativ [1-4 / x]: "
     echo ""
     echo ""
     read valg

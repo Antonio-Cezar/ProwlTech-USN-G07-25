@@ -157,7 +157,7 @@ void can_rx_callback_pi(const struct device *dev, struct can_frame *frame, void 
         printf("[PI → Motor-MB] Mottatt:\n");
         printf("  Fart     : ", fart);
         printf("  Vinkel   : ", vinkel, (vinkel * 180.0f / 3.14159f));
-        printf("  Rotasjon : ", rotasjon);x
+        printf("  Rotasjon : ", rotasjon);
         printf("-----------------------------\n");
 
         // Velg joystick-modus ut ifra rotasjon

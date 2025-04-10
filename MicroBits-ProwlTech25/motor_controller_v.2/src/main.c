@@ -30,10 +30,10 @@ void main(void) {
     }
 
     //tester motorstyring direkte
-    float test_fart = 0.8f;
-    float test_vinkel = M_PI / 4;
-    float test_rotasjon = 0.3f;
-    kontroller_motorene(test_fart, test_vinkel, test_rotasjon);
+    //float test_fart = 0.8f;
+    //float test_vinkel = M_PI / 4;
+    //float test_rotasjon = 0.3f;
+    //kontroller_motorene(test_fart, test_vinkel, test_rotasjon);
 
 
     printf("PWM er klar.\n");

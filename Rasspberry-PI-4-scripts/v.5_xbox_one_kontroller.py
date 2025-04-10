@@ -24,12 +24,11 @@ MSG_ID = 0x0000001  # samme som RECEIVE_ID hos motor-MB
 # Funksjonen for pakken som blir sendt
 def send_data(bus, fart, vinkel, rotasjon=0.0):
     try:
-        # Skaler verdier fra float til int8 eller int16
-        fart_i = int(fart * 100)         # f.eks. 0.5 → 50
-        vinkel_i = int(vinkel * 100)     # f.eks. 3.14 → 314
-        rotasjon_i = int(rotasjon * 100) # f.eks. 0.7 → 70
+        vinkel_f = float(vinkel)          # 4 bytes (float)
+        fart_i = int(fart * 1000)         # 2 bytes (int16)
+        rotasjon_i = int(rotasjon * 1000) # 2 bytes (int16)
 
-        data = struct.pack('<hhh', fart_i, vinkel_i, rotasjon_i)  # 6 byte
+        data = struct.pack('<fhh', vinkel_f, fart_i, rotasjon_i)  # 8 byte total
         melding = can.Message(
             arbitration_id=MSG_ID,
             data=data,
