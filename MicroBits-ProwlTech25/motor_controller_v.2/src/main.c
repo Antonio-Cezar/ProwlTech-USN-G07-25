@@ -11,7 +11,6 @@
 #include <string.h>
 #include <stdio.h>
 #include "pwm.h"
-#include "motorkontroller.h"
 #include "motorstyring.h" //lagt til av RAS(PROWLTECH25)
 #include "canbus.h"
 // Commented and coded by OA and EAH

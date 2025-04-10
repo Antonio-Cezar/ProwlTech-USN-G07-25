@@ -1,5 +1,4 @@
-#include "motorstyring.h" //header fil
-#include "motorkontroller.h" //legger til denne for å få tilgang til speed_to_ds() og mapValue(). for å omregne hastighet og retning til pwm signaler
+#include "motorstyring.h"
 #include "pwm.h" //for å kunne bruke pwm_write så motorene forstår signalene vi sender
 #include <math.h> //for å få tilgang til mattefunksjoner
 #ifndef M_PI //for å definere pi så vi kan bruke til vinkelberegning (er ikke definert i math.h)
@@ -13,11 +12,32 @@
 #define MOTOR_ID_REAR_RIGHT 3
 
 
+//ny versjon for mapValue
+
+int mapValue (int prosent, int retning){
+    int min = 50;
+    int diff = prosent * 0.4f; // 0-100 - > 0-40
+
+    if (retning == 1) return min + diff; //fremover
+    if (retning == 2) return min - diff; // bakover
+    return 50; // default setting
+}
+
+int speed_to_ds(int duty_cycle) {
+    int periode = 40000000; // 40ms = 25 hz
+    return ((duty_cycle * (periode / 10)) /10); //(duty cycle / 100) * periode
+
+}
+
+
 
 //funksjon som beregn motorverdier fra fart, vinkel og rotasjon. regner ut hvor mye hver av de 4 motorene skal kjøre.
 //basert på fart(hvor fort vi vil kjøre fra 0 til 1), 
 //vinkel(hvilken retning vi vil kjøre. for eks 0 er fremover og pi/2 er til venstre),
 //rotasjon(rotasjon av hele bilen, positiv=høyre og negativ=venstre)
+
+
+
  struct MotorVerdier kalkulerMotorVerdier(float fart, float vinkel, float rotasjon) {
     float x = fart * cosf(vinkel); //her regner vi fart og vinkel om til x kordinater
     float y = fart * sinf(vinkel); //her regner vi fart og vinkel om til y kordinater
