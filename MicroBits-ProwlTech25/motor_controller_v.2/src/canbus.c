@@ -137,10 +137,8 @@ void can_rx_callback(const struct device *dev, struct can_frame *frame, void *us
         bool joystick_mode = (rotasjon == 0.0f);
 
         // Klargjør for motorstyring
-        int vinkel_deg = (int)(vinkel * 180.0f / 3.14159f);
-        int fart_int = (int)(fart * 100);
+        kontroller_motorene(fart, vinkel, rotasjon);
 
-        kontroller_motorene(vinkel_deg, fart_int, joystick_mode);
     } else {
         printf("CAN frame ignorert: ID 0x%X, DLC %d\n", frame->id, frame->dlc);
     }
