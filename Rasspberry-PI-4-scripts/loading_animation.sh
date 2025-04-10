@@ -1,14 +1,13 @@
 #!/bin/bash
 
-# Enkel laster-animasjon med roterende symboler
 loading_animasjon() {
     local i=0
     local symboler=('|' '/' '-' '\\')
     echo -n "Laster  "
-    while [ $i -lt 10 ]; do
+    while [ $i -lt 4 ]; do
         for s in "${symboler[@]}"; do
             echo -ne "\rLaster $s"
-            sleep 0.1
+            sleep 0.125
         done
         ((i++))
     done

@@ -35,10 +35,7 @@ loading_run() {
 
 # meny
 while true; do
-    echo ""
-    echo ""
-    echo ""
-    echo ""
+    clear
     echo "===================================="
     echo "=== (can0) CAN-bus Kontrollmeny ==="
     echo "1. Prøv å starte CAN-bus på nytt"
