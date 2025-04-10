@@ -11,7 +11,6 @@
 #include <stdbool.h>
 #include <string.h>
 #include "canbus.h"
-#include "motorkontroller.h"
 #include "motorstyring.h" 
 
  //lagt til av RAS (PROWLTECH25)
@@ -141,7 +140,7 @@ void can_rx_callback(const struct device *dev, struct can_frame *frame, void *us
         int vinkel_deg = (int)(vinkel * 180.0f / 3.14159f);
         int fart_int = (int)(fart * 100);
 
-        control_motors(vinkel_deg, fart_int, joystick_mode);
+        kontroller_motorene(vinkel_deg, fart_int, joystick_mode);
     } else {
         printf("CAN frame ignorert: ID 0x%X, DLC %d\n", frame->id, frame->dlc);
     }
