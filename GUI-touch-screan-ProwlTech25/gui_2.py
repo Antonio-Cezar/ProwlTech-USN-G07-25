@@ -33,7 +33,7 @@ class ProwlTechApp(ctk.CTk):
         self.title("ProwlTech Kontrollpanel")           # Setter vindutittel
         self.geometry("800x450")                        # Setter størrelse 
         #self.resizable(False,False)                     # Hindrer at vinduet kan skaleres
-        self.attributes("-fullscreen", True)
+        self.attributes("-fullscreen", True)            # Fullskjerm på Raspberry Pi
         self.bind("<Escape>", self.exit_fullscreen)     # ESC lukker programmet
         self.config(cursor="none")                      # Skjuler musepeker når GUI er i gang
 
@@ -51,12 +51,7 @@ class ProwlTechApp(ctk.CTk):
         self.grid_columnconfigure(2, weight=1)
         self.grid_columnconfigure(3, weight=1)
 
-        # Kaller funksjoner som bygger seksjonene
-
-        #self.top_section()
-        #self.mid_section()
-        #self.bot_section()
-
+        # Funksjoner som bygger seksjon
         self.front_page()
 
     # Startside
@@ -64,6 +59,7 @@ class ProwlTechApp(ctk.CTk):
         self.front_frame = ctk.CTkFrame(self, fg_color="#CDB9FC")
         self.front_frame.grid(row=0, column=0, rowspan=4, columnspan=4, sticky="nsew")
 
+        # Bilde av ProwlTech-logo
         prowltech_logo = Image.open("Image/prowltech_logo2.png")
         self.prowltech_logo_icon = ctk.CTkImage(light_image=prowltech_logo, size=(550, 550))
         self.logo_label = ctk.CTkLabel(self.front_frame, image=self.prowltech_logo_icon, text="")
@@ -118,7 +114,7 @@ class ProwlTechApp(ctk.CTk):
         # CAN_bus-knapp
         self.can_bus_button = ctk.CTkButton(
             self.front_frame,
-            text="CAN-bus",
+            text="CAN-meny",
             font=("Century Gothic", 20),
             width=150,
             height=40,
@@ -168,6 +164,7 @@ class ProwlTechApp(ctk.CTk):
             )
         self.label.place(relx=0.5, rely=0.5, anchor=ctk.CENTER)
 
+        # Knapp for å lukke popup-vindu
         close_button = ctk.CTkButton(
             self.top,
             text="Lukk",
@@ -184,6 +181,7 @@ class ProwlTechApp(ctk.CTk):
         )
         close_button.grid(row=0, column=2, padx=550, pady=30)
 
+        # Beskrivelse-tekst
         self.info_text = ctk.CTkLabel(
             self.bottom,
             text="Kort beskrivelse av hvordan bilen fungerer.",
@@ -193,9 +191,11 @@ class ProwlTechApp(ctk.CTk):
         )
         self.info_text.pack(padx=80, pady=20)
 
+    # Funksjon: Lukke info-vindu
     def close_info_window(self):
         self.popup_panel.destroy()
 
+    # Funksjon: Åpne kontrollpanel
     def open_control_panel(self):
         self.front_frame.destroy()
 
@@ -203,7 +203,7 @@ class ProwlTechApp(ctk.CTk):
         self.mid_section()
         self.bot_section()
 
-    # Funksjon for å avslutte programmet (ESC)
+    # Funksjon: Avslutte programmet (ESC)
     def exit_fullscreen(self, event=None):
         self.destroy()
 
