@@ -77,6 +77,10 @@ class ProwlTechApp(ctk.CTk):
         start_image = Image.open("Image/play.png")
         self.start_icon = ctk.CTkImage(light_image=start_image, size=(20, 20))
 
+        # Ikon: can_bus
+        can_bus_image = Image.open("Image/random.png")
+        self.can_bus_icon = ctk.CTkImage(light_image=can_bus_image, size=(20, 20))
+
         # Start-knapp
         self.start_button = ctk.CTkButton(
             self.front_frame,
@@ -110,6 +114,23 @@ class ProwlTechApp(ctk.CTk):
             command=self.open_info_window
         )
         self.info_button.place(relx=0.8, rely=0.9, anchor="center")
+
+        # CAN_bus-knapp
+        self.can_bus_button = ctk.CTkButton(
+            self.front_frame,
+            text="CAN-bus",
+            font=("Century Gothic", 20),
+            width=150,
+            height=40,
+            fg_color="#6F48A6",
+            hover_color=button_hover_color,
+            text_color="white",
+            image=self.can_bus_icon,
+            compound="right",
+            corner_radius=10,
+            command=None
+        )
+        self.can_bus_button.place(relx=0.2, rely=0.9, anchor="center")
 
     # Popup-vindu som vises når "Info"-knappen trykkes
     def open_info_window(self):
