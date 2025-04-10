@@ -1,6 +1,7 @@
 #define M_PI 3.14159265358979323846
 #include <math.h>
 #include <stdio.h>
+#include <zephyr/sys/byteorder.h>
 
 #include <zephyr/kernel.h>
 #include <zephyr/drivers/can.h>
@@ -129,7 +130,7 @@ void can_rx_callback(const struct device *dev, struct can_frame *frame, void *us
         // Print verdier
         printf("[PI → Motor-MB] Mottatt:\n");
         printf("  Fart     : %.2f\n", fart);
-        printf("  Vinkel   : %.2f\n", vinkel, (vinkel * 180.0f / 3.14159f));
+        printf("  Vinkel   : %.2f\n", (vinkel * 180.0f / (float)M_PI));
         printf("  Rotasjon : %.2f\n", rotasjon);
         printf("-----------------------------\n");
 
