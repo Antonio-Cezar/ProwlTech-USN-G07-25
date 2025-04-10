@@ -1,2 +1,17 @@
-dtoverlay=mcp2515-can0,oscillator=1600 0000,interrupt=25
+========================================================
+sudo nano /boot/frimware/config.txt
+
+dtparam=api=on
+dtoverlay=mcp2515-can0,oscillator=16000000,interrupt=25
 dtoverlay=spi-bcm2835
+========================================================
+
+========================================================
+nano ~/.config/autostart/start_canbus.desktop
+
+[Desktop Entry]
+Name=CAN-Bus Kontroll
+Exec=lxterminal -t "CAN-bus Kontroll" -e /home/pi/start_canbus.sh
+Type=Application
+X-GNOME-Autostart-enabled=true
+========================================================
