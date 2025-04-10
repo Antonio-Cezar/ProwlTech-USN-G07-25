@@ -111,6 +111,10 @@ class ProwlTechApp(ctk.CTk):
         bluetooth_image = Image.open("Image/bluetooth.png")
         self.bluetooth_icon = ctk.CTkImage(light_image=bluetooth_image, size=(20, 20))
 
+        # Ikon: meny
+        menu_image = Image.open("Image/menu.png")
+        self.menu_icon = ctk.CTkImage(light_image=menu_image, size=(20, 20))
+
         # Titteltekst i midten av toppseksjonen
         self.title_label = ctk.CTkLabel(
             self.top_frame, 
@@ -140,22 +144,22 @@ class ProwlTechApp(ctk.CTk):
         )
         self.connect_button.grid(row=0, column=0, padx=40, pady=45)
 
-        # Info-knapp (skal vise informasjon om bilen)
-        self.info_button = ctk.CTkButton(
+        # Meny-knapp
+        self.menu_button = ctk.CTkButton(
             self.top_frame,
             width=85,
             height=40,
-            text="Info",
+            text="Meny",
             font=("Century Gothic", 16),
             text_color="white",
-            #image=self.power_icon,
-            #compound="right",
+            image=self.menu_icon,
+            compound="right",
             fg_color=button_color,
             hover_color=button_hover_color,
             corner_radius=10,
-            command=self.open_info_window
+            command=self.front_page
         )
-        self.info_button.grid(row=0, column=3, padx=(320, 10), pady=45)
+        self.menu_button.grid(row=0, column=3, padx=(320, 10), pady=45)
 
     # Pop-up vindu som vises når "Koble til kontroller" trykkes på
     def open_connection_window(self):
@@ -317,7 +321,6 @@ class ProwlTechApp(ctk.CTk):
             self.status_label.configure(text=f"Kunne ikke koble til {name}", text_color="red")
             self.connection_status.configure(text=f"Ingen kontroller tilkoblet", text_color="red")
 
-   
     # Lukker popup-vindu når lukk-knappen trykkes
     def close_connection_window(self):
         self.popup_panel.destroy()
