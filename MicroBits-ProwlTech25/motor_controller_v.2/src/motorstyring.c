@@ -7,6 +7,11 @@
 #endif
 #include <stdio.h> // for å bruke printf og skrive ut
 #include <stdlib.h> // for tilgang til minnehåndtering
+#define MOTOR_ID_FRONT_LEFT 0
+#define MOTOR_ID_FRONT_RIGHT 1
+#define MOTOR_ID_REAR_LEFT 2
+#define MOTOR_ID_REAR_RIGHT 3
+
 
 
 //funksjon som beregn motorverdier fra fart, vinkel og rotasjon. regner ut hvor mye hver av de 4 motorene skal kjøre.
@@ -37,6 +42,34 @@
         rear_right /= max_val;
     }
 
+    //sjekker kraft - feilsøkinger
+    float gjennomsnitt = (fabsf(front_left) + fabsf(front_right) + fabs(rear_left) + fabs(rear_right)) / 4.0f;
+
+    if (fabs(front_left) > gjennomsnitt * 1.5f)
+        printf("Advarsel: front_left motor bruker mer kraft enn snittet\n");
+    
+    if (fabs(front_right) > gjennomsnitt * 1.5f)
+        printf("Advarsel: front_right motor bruker mer kraft enn snittet\n");
+    
+    if (fabs(rear_left) > gjennomsnitt * 1.5f)
+        printf("Advarsel: rear_left motor bruker mer kraft enn snittet\n");
+
+    if (fabs(rear_right) > gjennomsnitt * 1.5f)
+        printf("Advarsel: rear_right motor bruker mer kraft enn snittet\n");
+    
+    if (fabs(front_left) < 0.05f && gjennomsnitt > 0.2f)
+        printf("Advarsel: front_left motor bidrar lite mens de andre jobber\n");
+    
+    if (fabs(front_right) < 0.05f && gjennomsnitt > 0.2f)
+        printf("Advarsel: front_right motor bidrar lite mens de andre jobber\n");
+
+    if (fabs(rear_left) < 0.05f && gjennomsnitt > 0.2f)
+        printf("Advarsel: rear_left motor bidrar lite mens de andre jobber\n");
+    
+    if (fabs(rear_right) < 0.05f && gjennomsnitt > 0.2f)
+        printf("Advarsel: rear_right motor bidrar lite mens de andre jobber\n");
+
+
     struct MotorVerdier motorVerdier = {front_left, front_right, rear_left, rear_right}; // struct med 4 motorverdiene og returnerer den.
     return motorVerdier;
 
@@ -64,6 +97,12 @@ int kontroller_motorene(float fart, float vinkel, float rotasjon) {
     if (rotasjon < -1.0f || rotasjon > 1.0f) {
         printf("Advarsel: Rotasjon utenfor gyldig område (-1.0 - 1.0): %.2f\n", rotasjon);
 
+    }
+
+    //Rotasjonssjekk - unngå overdominans av rotasjon
+
+    if (fabs(rotasjon) > fart * 2.0f && fart > 0.1f) {
+        printf("Advarsel: Rotasjon dominerer over fart, det kan gi spin eller ubalanse\n");
     }
 
     if (fart < 0.05f && fabsf(rotasjon) < 0.05f) { // Hvis det er ingen bevegelse eller rotasjon så skal motorene stoppes.
