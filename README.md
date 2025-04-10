@@ -20,3 +20,11 @@ Bachelor Group 07 will enhance a Mecanum drive car with omnidirectional movement
 
 
 ![alt text](img/Controller%20og%20kjøreretninger%20v3.jpg)
+
+
+
+![alt text](img/GUI_wireframe_3.png)
+
+
+
+![alt text](img/GUI_modell_4.png)
