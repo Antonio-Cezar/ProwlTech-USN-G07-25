@@ -140,3 +140,36 @@ void send_string(const struct device *can_dev, const char *str){ // Function for
         }*/
 }
 
+// cezar husk å kommentere og endre
+void can_rx_callback_pi(const struct device *dev, struct can_frame *frame, void *user_data) {
+    if (frame->id == RECEIVE_ID && frame->dlc == 6) {
+        // Korrekt endian-konvertering
+        int16_t fart_i     = sys_le16_to_cpu(*(int16_t *)&frame->data[0]);
+        int16_t vinkel_i   = sys_le16_to_cpu(*(int16_t *)&frame->data[2]);
+        int16_t rotasjon_i = sys_le16_to_cpu(*(int16_t *)&frame->data[4]);
+
+        // Konverter til float
+        float fart     = fart_i / 100.0f;
+        float vinkel   = vinkel_i / 100.0f;
+        float rotasjon = rotasjon_i / 100.0f;
+
+        // Print verdier
+        printf("[PI → Motor-MB] Mottatt:\n");
+        printf("  Fart     : ", fart);
+        printf("  Vinkel   : ", vinkel, (vinkel * 180.0f / 3.14159f));
+        printf("  Rotasjon : ", rotasjon);x
+        printf("-----------------------------\n");
+
+        // Velg joystick-modus ut ifra rotasjon
+        bool joystick_mode = (rotasjon == 0.0f);
+
+        // Klargjør for motorstyring
+        int vinkel_deg = (int)(vinkel * 180.0f / 3.14159f);
+        int fart_int = (int)(fart * 100);
+
+        control_motors(vinkel_deg, fart_int, joystick_mode);
+    } else {
+        printf("CAN frame ignorert: ID 0x%X, DLC %d\n", frame->id, frame->dlc);
+    }
+}
+
