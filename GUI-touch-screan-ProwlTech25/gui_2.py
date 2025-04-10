@@ -107,11 +107,73 @@ class ProwlTechApp(ctk.CTk):
             image=self.info_icon,
             compound="right",
             corner_radius=10,
-            command=None
+            command=self.open_info_window
         )
         self.info_button.place(relx=0.8, rely=0.9, anchor="center")
 
+    # Popup-vindu som vises når "Info"-knappen trykkes
+    def open_info_window(self):
+        self.popup_panel = ctk.CTkFrame(self, fg_color=popup_background_color, corner_radius=0)
+        self.popup_panel.place(relx=0.5, rely=0.5, anchor="center", relwidth=0.85, relheight=0.85)
+        self.popup_panel.grid_propagate(False)
 
+        # Grid-oppsett i popup-vindu
+        self.popup_panel.grid_rowconfigure(0, minsize=80)
+        self.popup_panel.grid_rowconfigure(1, weight=1)
+        self.popup_panel.grid_columnconfigure(0, weight=1)
+        self.popup_panel.grid_columnconfigure(1, weight=1)
+        self.popup_panel.grid_columnconfigure(2, weight=1)
+
+        # Ikon: kryss 
+        cross_image = Image.open("Image/cross.png")
+        self.cross_icon = ctk.CTkImage(light_image=cross_image, size=(15, 15))
+
+        # Øvre og nedre seksjon i popup-vindu
+        self.top = ctk.CTkFrame(self.popup_panel, fg_color=popup_top_color)
+        self.top.grid(row=0, column=0, columnspan=3, sticky="nsew")
+
+        self.bottom = ctk.CTkFrame(self.popup_panel, fg_color=popup_background_color)
+        self.bottom.grid(row=1, column=0, columnspan=3, sticky="nsew")
+        self.bottom.grid_rowconfigure(0, weight=1)
+        self.bottom.grid_columnconfigure(0, weight=1)
+
+         # Titteltekst i popup-vindu
+        self.label = ctk.CTkLabel(
+            self.top, 
+            text="Informasjon", 
+            font=("Century Gothic", 24),
+            justify="center",
+            anchor="center"
+            )
+        self.label.place(relx=0.5, rely=0.5, anchor=ctk.CENTER)
+
+        close_button = ctk.CTkButton(
+            self.top,
+            text="Lukk",
+            width=100,
+            height=40,
+            image=self.cross_icon,
+            compound="right",  
+            font=("Century Gothic", 16),
+            fg_color=popup_button_color,
+            hover_color=button_hover_color,
+            text_color="white",
+            corner_radius=10,
+            command=self.close_info_window
+        )
+        close_button.grid(row=0, column=2, padx=550, pady=30)
+
+        self.info_text = ctk.CTkLabel(
+            self.bottom,
+            text="Kort beskrivelse av hvordan bilen fungerer.",
+            font=("Century Gothic", 16),
+            text_color="white",
+            justify="left"
+        )
+        self.info_text.pack(padx=80, pady=20)
+
+    def close_info_window(self):
+        self.popup_panel.destroy()
 
     def open_control_panel(self):
         self.front_frame.destroy()
@@ -352,77 +414,6 @@ class ProwlTechApp(ctk.CTk):
 
     # Lukker popup-vindu når lukk-knappen trykkes
     def close_connection_window(self):
-        self.popup_panel.destroy()
-
-    # Popup-vindu som vises når "Info"-knappen trykkes
-    def open_info_window(self):
-
-        # Ytre ramme av popup-vindu
-        #self.popup_border =ctk.CTkFrame(self, fg_color=popup_border_color, corner_radius=0)
-        #self.popup_border.place(relx=0.5, rely=0.5, anchor="center", relwidth=0.9, relheight=0.9)
-        #self.popup_border.grid_propagate(False)
-
-        # Indre ramme av popup-vindu
-        self.popup_panel = ctk.CTkFrame(self, fg_color=popup_background_color, corner_radius=0)
-        self.popup_panel.place(relx=0.5, rely=0.5, anchor="center", relwidth=0.85, relheight=0.85)
-        self.popup_panel.grid_propagate(False)
-
-        # Grid-oppsett i popup-vindu
-        self.popup_panel.grid_rowconfigure(0, minsize=80)
-        self.popup_panel.grid_rowconfigure(1, weight=1)
-        self.popup_panel.grid_columnconfigure(0, weight=1)
-        self.popup_panel.grid_columnconfigure(1, weight=1)
-        self.popup_panel.grid_columnconfigure(2, weight=1)
-
-        # Ikon: kryss 
-        cross_image = Image.open("Image/cross.png")
-        self.cross_icon = ctk.CTkImage(light_image=cross_image, size=(15, 15))
-
-        # Øvre og nedre seksjon i popup-vindu
-        self.top = ctk.CTkFrame(self.popup_panel, fg_color=popup_top_color)
-        self.top.grid(row=0, column=0, columnspan=3, sticky="nsew")
-
-        self.bottom = ctk.CTkFrame(self.popup_panel, fg_color=popup_background_color)
-        self.bottom.grid(row=1, column=0, columnspan=3, sticky="nsew")
-        self.bottom.grid_rowconfigure(0, weight=1)
-        self.bottom.grid_columnconfigure(0, weight=1)
-
-         # Titteltekst i popup-vindu
-        self.label = ctk.CTkLabel(
-            self.top, 
-            text="Informasjon", 
-            font=("Century Gothic", 24),
-            justify="center",
-            anchor="center"
-            )
-        self.label.place(relx=0.5, rely=0.5, anchor=ctk.CENTER)
-
-        close_button = ctk.CTkButton(
-            self.top,
-            text="Lukk",
-            width=100,
-            height=40,
-            image=self.cross_icon,
-            compound="right",  
-            font=("Century Gothic", 16),
-            fg_color=popup_button_color,
-            hover_color=button_hover_color,
-            text_color="white",
-            corner_radius=10,
-            command=self.close_info_window
-        )
-        close_button.grid(row=0, column=2, padx=550, pady=30)
-
-        self.info_text = ctk.CTkLabel(
-            self.bottom,
-            text="Kort beskrivelse av hvordan bilen fungerer.",
-            font=("Century Gothic", 16),
-            text_color="white",
-            justify="left"
-        )
-        self.info_text.pack(padx=80, pady=20)
-
-    def close_info_window(self):
         self.popup_panel.destroy()
 
     # Midtseksjon: viser batteri, temperatur, tilkobling og sensor
