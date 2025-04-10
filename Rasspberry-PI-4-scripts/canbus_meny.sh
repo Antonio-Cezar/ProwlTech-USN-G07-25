@@ -35,9 +35,21 @@ show_status() {
     echo ""
 }
 
+pause_for_return() {
+    echo ""
+    echo "Trykk x for å gå tilbake til menyen..."
+    while true; do
+        read -n 1 -s input
+        if [[ $input == "x" || $input == "X" ]]; then
+            break
+        fi
+    done
+}
+
 # meny
 while true; do
     clear
+    loading_animation
     echo "===================================="
     echo "=== (can0) CAN-bus Kontrollmeny ==="
     echo "1. Prøv å starte CAN-bus på nytt"
@@ -48,46 +60,55 @@ while true; do
     echo "x. Avslutt"
     echo "===================================="
     echo -n "Velg et alternativ [1-5 / x]: "
-    echo ""
-    echo ""
     read valg
 
     case $valg in
         1)
+            clear
             start_canbus
             show_status
             loading_animation
+            pause_for_return
             ;;
         2)
+            clear
             echo "Manuelt: Skru AV $CAN_INTERFACE ..."
             sudo ip link set $CAN_INTERFACE down
             show_status
             loading_animation
+            pause_for_return
             ;;
         3)
+            clear
             echo "Manuelt: Skru PÅ $CAN_INTERFACE ..."
             sudo ip link set $CAN_INTERFACE type can bitrate $BITRATE
             sudo ip link set $CAN_INTERFACE up
             show_status
             loading_animation
+            pause_for_return
             ;;
         4)
+            clear
             show_status
             loading_animation
+            pause_for_return
             ;;
         5)
-            echo "Starter CAN-dump... Trykk x + Enter for å avslutte."
+            clear
+            echo "Starter CAN-dump... Trykk x for å avslutte."
             loading_animation
             candump $CAN_INTERFACE &
             CANDUMP_PID=$!
 
-            read -n 1 -s input
-            if [[ $input == "x" || $input == "X" ]]; then
-                echo "Avslutter candump..."
-                kill $CANDUMP_PID
-                wait $CANDUMP_PID 2>/dev/null
-                echo "Tilbake til meny."
-            fi
+            while true; do
+                read -n 1 -s input
+                if [[ $input == "x" || $input == "X" ]]; then
+                    echo "Avslutter candump..."
+                    kill $CANDUMP_PID
+                    wait $CANDUMP_PID 2>/dev/null
+                    break
+                fi
+            done
             ;;
         x)
             echo "Avslutter."
@@ -95,8 +116,10 @@ while true; do
             exit 0
             ;;
         *)
+            clear
             echo "Ugyldig valg. Prøv igjen."
             loading_animation
+            pause_for_return
             ;;
     esac
 done
