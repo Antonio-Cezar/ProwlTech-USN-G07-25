@@ -45,10 +45,10 @@ while true; do
     echo "2. Manuelt: Skru AV can0"
     echo "3. Manuelt: Skru PÅ can0"
     echo "4. Vis CAN-status"
-    echo "5. Vis CAN-dum (BUS info)"
+    echo "5. Vis CAN-dump (BUS info)"
     echo "x. Avslutt"
     echo "===================================="
-    echo -n "Velg et alternativ [1-4 / x]: "
+    echo -n "Velg et alternativ [1-5 / x]: "
     echo ""
     echo ""
     read valg
@@ -77,6 +77,19 @@ while true; do
             loading_run
             ;;
         5)
+            echo "Starter CAN-dump... Trykk x + Enter for å avslutte."
+            # Start candump i bakgrunnen
+            candump $CAN_INTERFACE &
+            CANDUMP_PID=$!
+
+            # Vent på 'x' eller ctrl+c
+            read -n 1 -s input
+            if [[ $input == "x" || $input == "X" ]]; then
+                echo "Avslutter candump..."
+                kill $CANDUMP_PID
+                wait $CANDUMP_PID 2>/dev/null
+                echo "Tilbake til meny."
+            fi
             ;;
         x)
             echo "Avslutter."

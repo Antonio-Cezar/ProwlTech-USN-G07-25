@@ -9,18 +9,26 @@ dtoverlay=spi-bcm2835
 
 
 
+
+
 For å åpne CAN_meny på egen consol
 ========================================================
+mkdir -p ~/.config/autostart
+
 chmod +x /home/pi/can_start_meny.sh
 
-nano ~/.config/autostart/start_canbus.desktop
+nano ~/.config/autostart/canbus_meny.desktop
+
 
 [Desktop Entry]
-Name=CAN-Bus Kontroll
-Exec=lxterminal -t "CAN-bus Kontroll" -e /home/pi/can_start_meny.sh
+Name=CAN-bus Kontrollmeny
+Exec=/home/pi/start_canbus_launcher.sh
 Type=Application
+Terminal=false
 X-GNOME-Autostart-enabled=true
 ========================================================
+
+
 
 
 
