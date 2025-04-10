@@ -1,9 +1,10 @@
 import customtkinter as ctk
 from PIL import Image
 import platform
-import bluetooth_dbus
 import threading
-    
+import bluetooth_dbus
+import subprocess
+
 
 # Setter mørkt tema for hele GUI-et
 ctk.set_appearance_mode("dark")
@@ -124,9 +125,12 @@ class ProwlTechApp(ctk.CTk):
             image=self.can_bus_icon,
             compound="right",
             corner_radius=10,
-            command=None
+            command=self.run_can_script
         )
         self.can_bus_button.place(relx=0.2, rely=0.9, anchor="center")
+
+    def run_can_script():
+        subprocess.Popen(["bash", "start_canbus_meny_konsoll.sh"])
 
     # Popup-vindu som vises når "Info"-knappen trykkes
     def open_info_window(self):
