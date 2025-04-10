@@ -5,7 +5,7 @@ BITRATE=125000
 
 loading_animation() {
     spinner="/|\\-"
-    duration=0.3
+    duration=0.6
     interval=0.1
     end_time=$(echo "$duration / $interval" | bc)
 
@@ -50,6 +50,7 @@ pause_for_return() {
 while true; do
     clear
     loading_animation
+    clear
     echo "===================================="
     echo "=== (can0) CAN-bus Kontrollmeny ==="
     echo "1. Prøv å starte CAN-bus på nytt"
@@ -63,8 +64,9 @@ while true; do
     echo ""
     echo "x. Avslutt"
     echo "===================================="
-    echo -n "Velg et alternativ [1-5 / x]: "
-    read valg
+    echo -n "Velg operasjon: "
+    read -n 1 valg
+    echo
 
     case $valg in
         1)
@@ -117,6 +119,7 @@ while true; do
         x)
             echo "Avslutter."
             loading_animation
+            clear
             exit 0
             ;;
         *)
