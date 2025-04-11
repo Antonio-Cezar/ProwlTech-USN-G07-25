@@ -30,8 +30,11 @@ start_canbus() {
 
 show_status() {
     echo ""
+    echo "===================================="
     echo "=== CAN-status ==="
+    echo "===================================="
     ip -details link show $CAN_INTERFACE | grep -A 5 "$CAN_INTERFACE"
+    echo "===================================="
     echo ""
 }
 
