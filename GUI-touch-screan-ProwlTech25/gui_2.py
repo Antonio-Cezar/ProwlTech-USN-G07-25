@@ -1,6 +1,6 @@
 import customtkinter as ctk
 from PIL import Image
-from assets import info_icon
+from assets import info_icon, bluetooth_icon, bolt_icon, can_icon, cross_icon, loading_icon, menu_icon, prowltech_logo, usn_logo, sensor_icon, signal_icon, start_icon, temp_icon, update_icon, warning_icon
 import platform
 import threading
 import bluetooth_dbus
@@ -62,22 +62,8 @@ class ProwlTechApp(ctk.CTk):
         self.front_frame.grid(row=0, column=0, rowspan=4, columnspan=4, sticky="nsew")
 
         # Bilde av ProwlTech-logo
-        prowltech_logo = Image.open("Image/prowltech_logo2.png")
-        self.prowltech_logo_icon = ctk.CTkImage(light_image=prowltech_logo, size=(550, 550))
-        self.logo_label = ctk.CTkLabel(self.front_frame, image=self.prowltech_logo_icon, text="")
+        self.logo_label = ctk.CTkLabel(self.front_frame, image=prowltech_logo, text="")
         self.logo_label.place(relx=0.5, rely=0.45, anchor="center")
-
-        # Ikon: info
-        #info_image = Image.open("Image/info.png")
-        #self.info_icon = ctk.CTkImage(light_image=info_image, size=(20, 20))
-
-        # Ikon: start
-        start_image = Image.open("Image/play.png")
-        self.start_icon = ctk.CTkImage(light_image=start_image, size=(20, 20))
-
-        # Ikon: can_bus
-        can_bus_image = Image.open("Image/random.png")
-        self.can_bus_icon = ctk.CTkImage(light_image=can_bus_image, size=(20, 20))
 
         # Start-knapp
         self.start_button = ctk.CTkButton(
@@ -123,7 +109,7 @@ class ProwlTechApp(ctk.CTk):
             fg_color="#6F48A6",
             hover_color=button_hover_color,
             text_color="white",
-            image=self.can_bus_icon,
+            image=can_icon,
             compound="right",
             corner_radius=10,
             command=self.run_can_script
@@ -145,10 +131,6 @@ class ProwlTechApp(ctk.CTk):
         self.popup_panel.grid_columnconfigure(0, weight=1)
         self.popup_panel.grid_columnconfigure(1, weight=1)
         self.popup_panel.grid_columnconfigure(2, weight=1)
-
-        # Ikon: kryss 
-        cross_image = Image.open("Image/cross.png")
-        self.cross_icon = ctk.CTkImage(light_image=cross_image, size=(15, 15))
 
         # Øvre og nedre seksjon i popup-vindu
         self.top = ctk.CTkFrame(self.popup_panel, fg_color=popup_top_color)
@@ -175,7 +157,7 @@ class ProwlTechApp(ctk.CTk):
             text="Lukk",
             width=100,
             height=40,
-            image=self.cross_icon,
+            image=cross_icon,
             compound="right",  
             font=("Century Gothic", 16),
             fg_color=popup_button_color,
@@ -218,19 +200,9 @@ class ProwlTechApp(ctk.CTk):
         self.top_frame.grid(row=0, column=0, columnspan=4, sticky="nsew")
         self.top_frame.grid_propagate(False)
 
-        # Legger til USN-logo
-        logo_image = Image.open("Image/USN_logo2.png")                                            
-        self.logo_icon = ctk.CTkImage(light_image=logo_image, size=(60, 40))               
-        self.logo_label = ctk.CTkLabel(self.top_frame, image=self.logo_icon, text="")      
+        # Legger til USN-logo           
+        self.logo_label = ctk.CTkLabel(self.top_frame, image=usn_logo, text="")      
         self.logo_label.place(x=720, y=25)                                               
-
-        # Ikon: bluetooth
-        bluetooth_image = Image.open("Image/bluetooth.png")
-        self.bluetooth_icon = ctk.CTkImage(light_image=bluetooth_image, size=(20, 20))
-
-        # Ikon: meny
-        menu_image = Image.open("Image/menu.png")
-        self.menu_icon = ctk.CTkImage(light_image=menu_image, size=(20, 20))
 
         # Titteltekst i midten av toppseksjonen
         self.title_label = ctk.CTkLabel(
@@ -250,7 +222,7 @@ class ProwlTechApp(ctk.CTk):
             width=50,
             height=40,
             text="Koble til kontroller",
-            image=self.bluetooth_icon,
+            image=bluetooth_icon,
             compound="right",                          
             font=("Century Gothic", 16),
             fg_color=button_color,
@@ -269,7 +241,7 @@ class ProwlTechApp(ctk.CTk):
             text="Meny",
             font=("Century Gothic", 16),
             text_color="white",
-            image=self.menu_icon,
+            image=menu_icon,
             compound="right",
             fg_color=button_color,
             hover_color=button_hover_color,
@@ -280,14 +252,6 @@ class ProwlTechApp(ctk.CTk):
 
     # Pop-up vindu som vises når "Koble til kontroller" trykkes på
     def open_connection_window(self):
-
-        # Ikon: kryss 
-        cross_image = Image.open("Image/cross.png")
-        self.cross_icon = ctk.CTkImage(light_image=cross_image, size=(15, 15))
-
-        # Ikon: oppdatere 
-        update_image = Image.open("Image/rotate.png")
-        self.update_icon = ctk.CTkImage(light_image=update_image, size=(15, 15))
 
         # Ytre ramme av popup-vindu
         #self.popup_border =ctk.CTkFrame(self, fg_color=popup_top_color, corner_radius=0)
@@ -321,7 +285,7 @@ class ProwlTechApp(ctk.CTk):
             text="Oppdater",
             width=100,
             height=40,
-            image=self.update_icon,
+            image=update_icon,
             compound="right",  
             font=("Century Gothic", 16),
             fg_color=popup_button_color,
@@ -365,7 +329,7 @@ class ProwlTechApp(ctk.CTk):
             text="Lukk",
             width=100,
             height=40,
-            image=self.cross_icon,
+            image=cross_icon,
             compound="right",  
             font=("Century Gothic", 16),
             fg_color=popup_button_color,
@@ -448,23 +412,6 @@ class ProwlTechApp(ctk.CTk):
         self.mid_frame.grid(row=1, column=0, rowspan=2, columnspan=4, sticky="nsew")
         self.mid_frame.grid_propagate(False)
 
-        # Ikon: bolt
-        bolt_image = Image.open("Image/bolt.png")
-        self.bolt_icon = ctk.CTkImage(light_image=bolt_image, size=(15, 15))
-
-        # Ikon: termometer
-        temp_image = Image.open("Image/temperature.png")
-        self.temp_icon = ctk.CTkImage(light_image=temp_image, size=(15, 15))
-
-        # Ikon: tilkobling
-        signal_image = Image.open("Image/signal-2.png")
-        self.signal_icon = ctk.CTkImage(light_image=signal_image, size=(15, 15))
-
-        # Ikon: sensor
-        sensor_image = Image.open("Image/signal.png")
-        self.sensor_icon = ctk.CTkImage(light_image=sensor_image, size=(17, 17))
-
-
         # Batteristatus:
         self.battery_container = ctk.CTkFrame(self.mid_frame, fg_color=background_color)
         self.battery_container.grid(row=1, column=0, rowspan=2, padx=10, pady=20)
@@ -474,7 +421,7 @@ class ProwlTechApp(ctk.CTk):
             self.battery_container, 
             text="BATTERISTATUS  ",
             font=("Century Gothic", 13),
-            image=self.bolt_icon,
+            image=bolt_icon,
             compound="right",
             text_color=text_color,
             justify="left"
@@ -495,7 +442,7 @@ class ProwlTechApp(ctk.CTk):
             self.temp_container, 
             text="TEMPERATUR  ",
             font=("Century Gothic", 13),
-            image=self.temp_icon,
+            image=temp_icon,
             compound="right",
             text_color=text_color,
             justify="left"
@@ -516,7 +463,7 @@ class ProwlTechApp(ctk.CTk):
             self.connection_containter, 
             text="TILKOBLING  ",
             font=("Century Gothic", 13),
-            image=self.signal_icon,
+            image=signal_icon,
             compound="right",
             text_color=text_color,
             justify="left"
@@ -549,7 +496,7 @@ class ProwlTechApp(ctk.CTk):
             self.sensor_container, 
             text="SENSORMÅLINGER  ",
             font=("Century Gothic", 13),
-            image=self.sensor_icon,
+            image=sensor_icon,
             compound="right",
             text_color=text_color,
             justify="left"
@@ -566,10 +513,6 @@ class ProwlTechApp(ctk.CTk):
         self.bot_frame.grid(row=3, column=0, columnspan=4, sticky="nsew")
         self.bot_frame.grid_propagate(False)
 
-        # Ikon: advarseltegn
-        warning_image = Image.open("Image/warning.png")
-        self.warning_icon = ctk.CTkImage(light_image=warning_image, size=(17, 17))
-
         # Feilmeldinger:
         self.error_container = ctk.CTkFrame(self.bot_frame, fg_color=background_color)
         self.error_container.grid(row=3, column=0, columnspan=4, sticky="nsew")
@@ -578,7 +521,7 @@ class ProwlTechApp(ctk.CTk):
         self.error_label = ctk.CTkLabel(
             self.error_container, 
             text="FEILMELDINGER  ",
-            image=self.warning_icon,
+            image=warning_icon,
             compound="right", 
             font=("Century Gothic", 14),
             text_color=text_color,
