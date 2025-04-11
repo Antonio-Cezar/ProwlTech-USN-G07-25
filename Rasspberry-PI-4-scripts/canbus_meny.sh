@@ -35,6 +35,15 @@ show_status() {
     echo ""
 }
 
+get_can_status() {
+    local state=$(ip link show $CAN_INTERFACE | grep -o "state [A-Z]*" | awk '{print $2}')
+    if [[ $state == "UP" ]]; then
+        echo "(can0 status: AKTIV)"
+    else
+        echo "(can0 status: INAKTIV)"
+    fi
+}
+
 pause_for_return() {
     echo ""
     echo "Trykk x for å gå tilbake til menyen..."
@@ -51,6 +60,8 @@ while true; do
     clear
     loading_animation
     clear
+    echo "===================================="
+    echo "$(get_can_status)"
     echo "===================================="
     echo "=== (can0) CAN-bus Kontrollmeny ==="
     echo "1. Prøv å starte CAN-bus på nytt"
@@ -81,8 +92,8 @@ while true; do
             echo "Manuelt: Skru AV $CAN_INTERFACE ..."
             sudo ip link set $CAN_INTERFACE down
             show_status
+            sleep 0.2
             loading_animation
-            pause_for_return
             ;;
         3)
             clear
@@ -90,8 +101,8 @@ while true; do
             sudo ip link set $CAN_INTERFACE type can bitrate $BITRATE
             sudo ip link set $CAN_INTERFACE up
             show_status
+            sleep 0.2
             loading_animation
-            pause_for_return
             ;;
         4)
             clear
