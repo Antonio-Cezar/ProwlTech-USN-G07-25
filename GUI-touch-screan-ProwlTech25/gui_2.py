@@ -1,5 +1,6 @@
 import customtkinter as ctk
 from PIL import Image
+from assets import info_icon
 import platform
 import threading
 import bluetooth_dbus
@@ -67,8 +68,8 @@ class ProwlTechApp(ctk.CTk):
         self.logo_label.place(relx=0.5, rely=0.45, anchor="center")
 
         # Ikon: info
-        info_image = Image.open("Image/info.png")
-        self.info_icon = ctk.CTkImage(light_image=info_image, size=(20, 20))
+        #info_image = Image.open("Image/info.png")
+        #self.info_icon = ctk.CTkImage(light_image=info_image, size=(20, 20))
 
         # Ikon: start
         start_image = Image.open("Image/play.png")
@@ -105,7 +106,7 @@ class ProwlTechApp(ctk.CTk):
             fg_color="#6F48A6",
             hover_color=button_hover_color,
             text_color="white",
-            image=self.info_icon,
+            image=info_icon,
             compound="right",
             corner_radius=10,
             command=self.open_info_window
