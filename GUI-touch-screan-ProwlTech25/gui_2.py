@@ -1,6 +1,6 @@
 import customtkinter as ctk
 from PIL import Image
-from assets import info_icon, bluetooth_icon, bolt_icon, can_icon, cross_icon, loading_icon, menu_icon, prowltech_logo, usn_logo, sensor_icon, signal_icon, start_icon, temp_icon, update_icon, warning_icon
+from assets import info_icon, bluetooth_icon, bolt_icon, can_icon, cross_icon, loading_icon, menu_icon, prowltech_logo, usn_logo, sensor_icon, signal_icon, temp_icon, update_icon, warning_icon, start_icon
 import platform
 import threading
 import bluetooth_dbus
@@ -75,7 +75,7 @@ class ProwlTechApp(ctk.CTk):
             fg_color="#6F48A6",
             hover_color=button_hover_color,
             text_color="white",
-            image=self.start_icon,
+            image=start_icon,
             compound="right",
             corner_radius=10,
             command=self.open_control_panel
