@@ -1,6 +1,7 @@
 #define M_PI 3.14159265358979323846
 #include <math.h>
 #include <stdio.h>
+#include <zephyr/sys/byteorder.h>
 
 #include <zephyr/kernel.h>
 #include <zephyr/drivers/can.h>
@@ -10,7 +11,6 @@
 #include <stdbool.h>
 #include <string.h>
 #include "canbus.h"
-#include "motorkontroller.h"
 #include "motorstyring.h" 
 
  //lagt til av RAS (PROWLTECH25)
@@ -129,7 +129,7 @@ void can_rx_callback(const struct device *dev, struct can_frame *frame, void *us
         // Print verdier
         printf("[PI → Motor-MB] Mottatt:\n");
         printf("  Fart     : %.2f\n", fart);
-        printf("  Vinkel   : %.2f\n", vinkel, (vinkel * 180.0f / 3.14159f));
+        printf("  Vinkel   : %.2f\n", (vinkel * 180.0f / (float)M_PI));
         printf("  Rotasjon : %.2f\n", rotasjon);
         printf("-----------------------------\n");
 
@@ -137,10 +137,8 @@ void can_rx_callback(const struct device *dev, struct can_frame *frame, void *us
         bool joystick_mode = (rotasjon == 0.0f);
 
         // Klargjør for motorstyring
-        int vinkel_deg = (int)(vinkel * 180.0f / 3.14159f);
-        int fart_int = (int)(fart * 100);
+        kontroller_motorene(fart, vinkel, rotasjon);
 
-        control_motors(vinkel_deg, fart_int, joystick_mode);
     } else {
         printf("CAN frame ignorert: ID 0x%X, DLC %d\n", frame->id, frame->dlc);
     }
