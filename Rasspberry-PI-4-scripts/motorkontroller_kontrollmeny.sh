@@ -2,9 +2,7 @@
 
 CAN_INTERFACE="can0"
 BITRATE=125000
-
-canbus_kontrollmeny=./canbus_meny.sh
-motorkontroller_kontrollmeny=./motorkontroller_kontrollmeny.sh
+VESC_ID=10  # Change this to match your VESC's CAN ID
 
 loading_animation() {
     spinner="/|\\-"
@@ -23,13 +21,31 @@ loading_animation() {
     printf "\b Ferdig!\n"
 }
 
-get_can_status() {
-    local state=$(ip link show $CAN_INTERFACE | grep -o "state [A-Z]*" | awk '{print $2}')
-    if [[ $state == "UP" ]]; then
-        echo "(can0 status: AKTIV)"
-    else
-        echo "(can0 status: INAKTIV)"
-    fi
+pause_for_return() {
+    echo ""
+    echo "Trykk x for å gå tilbake til menyen..."
+    while true; do
+        read -n 1 -s input
+        if [[ $input == "x" || $input == "X" ]]; then
+            break
+        fi
+    done
+}
+
+send_start() {
+    echo "Sender START-kommando til VESC (CAN ID: $VESC_ID)..."
+    python3 vesc_cmd.py --can_id $VESC_ID --duty 0.10
+}
+
+send_stop() {
+    echo "Sender STOP-kommando til VESC (CAN ID: $VESC_ID)..."
+    python3 vesc_cmd.py --can_id $VESC_ID --duty 0.00
+}
+
+read_temp() {
+    echo "Henter temperatur fra VESC (CAN ID: $VESC_ID)..."
+    python3 vesc_cmd.py --can_id $VESC_ID --get_temp
+    pause_for_return
 }
 
 get_motor_status() {
@@ -80,18 +96,18 @@ while true; do
     loading_animation
     clear
     echo "===================================="
-    echo "$(get_can_status)"
-    echo""
     echo "$(check_vesc_status)"
     echo "$(get_motor_status)"
     echo "===================================="
     echo ""
     echo ""
     echo "===================================="
-    echo "===Velg Kontrollmeny ==="
-    echo "1. CAN-bus kontrollmeny"
+    echo "=== (can0) CAN-bus Kontrollmeny ==="
     echo ""
-    echo "2. Motorkontrollere kontrollmeny"
+    echo "1. Send PÅ-kommando til VESC"
+    echo "2. Send AV-kommando til VESC"
+    echo ""
+    echo "3. Hent temperatur fra VESC"
     echo ""
     echo "x. Avslutt"
     echo "===================================="
@@ -102,31 +118,17 @@ while true; do
     case $valg in
         1)
             clear
-            echo "Åpner opp: "
-            echo "CAN-bus kontrollmeny"
-            sleep 0.2
-            loading_animation
-            if [[ -x $canbus_kontrollmeny ]]; then
-                $canbus_kontrollmeny
-            else
-                echo "Feil: Fant ikke $canbus_kontrollmeny"
-                sleep 0.4
-                loading_animation
-            fi
+            send_start
+            pause_for_return
             ;;
         2)
             clear
-            echo "Åpner opp: "
-            echo "Motorkontrollere kontrollmeny"
-            sleep 0.2
-            loading_animation
-            if [[ -x $motorkontroller_kontrollmeny ]]; then
-                $motorkontroller_kontrollmeny
-            else
-                echo "Feil: Fant ikke $motorkontroller_kontrollmeny"
-                sleep 0.4
-                loading_animation
-            fi
+            send_stop
+            pause_for_return
+            ;;
+        3)
+            clear
+            read_temp
             ;;
         x)
             echo "Avslutter."
@@ -138,6 +140,7 @@ while true; do
             clear
             echo "Ugyldig valg. Prøv igjen."
             loading_animation
+            pause_for_return
             ;;
     esac
 done
