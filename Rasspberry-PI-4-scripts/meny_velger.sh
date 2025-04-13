@@ -4,7 +4,8 @@ CAN_INTERFACE="can0"
 BITRATE=125000
 
 canbus_kontrollmeny=./canbus_meny.sh
-motorkontroller_kontrollmeny=./motorkontroller_kontrollmeny.sh
+motorkontroller_kontrollmeny=./motorkontroller_meny.sh
+kontroller_meny=./kontroller_meny.sh
 
 loading_animation() {
     spinner="/|\\-"
@@ -93,6 +94,8 @@ while true; do
     echo ""
     echo "2. Motorkontrollere kontrollmeny"
     echo ""
+    echo "3. Kontroller meny"
+    echo ""
     echo "x. Avslutt"
     echo "===================================="
     echo -n "Velg operasjon: "
@@ -124,6 +127,20 @@ while true; do
                 $motorkontroller_kontrollmeny
             else
                 echo "Feil: Fant ikke $motorkontroller_kontrollmeny"
+                sleep 0.4
+                loading_animation
+            fi
+            ;;
+        3)
+            clear
+            echo "Åpner opp: "
+            echo "kontroller meny"
+            sleep 0.2
+            loading_animation
+            if [[ -x $kontroller_meny ]]; then
+                $kontroller_meny
+            else
+                echo "Feil: Fant ikke $kontroller_meny"
                 sleep 0.4
                 loading_animation
             fi
