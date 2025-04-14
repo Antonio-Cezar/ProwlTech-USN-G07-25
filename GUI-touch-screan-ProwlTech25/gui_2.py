@@ -1,7 +1,8 @@
 import customtkinter as ctk
 from PIL import Image
+from popup_window import PopupWindow
 from assets import info_icon, bluetooth_icon, bolt_icon, can_icon, cross_icon, loading_icon, menu_icon, prowltech_logo, usn_logo, sensor_icon, signal_icon, temp_icon, update_icon, warning_icon, start_icon
-import platform
+#import platform
 import threading
 import bluetooth_dbus
 import subprocess
@@ -119,8 +120,63 @@ class ProwlTechApp(ctk.CTk):
     def run_can_script(self):
         subprocess.Popen(["bash", "../Rasspberry-PI-4-scripts/canbus_meny.sh"])
 
-    # Popup-vindu som vises når "Info"-knappen trykkes
+    # Åpner info-popup
     def open_info_window(self):
+        self.popup = PopupWindow(self, title="Informasjon")
+
+        info_label = ctk.CTkLabel(
+            self.popup.bottom,
+            text="Kort beskrivelse av hvordan bilen fungerer.",
+            font=("Century Gothic", 16),
+            text_color="white"
+        )
+        self.popup.add_widget(info_label, padx=30, pady=20)
+
+    def open_connection_window(self):
+        self.popup = PopupWindow(self, title="Enheter")
+
+        # Knapp for å oppdatere søket etter tilgjengelige kontrollere
+        self.update_button = ctk.CTkButton(
+            self.popup.top,
+            text="Oppdater",
+            width=120,
+            height=40,
+            image=update_icon,
+            compound="right",  
+            font=("Century Gothic", 16),
+            fg_color=popup_button_color,
+            hover_color=button_hover_color,
+            text_color="white",
+            corner_radius=10,
+            command=self.start_update
+        )
+        self.update_button.place(relx=0.05, rely=0.5, anchor="w")
+
+        # Prosessbar (skjult når inaktiv)
+        self.progress = ctk.CTkProgressBar(self.popup.bottom, progress_color=frame_color)
+        self.progress.pack(pady=10, padx=20, fill="x")
+        self.progress.configure(mode="indeterminate")
+        self.progress.set(0)
+        self.progress.pack_forget()
+
+        self.status_label = ctk.CTkLabel(
+            self.popup.bottom,
+            text="",
+            font=("Century Gothic", 16),
+            text_color="white"
+        )
+        self.status_label.pack(pady=(10, 0))
+
+    '''
+ # Pop-up vindu som vises når "Koble til kontroller" trykkes på
+    def open_connection_window(self):
+
+        # Ytre ramme av popup-vindu
+        #self.popup_border =ctk.CTkFrame(self, fg_color=popup_top_color, corner_radius=0)
+        #self.popup_border.place(relx=0.5, rely=0.5, anchor="center", relwidth=0.9, relheight=0.9)
+        #self.popup_border.grid_propagate(False)
+
+        # Indre ramme av popup-vindu
         self.popup_panel = ctk.CTkFrame(self, fg_color=popup_background_color, corner_radius=0)
         self.popup_panel.place(relx=0.5, rely=0.5, anchor="center", relwidth=0.85, relheight=0.85)
         self.popup_panel.grid_propagate(False)
@@ -140,18 +196,43 @@ class ProwlTechApp(ctk.CTk):
         self.bottom.grid(row=1, column=0, columnspan=3, sticky="nsew")
         self.bottom.grid_rowconfigure(0, weight=1)
         self.bottom.grid_columnconfigure(0, weight=1)
+        
+        # Knapp for å oppdatere søket etter tilgjengelige kontrollere
+        self.update_button = ctk.CTkButton(
+            self.top,
+            text="Oppdater",
+            width=100,
+            height=40,
+            image=update_icon,
+            compound="right",  
+            font=("Century Gothic", 16),
+            fg_color=popup_button_color,
+            hover_color=button_hover_color,
+            text_color="white",
+            corner_radius=10,
+            command=self.start_update
+        )
+        self.update_button.grid(row=0, column=0, padx=(30, 30), pady=30)
 
-         # Titteltekst i popup-vindu
+        # Prosessbar (skjult når inaktiv)
+        self.progress = ctk.CTkProgressBar(self.bottom, progress_color=frame_color)
+        self.progress.grid(row=0, column=0, padx=10, pady=10, sticky="nsew")
+        self.progress.configure(mode="indeterminate")
+        self.progress.set(0)
+        self.progress.grid_forget()
+
+        # Titteltekst i popup-vindu
         self.label = ctk.CTkLabel(
             self.top, 
-            text="Informasjon", 
+            text="Enheter", 
             font=("Century Gothic", 24),
             justify="center",
             anchor="center"
             )
-        self.label.place(relx=0.5, rely=0.5, anchor=ctk.CENTER)
+        self.label.grid(row=0, column=1, padx=95, pady=30)
 
-        # Knapp for å lukke popup-vindu
+   
+        # Lukk-knapp for popup-vindu
         close_button = ctk.CTkButton(
             self.top,
             text="Lukk",
@@ -164,23 +245,19 @@ class ProwlTechApp(ctk.CTk):
             hover_color=button_hover_color,
             text_color="white",
             corner_radius=10,
-            command=self.close_info_window
+            command=self.close_connection_window
         )
-        close_button.grid(row=0, column=2, padx=550, pady=30)
+        close_button.grid(row=0, column=2, padx=(90, 0), pady=30)
 
-        # Beskrivelse-tekst
-        self.info_text = ctk.CTkLabel(
+        self.status_label = ctk.CTkLabel(
             self.bottom,
-            text="Kort beskrivelse av hvordan bilen fungerer.",
+            text="",
             font=("Century Gothic", 16),
-            text_color="white",
-            justify="left"
+            text_color="white"
         )
-        self.info_text.pack(padx=80, pady=20)
+        self.status_label.pack(pady=(10, 0))
 
-    # Funksjon: Lukke info-vindu
-    def close_info_window(self):
-        self.popup_panel.destroy()
+    '''
 
     # Funksjon: Åpne kontrollpanel
     def open_control_panel(self):
@@ -250,104 +327,7 @@ class ProwlTechApp(ctk.CTk):
         )
         self.menu_button.grid(row=0, column=3, padx=(320, 10), pady=45)
 
-    # Pop-up vindu som vises når "Koble til kontroller" trykkes på
-    def open_connection_window(self):
-
-        # Ytre ramme av popup-vindu
-        #self.popup_border =ctk.CTkFrame(self, fg_color=popup_top_color, corner_radius=0)
-        #self.popup_border.place(relx=0.5, rely=0.5, anchor="center", relwidth=0.9, relheight=0.9)
-        #self.popup_border.grid_propagate(False)
-
-        # Indre ramme av popup-vindu
-        self.popup_panel = ctk.CTkFrame(self, fg_color=popup_background_color, corner_radius=0)
-        self.popup_panel.place(relx=0.5, rely=0.5, anchor="center", relwidth=0.85, relheight=0.85)
-        self.popup_panel.grid_propagate(False)
-
-        # Grid-oppsett i popup-vindu
-        self.popup_panel.grid_rowconfigure(0, minsize=80)
-        self.popup_panel.grid_rowconfigure(1, weight=1)
-        self.popup_panel.grid_columnconfigure(0, weight=1)
-        self.popup_panel.grid_columnconfigure(1, weight=1)
-        self.popup_panel.grid_columnconfigure(2, weight=1)
-
-        # Øvre og nedre seksjon i popup-vindu
-        self.top = ctk.CTkFrame(self.popup_panel, fg_color=popup_top_color)
-        self.top.grid(row=0, column=0, columnspan=3, sticky="nsew")
-
-        self.bottom = ctk.CTkFrame(self.popup_panel, fg_color=popup_background_color)
-        self.bottom.grid(row=1, column=0, columnspan=3, sticky="nsew")
-        self.bottom.grid_rowconfigure(0, weight=1)
-        self.bottom.grid_columnconfigure(0, weight=1)
-        
-        # Knapp for å oppdatere søket etter tilgjengelige kontrollere
-        self.update_button = ctk.CTkButton(
-            self.top,
-            text="Oppdater",
-            width=100,
-            height=40,
-            image=update_icon,
-            compound="right",  
-            font=("Century Gothic", 16),
-            fg_color=popup_button_color,
-            hover_color=button_hover_color,
-            text_color="white",
-            corner_radius=10,
-            command=self.start_update
-        )
-        self.update_button.grid(row=0, column=0, padx=(30, 30), pady=30)
-
-        #self.device_menu = ctk.CTkOptionMenu(
-        #    self.bottom, 
-        #    values=["Ingen enheter funnet"],
-        #    fg_color=popup_button_color,
-        #    text_color="white",
-        #    width=300
-        #)
-        #self.device_menu.grid(row=1, column=0, padx=20, pady=(0,20))
-
-        # Prosessbar (skjult når inaktiv)
-        self.progress = ctk.CTkProgressBar(self.bottom, progress_color=frame_color)
-        self.progress.grid(row=0, column=0, padx=10, pady=10, sticky="nsew")
-        self.progress.configure(mode="indeterminate")
-        self.progress.set(0)
-        self.progress.grid_forget()
-
-        # Titteltekst i popup-vindu
-        self.label = ctk.CTkLabel(
-            self.top, 
-            text="Enheter", 
-            font=("Century Gothic", 24),
-            justify="center",
-            anchor="center"
-            )
-        self.label.grid(row=0, column=1, padx=95, pady=30)
-
    
-        # Lukk-knapp for popup-vindu
-        close_button = ctk.CTkButton(
-            self.top,
-            text="Lukk",
-            width=100,
-            height=40,
-            image=cross_icon,
-            compound="right",  
-            font=("Century Gothic", 16),
-            fg_color=popup_button_color,
-            hover_color=button_hover_color,
-            text_color="white",
-            corner_radius=10,
-            command=self.close_connection_window
-        )
-        close_button.grid(row=0, column=2, padx=(90, 0), pady=30)
-
-        self.status_label = ctk.CTkLabel(
-            self.bottom,
-            text="",
-            font=("Century Gothic", 16),
-            text_color="white"
-        )
-        self.status_label.pack(pady=(10, 0))
-
     # Oppdaterer søk etter kontrollere
     def start_update(self):
         self.update_button.configure(text="Søker...", state="disabled")
@@ -360,21 +340,21 @@ class ProwlTechApp(ctk.CTk):
     def scan_and_show(self):
         bluetooth_dbus.scan_devices()   # Starter skanning
         devices = bluetooth_dbus.get_devices()
-        self.bottom.after(0, lambda: self.show_devices(devices))
+        self.popup.bottom.after(0, lambda: self.show_devices(devices))
 
     def show_devices(self, devices):
         self.progress.stop() 
         self.progress.pack_forget() 
 
         # Fjerner gamle synlige enheter om det er noen
-        for widget in self.bottom.winfo_children():
+        for widget in self.popup.bottom.winfo_children():
                 if isinstance(widget, ctk.CTkButton) or (isinstance(widget, ctk.CTkLabel) and widget != self.status_label):
                     widget.destroy()
 
         if devices:
             for name in devices.values():
                 btn = ctk.CTkButton(
-                    self.bottom,
+                    self.popup.bottom,
                     text=name,
                     fg_color=popup_button_color,
                     hover_color=button_hover_color,
@@ -401,10 +381,6 @@ class ProwlTechApp(ctk.CTk):
         else:
             self.status_label.configure(text=f"Kunne ikke koble til {name}", text_color="red")
             self.connection_status.configure(text=f"Ingen kontroller tilkoblet", text_color="red")
-
-    # Lukker popup-vindu når lukk-knappen trykkes
-    def close_connection_window(self):
-        self.popup_panel.destroy()
 
     # Midtseksjon: viser batteri, temperatur, tilkobling og sensor
     def mid_section(self):
