@@ -1,4 +1,4 @@
-use_mock = True # Sett til False når Linux brukes 
+use_mock = False # Sett til False når Linux brukes 
 
 # ---------- Mock-versjon for å teste i windows
 if use_mock:
