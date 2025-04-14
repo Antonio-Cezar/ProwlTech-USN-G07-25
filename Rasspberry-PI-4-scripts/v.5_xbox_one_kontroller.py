@@ -258,18 +258,16 @@ while True:
         fart_r = round(fart, 2)
         vinkel_r = round(vinkel, 2)
 
-        # Hvis vi har rotasjon, så skal vi sende – uansett fart
         if rotasjon != 0.0:
-            if fart_r < 0.01:
-                # Sett default fart for rotasjon
-                if Hastighetsmodus == 1:
-                    fart_r = 0.3
-                elif Hastighetsmodus == 2:
-                    fart_r = 0.6
-                elif Hastighetsmodus == 3:
-                    fart_r = 1.0
-                else:
-                    fart_r = 0.3
+            # Bruk maks fart for valgt modus, uavhengig av joystick-input
+            if Hastighetsmodus == 1:
+                fart_r = 0.3
+            elif Hastighetsmodus == 2:
+                fart_r = 0.6
+            elif Hastighetsmodus == 3:
+                fart_r = 1.0
+            else:
+                fart_r = 0.3  # fallback
 
             vinkel_r = 0.0  # fast retning for rotasjon
             send_data(bus, fart_r, vinkel_r, rotasjon=rotasjon * rotasjon_faktor)
@@ -277,6 +275,7 @@ while True:
             sist_sendte_fart = fart_r
             sist_sendte_vinkel = vinkel_r
             continue
+
 
 
         # Bare send hvis fart er stor nok så vil den sende til bus
