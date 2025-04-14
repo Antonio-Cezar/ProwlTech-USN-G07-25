@@ -7,7 +7,7 @@ if use_mock:
 
     def receive_sensor_data():
         time.sleep(1)
-        byte = random.choice([0, 1])
+        byte = 1
 
         sensor_states = {
             'Front': (byte >> 0) & 1,
