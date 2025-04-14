@@ -73,7 +73,7 @@ int main(void) {
     
         for (int i = 0; i < 4; i++) {
             distances[i] = hc_sr04_read_distance(&sensors[i]);
-            sensor_distances[i] = (uint8_t)distances[i];  // Konverter til heltall 0–255
+            sensor_distances[i] = (uint8_t)distances[i];  // Konverter til heltall 0–255 uuuuu
     
             printk("Sensor %d Distance: %d cm\n", i + 1, sensor_distances[i]);
         }
