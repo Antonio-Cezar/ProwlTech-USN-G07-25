@@ -1,9 +1,17 @@
 import customtkinter as ctk
 from PIL import Image
-import platform
 import threading
 import bluetooth_dbus
 import subprocess
+import sys
+import os
+script_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "Rasspberry-PI-4-scripts"))
+sys.path.append(script_dir)
+from get_can_data import receive_sensor_data
+
+from popup_window import PopupWindow
+from assets import info_icon, bluetooth_icon, bolt_icon, can_icon, cross_icon, loading_icon, menu_icon, prowltech_logo, usn_logo, sensor_icon, signal_icon, temp_icon, update_icon, warning_icon, start_icon
+
 
 
 # Setter mørkt tema for hele GUI-et
@@ -32,7 +40,7 @@ class ProwlTechApp(ctk.CTk):
     def __init__(self):
         super().__init__()
         self.title("ProwlTech Kontrollpanel")           # Setter vindutittel
-        self.geometry("800x450")                        # Setter størrelse 
+        self.geometry("800x480")                        # Setter størrelse 
         #self.resizable(False,False)                     # Hindrer at vinduet kan skaleres
         self.attributes("-fullscreen", True)            # Fullskjerm på Raspberry Pi
         self.bind("<Escape>", self.exit_fullscreen)     # ESC lukker programmet
@@ -61,22 +69,8 @@ class ProwlTechApp(ctk.CTk):
         self.front_frame.grid(row=0, column=0, rowspan=4, columnspan=4, sticky="nsew")
 
         # Bilde av ProwlTech-logo
-        prowltech_logo = Image.open("Image/prowltech_logo2.png")
-        self.prowltech_logo_icon = ctk.CTkImage(light_image=prowltech_logo, size=(550, 550))
-        self.logo_label = ctk.CTkLabel(self.front_frame, image=self.prowltech_logo_icon, text="")
+        self.logo_label = ctk.CTkLabel(self.front_frame, image=prowltech_logo, text="")
         self.logo_label.place(relx=0.5, rely=0.45, anchor="center")
-
-        # Ikon: info
-        info_image = Image.open("Image/info.png")
-        self.info_icon = ctk.CTkImage(light_image=info_image, size=(20, 20))
-
-        # Ikon: start
-        start_image = Image.open("Image/play.png")
-        self.start_icon = ctk.CTkImage(light_image=start_image, size=(20, 20))
-
-        # Ikon: can_bus
-        can_bus_image = Image.open("Image/random.png")
-        self.can_bus_icon = ctk.CTkImage(light_image=can_bus_image, size=(20, 20))
 
         # Start-knapp
         self.start_button = ctk.CTkButton(
@@ -88,7 +82,7 @@ class ProwlTechApp(ctk.CTk):
             fg_color="#6F48A6",
             hover_color=button_hover_color,
             text_color="white",
-            image=self.start_icon,
+            image=start_icon,
             compound="right",
             corner_radius=10,
             command=self.open_control_panel
@@ -105,7 +99,7 @@ class ProwlTechApp(ctk.CTk):
             fg_color="#6F48A6",
             hover_color=button_hover_color,
             text_color="white",
-            image=self.info_icon,
+            image=info_icon,
             compound="right",
             corner_radius=10,
             command=self.open_info_window
@@ -122,7 +116,7 @@ class ProwlTechApp(ctk.CTk):
             fg_color="#6F48A6",
             hover_color=button_hover_color,
             text_color="white",
-            image=self.can_bus_icon,
+            image=can_icon,
             compound="right",
             corner_radius=10,
             command=self.run_can_script
@@ -130,74 +124,55 @@ class ProwlTechApp(ctk.CTk):
         self.can_bus_button.place(relx=0.2, rely=0.9, anchor="center")
 
     def run_can_script(self):
-        subprocess.Popen(["bash", "../Raspberry-PI-4-scripts/start_canbus_meny_konsoll.sh"])
+        subprocess.Popen(["bash", "../Rasspberry-PI-4-scripts/canbus_meny.sh"])
 
-    # Popup-vindu som vises når "Info"-knappen trykkes
+    # Åpner info-popup
     def open_info_window(self):
-        self.popup_panel = ctk.CTkFrame(self, fg_color=popup_background_color, corner_radius=0)
-        self.popup_panel.place(relx=0.5, rely=0.5, anchor="center", relwidth=0.85, relheight=0.85)
-        self.popup_panel.grid_propagate(False)
+        self.popup = PopupWindow(self, title="Informasjon")
 
-        # Grid-oppsett i popup-vindu
-        self.popup_panel.grid_rowconfigure(0, minsize=80)
-        self.popup_panel.grid_rowconfigure(1, weight=1)
-        self.popup_panel.grid_columnconfigure(0, weight=1)
-        self.popup_panel.grid_columnconfigure(1, weight=1)
-        self.popup_panel.grid_columnconfigure(2, weight=1)
+        info_label = ctk.CTkLabel(
+            self.popup.bottom,
+            text="Kort beskrivelse av hvordan bilen fungerer.",
+            font=("Century Gothic", 16),
+            text_color="white"
+        )
+        self.popup.add_widget(info_label, padx=30, pady=20)
 
-        # Ikon: kryss 
-        cross_image = Image.open("Image/cross.png")
-        self.cross_icon = ctk.CTkImage(light_image=cross_image, size=(15, 15))
+    # Åpner koble_til_kontroller-popup
+    def open_connection_window(self):
+        self.popup = PopupWindow(self, title="Enheter")
 
-        # Øvre og nedre seksjon i popup-vindu
-        self.top = ctk.CTkFrame(self.popup_panel, fg_color=popup_top_color)
-        self.top.grid(row=0, column=0, columnspan=3, sticky="nsew")
-
-        self.bottom = ctk.CTkFrame(self.popup_panel, fg_color=popup_background_color)
-        self.bottom.grid(row=1, column=0, columnspan=3, sticky="nsew")
-        self.bottom.grid_rowconfigure(0, weight=1)
-        self.bottom.grid_columnconfigure(0, weight=1)
-
-         # Titteltekst i popup-vindu
-        self.label = ctk.CTkLabel(
-            self.top, 
-            text="Informasjon", 
-            font=("Century Gothic", 24),
-            justify="center",
-            anchor="center"
-            )
-        self.label.place(relx=0.5, rely=0.5, anchor=ctk.CENTER)
-
-        # Knapp for å lukke popup-vindu
-        close_button = ctk.CTkButton(
-            self.top,
-            text="Lukk",
-            width=100,
+        # Knapp for å oppdatere søket etter tilgjengelige kontrollere
+        self.update_button = ctk.CTkButton(
+            self.popup.top,
+            text="Oppdater",
+            width=120,
             height=40,
-            image=self.cross_icon,
+            image=update_icon,
             compound="right",  
             font=("Century Gothic", 16),
             fg_color=popup_button_color,
             hover_color=button_hover_color,
             text_color="white",
             corner_radius=10,
-            command=self.close_info_window
+            command=self.start_update
         )
-        close_button.grid(row=0, column=2, padx=550, pady=30)
+        self.update_button.place(relx=0.05, rely=0.5, anchor="w")
 
-        # Beskrivelse-tekst
-        self.info_text = ctk.CTkLabel(
-            self.bottom,
-            text="Kort beskrivelse av hvordan bilen fungerer.",
+        # Prosessbar (skjult når inaktiv)
+        self.progress = ctk.CTkProgressBar(self.popup.bottom, progress_color=frame_color)
+        self.progress.pack(pady=10, padx=20, fill="x")
+        self.progress.configure(mode="indeterminate")
+        self.progress.set(0)
+        self.progress.pack_forget()
+
+        self.status_label = ctk.CTkLabel(
+            self.popup.bottom,
+            text="",
             font=("Century Gothic", 16),
-            text_color="white",
-            justify="left"
+            text_color="white"
         )
-        self.info_text.pack(padx=80, pady=20)
-
-    # Funksjon: Lukke info-vindu
-    def close_info_window(self):
-        self.popup_panel.destroy()
+        self.status_label.pack(pady=(10, 0))
 
     # Funksjon: Åpne kontrollpanel
     def open_control_panel(self):
@@ -206,6 +181,11 @@ class ProwlTechApp(ctk.CTk):
         self.top_section()
         self.mid_section()
         self.bot_section()
+
+        self.running = True
+        self.sensor_value = "__"
+        threading.Thread(target=self.get_sensor_data, daemon=True).start()
+        self.update_sensor_display()
 
     # Funksjon: Avslutte programmet (ESC)
     def exit_fullscreen(self, event=None):
@@ -217,19 +197,9 @@ class ProwlTechApp(ctk.CTk):
         self.top_frame.grid(row=0, column=0, columnspan=4, sticky="nsew")
         self.top_frame.grid_propagate(False)
 
-        # Legger til USN-logo
-        logo_image = Image.open("Image/USN_logo2.png")                                            
-        self.logo_icon = ctk.CTkImage(light_image=logo_image, size=(60, 40))               
-        self.logo_label = ctk.CTkLabel(self.top_frame, image=self.logo_icon, text="")      
+        # Legger til USN-logo           
+        self.logo_label = ctk.CTkLabel(self.top_frame, image=usn_logo, text="")      
         self.logo_label.place(x=720, y=25)                                               
-
-        # Ikon: bluetooth
-        bluetooth_image = Image.open("Image/bluetooth.png")
-        self.bluetooth_icon = ctk.CTkImage(light_image=bluetooth_image, size=(20, 20))
-
-        # Ikon: meny
-        menu_image = Image.open("Image/menu.png")
-        self.menu_icon = ctk.CTkImage(light_image=menu_image, size=(20, 20))
 
         # Titteltekst i midten av toppseksjonen
         self.title_label = ctk.CTkLabel(
@@ -249,7 +219,7 @@ class ProwlTechApp(ctk.CTk):
             width=50,
             height=40,
             text="Koble til kontroller",
-            image=self.bluetooth_icon,
+            image=bluetooth_icon,
             compound="right",                          
             font=("Century Gothic", 16),
             fg_color=button_color,
@@ -268,7 +238,7 @@ class ProwlTechApp(ctk.CTk):
             text="Meny",
             font=("Century Gothic", 16),
             text_color="white",
-            image=self.menu_icon,
+            image=menu_icon,
             compound="right",
             fg_color=button_color,
             hover_color=button_hover_color,
@@ -277,112 +247,7 @@ class ProwlTechApp(ctk.CTk):
         )
         self.menu_button.grid(row=0, column=3, padx=(320, 10), pady=45)
 
-    # Pop-up vindu som vises når "Koble til kontroller" trykkes på
-    def open_connection_window(self):
-
-        # Ikon: kryss 
-        cross_image = Image.open("Image/cross.png")
-        self.cross_icon = ctk.CTkImage(light_image=cross_image, size=(15, 15))
-
-        # Ikon: oppdatere 
-        update_image = Image.open("Image/rotate.png")
-        self.update_icon = ctk.CTkImage(light_image=update_image, size=(15, 15))
-
-        # Ytre ramme av popup-vindu
-        #self.popup_border =ctk.CTkFrame(self, fg_color=popup_top_color, corner_radius=0)
-        #self.popup_border.place(relx=0.5, rely=0.5, anchor="center", relwidth=0.9, relheight=0.9)
-        #self.popup_border.grid_propagate(False)
-
-        # Indre ramme av popup-vindu
-        self.popup_panel = ctk.CTkFrame(self, fg_color=popup_background_color, corner_radius=0)
-        self.popup_panel.place(relx=0.5, rely=0.5, anchor="center", relwidth=0.85, relheight=0.85)
-        self.popup_panel.grid_propagate(False)
-
-        # Grid-oppsett i popup-vindu
-        self.popup_panel.grid_rowconfigure(0, minsize=80)
-        self.popup_panel.grid_rowconfigure(1, weight=1)
-        self.popup_panel.grid_columnconfigure(0, weight=1)
-        self.popup_panel.grid_columnconfigure(1, weight=1)
-        self.popup_panel.grid_columnconfigure(2, weight=1)
-
-        # Øvre og nedre seksjon i popup-vindu
-        self.top = ctk.CTkFrame(self.popup_panel, fg_color=popup_top_color)
-        self.top.grid(row=0, column=0, columnspan=3, sticky="nsew")
-
-        self.bottom = ctk.CTkFrame(self.popup_panel, fg_color=popup_background_color)
-        self.bottom.grid(row=1, column=0, columnspan=3, sticky="nsew")
-        self.bottom.grid_rowconfigure(0, weight=1)
-        self.bottom.grid_columnconfigure(0, weight=1)
-        
-        # Knapp for å oppdatere søket etter tilgjengelige kontrollere
-        self.update_button = ctk.CTkButton(
-            self.top,
-            text="Oppdater",
-            width=100,
-            height=40,
-            image=self.update_icon,
-            compound="right",  
-            font=("Century Gothic", 16),
-            fg_color=popup_button_color,
-            hover_color=button_hover_color,
-            text_color="white",
-            corner_radius=10,
-            command=self.start_update
-        )
-        self.update_button.grid(row=0, column=0, padx=(30, 30), pady=30)
-
-        #self.device_menu = ctk.CTkOptionMenu(
-        #    self.bottom, 
-        #    values=["Ingen enheter funnet"],
-        #    fg_color=popup_button_color,
-        #    text_color="white",
-        #    width=300
-        #)
-        #self.device_menu.grid(row=1, column=0, padx=20, pady=(0,20))
-
-        # Prosessbar (skjult når inaktiv)
-        self.progress = ctk.CTkProgressBar(self.bottom, progress_color=frame_color)
-        self.progress.grid(row=0, column=0, padx=10, pady=10, sticky="nsew")
-        self.progress.configure(mode="indeterminate")
-        self.progress.set(0)
-        self.progress.grid_forget()
-
-        # Titteltekst i popup-vindu
-        self.label = ctk.CTkLabel(
-            self.top, 
-            text="Enheter", 
-            font=("Century Gothic", 24),
-            justify="center",
-            anchor="center"
-            )
-        self.label.grid(row=0, column=1, padx=95, pady=30)
-
    
-        # Lukk-knapp for popup-vindu
-        close_button = ctk.CTkButton(
-            self.top,
-            text="Lukk",
-            width=100,
-            height=40,
-            image=self.cross_icon,
-            compound="right",  
-            font=("Century Gothic", 16),
-            fg_color=popup_button_color,
-            hover_color=button_hover_color,
-            text_color="white",
-            corner_radius=10,
-            command=self.close_connection_window
-        )
-        close_button.grid(row=0, column=2, padx=(90, 0), pady=30)
-
-        self.status_label = ctk.CTkLabel(
-            self.bottom,
-            text="",
-            font=("Century Gothic", 16),
-            text_color="white"
-        )
-        self.status_label.pack(pady=(10, 0))
-
     # Oppdaterer søk etter kontrollere
     def start_update(self):
         self.update_button.configure(text="Søker...", state="disabled")
@@ -395,21 +260,21 @@ class ProwlTechApp(ctk.CTk):
     def scan_and_show(self):
         bluetooth_dbus.scan_devices()   # Starter skanning
         devices = bluetooth_dbus.get_devices()
-        self.bottom.after(0, lambda: self.show_devices(devices))
+        self.popup.bottom.after(0, lambda: self.show_devices(devices))
 
     def show_devices(self, devices):
         self.progress.stop() 
         self.progress.pack_forget() 
 
         # Fjerner gamle synlige enheter om det er noen
-        for widget in self.bottom.winfo_children():
+        for widget in self.popup.bottom.winfo_children():
                 if isinstance(widget, ctk.CTkButton) or (isinstance(widget, ctk.CTkLabel) and widget != self.status_label):
                     widget.destroy()
 
         if devices:
             for name in devices.values():
                 btn = ctk.CTkButton(
-                    self.bottom,
+                    self.popup.bottom,
                     text=name,
                     fg_color=popup_button_color,
                     hover_color=button_hover_color,
@@ -437,32 +302,32 @@ class ProwlTechApp(ctk.CTk):
             self.status_label.configure(text=f"Kunne ikke koble til {name}", text_color="red")
             self.connection_status.configure(text=f"Ingen kontroller tilkoblet", text_color="red")
 
-    # Lukker popup-vindu når lukk-knappen trykkes
-    def close_connection_window(self):
-        self.popup_panel.destroy()
+    # Henter sensorverdier fra CAN-bus kontinuerlig i bakgrunnen
+    def get_sensor_data(self):
+        while self.running:
+            val = receive_sensor_data() # Funksjonen som leser CAN-melding
+            if val is not None:
+                self.sensor_value = val
+            else:
+                self.sensor_value = "__"
+
+    # Oppdaterer sensorverdi med jevne mellomrom
+    def update_sensor_display(self):
+        if isinstance(self.sensor_value, dict):
+            # Formater visningen pent i GUI
+            text = "\n".join([f"{key}: {val} cm" for key, val in self.sensor_value.items()])
+        else:
+            text = "Sensorverdi: --"
+
+        self.sensor_value_label.configure(text=text)
+        self.after(500, self.update_sensor_display)
+
 
     # Midtseksjon: viser batteri, temperatur, tilkobling og sensor
     def mid_section(self):
         self.mid_frame = ctk.CTkFrame(self, fg_color=background_color)
         self.mid_frame.grid(row=1, column=0, rowspan=2, columnspan=4, sticky="nsew")
         self.mid_frame.grid_propagate(False)
-
-        # Ikon: bolt
-        bolt_image = Image.open("Image/bolt.png")
-        self.bolt_icon = ctk.CTkImage(light_image=bolt_image, size=(15, 15))
-
-        # Ikon: termometer
-        temp_image = Image.open("Image/temperature.png")
-        self.temp_icon = ctk.CTkImage(light_image=temp_image, size=(15, 15))
-
-        # Ikon: tilkobling
-        signal_image = Image.open("Image/signal-2.png")
-        self.signal_icon = ctk.CTkImage(light_image=signal_image, size=(15, 15))
-
-        # Ikon: sensor
-        sensor_image = Image.open("Image/signal.png")
-        self.sensor_icon = ctk.CTkImage(light_image=sensor_image, size=(17, 17))
-
 
         # Batteristatus:
         self.battery_container = ctk.CTkFrame(self.mid_frame, fg_color=background_color)
@@ -473,7 +338,7 @@ class ProwlTechApp(ctk.CTk):
             self.battery_container, 
             text="BATTERISTATUS  ",
             font=("Century Gothic", 13),
-            image=self.bolt_icon,
+            image=bolt_icon,
             compound="right",
             text_color=text_color,
             justify="left"
@@ -494,7 +359,7 @@ class ProwlTechApp(ctk.CTk):
             self.temp_container, 
             text="TEMPERATUR  ",
             font=("Century Gothic", 13),
-            image=self.temp_icon,
+            image=temp_icon,
             compound="right",
             text_color=text_color,
             justify="left"
@@ -515,7 +380,7 @@ class ProwlTechApp(ctk.CTk):
             self.connection_containter, 
             text="TILKOBLING  ",
             font=("Century Gothic", 13),
-            image=self.signal_icon,
+            image=signal_icon,
             compound="right",
             text_color=text_color,
             justify="left"
@@ -548,7 +413,7 @@ class ProwlTechApp(ctk.CTk):
             self.sensor_container, 
             text="SENSORMÅLINGER  ",
             font=("Century Gothic", 13),
-            image=self.sensor_icon,
+            image=sensor_icon,
             compound="right",
             text_color=text_color,
             justify="left"
@@ -557,17 +422,23 @@ class ProwlTechApp(ctk.CTk):
 
         # Sensormåling - Ramme
         self.sensor_frame = ctk.CTkFrame(self.sensor_container, height=70, width=300, fg_color=frame_color, corner_radius=20, border_color=frame_border_color, border_width=8)
-        self.sensor_frame.pack(side="top", expand=True, padx=30, pady=(0, 0))
+        self.sensor_frame.pack(side="top", expand=True, padx=20, pady=(0, 10))
+        self.sensor_frame.pack_propagate(False)
+
+        # Sensormåling - Innhold
+        self.sensor_value_label = ctk.CTkLabel(
+            self.sensor_frame,
+            text="Ingen data",
+            font=("Century Gothic", 12),
+            text_color="white"
+        )
+        self.sensor_value_label.pack(expand=True)
 
     # Bunnseksjon: viser feilmeldinger
     def bot_section(self):  
         self.bot_frame = ctk.CTkFrame(self, fg_color=background_color, height=120)
         self.bot_frame.grid(row=3, column=0, columnspan=4, sticky="nsew")
         self.bot_frame.grid_propagate(False)
-
-        # Ikon: advarseltegn
-        warning_image = Image.open("Image/warning.png")
-        self.warning_icon = ctk.CTkImage(light_image=warning_image, size=(17, 17))
 
         # Feilmeldinger:
         self.error_container = ctk.CTkFrame(self.bot_frame, fg_color=background_color)
@@ -577,7 +448,7 @@ class ProwlTechApp(ctk.CTk):
         self.error_label = ctk.CTkLabel(
             self.error_container, 
             text="FEILMELDINGER  ",
-            image=self.warning_icon,
+            image=warning_icon,
             compound="right", 
             font=("Century Gothic", 14),
             text_color=text_color,
@@ -589,8 +460,12 @@ class ProwlTechApp(ctk.CTk):
         self.error_frame = ctk.CTkFrame(self.error_container, height=80, width=750, fg_color=error_section, corner_radius=30)
         self.error_frame.pack(side="top", expand=True, padx=10, pady=5)
 
+    def on_closing(self):
+        self.running = False
+        self.destroy()
        
 
 # Starter GUI-applikasjon
 app = ProwlTechApp()
+app.protocol("WM_DELETE_WINDOW", app.on_closing)
 app.mainloop()

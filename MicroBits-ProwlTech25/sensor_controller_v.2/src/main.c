@@ -17,6 +17,24 @@ hc_sr04_t sensors[4]; // Structure for defining how many sensors to use
 enum can_state state; // Defines the state of the CAN controller
 struct can_bus_err_cnt err_cnt; // CAN controller error counter
 
+void send_sensor_distances(const struct device *can_dev, uint8_t *distances) {
+    struct can_frame frame;
+    memset(&frame, 0, sizeof(frame));
+
+    frame.flags = CAN_FRAME_IDE;
+    frame.id = MSG_ID;
+    frame.dlc = 4;  // Vi sender 4 bytes
+
+    memcpy(frame.data, distances, 4);  // Kopierer 4 bytes inn i CAN-rammen
+
+    if (can_send(can_dev, &frame, K_SECONDS(10), NULL, NULL) != 0) {
+        printk("Failed to send distance frame\n");
+    } else {
+        printk("Sent distances: %d %d %d %d\n", distances[0], distances[1], distances[2], distances[3]);
+    }
+}
+
+
 int main(void) {
     const struct device *const can_dev = get_can_dev(); // Getting the CAN device connected to the system
    
@@ -46,30 +64,22 @@ int main(void) {
     hc_sr04_init(&sensors[3], "GPIO_0", 11, 30); //Rear Sensor bit (0)000, Trigger on pin P7(P0.11), Echo on pin P10(P0.30)
 
     while (1) {
-        uint8_t sensor_byte = 0; // Sensor byte variable
-        if (can_get_state(can_dev, &state, &err_cnt) != 0) { // If test to check the state of the CAN controller
+        if (can_get_state(can_dev, &state, &err_cnt) != 0) {
             printk("Failed to get CAN state\n");
-        } else {
-        //printf("CAN State: %s\n", can_state_to_str(state));
-        //printf("TX Errors: %d, RX Errors: %d\n", err_cnt.tx_err_cnt, err_cnt.rx_err_cnt);
         }
-
-        double distances[4]; // Array with four distances. One for each sensor
-        distances[0] = hc_sr04_read_distance(&sensors[0]); // Getting the distance for sensor 1
-        distances[1] = hc_sr04_read_distance(&sensors[1]); // Getting the distance for sensor 2
-        distances[2] = hc_sr04_read_distance(&sensors[2]); // Getting the distance for sensor 3
-        distances[3] = hc_sr04_read_distance(&sensors[3]); // Getting the distance for sensor 4
-
-        for (int i = 0; i < 4; i++) { // For loop that will run through the number of sensors used
-            printk("Sensor %d Distance: %d cm\n", i + 1, (int)distances[i]); // Print funkction to display the sensor and its distance 
-            if ((int)distances[i] < 15) { // If test that checks if the distance returned by the sensors is below the given value
-                sensor_byte |= (1 << i); // Set the bit corresponding to the sensor if blocked
-            }
+    
+        double distances[4];
+        uint8_t sensor_distances[4];  // Avrundede avstander i byteformat
+    
+        for (int i = 0; i < 4; i++) {
+            distances[i] = hc_sr04_read_distance(&sensors[i]);
+            sensor_distances[i] = (uint8_t)distances[i];  // Konverter til heltall 0–255
+    
+            printk("Sensor %d Distance: %d cm\n", i + 1, sensor_distances[i]);
         }
-
-        printk("Sensor Status: 0x%02X\n", sensor_byte);
-        send_byte(can_dev, sensor_byte); // Sending the sensor byte over the bus
-        //printk("Byte sent");
-        k_msleep(500); // Sleep for 500ms
+    
+        send_sensor_distances(can_dev, sensor_distances);
+    
+        k_msleep(500);
     }
 }

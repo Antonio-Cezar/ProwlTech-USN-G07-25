@@ -70,4 +70,19 @@ void send_byte(const struct device *can_dev, uint8_t sensor_byte){ // Function f
         } /*else {
             printk("Frame sent\n");
         }*/
+
+void send_sensor_distance(const struct device *can_dev, uin8_t *distance){
+    struct can_frame frame;
+    memset(&frame, 0, sizeof(frame));
+
+    frame.flags = CAN_FRAME_IDE;
+    frame.id = MSG_ID;
+    frame.dlc = 4; // Sender 4 bytes 
+
+    memcpy(frame.data, distances, 4); // Kopierer distanse-verdier til frame
+
+    if (can_send(can_dev, &frame, K_SECONDS(10), NULL, NULL) != 0) {
+        printk("Failed to send distance frame\n");
+    }
+}
 }
