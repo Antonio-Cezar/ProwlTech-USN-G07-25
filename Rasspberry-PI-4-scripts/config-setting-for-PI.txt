@@ -1,41 +1,63 @@
-can0 konfigurasjoner
+can0 konfigurasjoner:
 ========================================================
+
+
 sudo nano /boot/frimware/config.txt
 
+kopier dette inn i config.txt
+--------------------------------
 dtparam=api=on
 dtoverlay=mcp2515-can0,oscillator=16000000,interrupt=25
 dtoverlay=spi-bcm2835
+--------------------------------
 ========================================================
 
 
 
 
 
-
-kjøre scriptet for oppstart av can0 ved ubunto oppstart
+konfigurer for å at can0 skal starte opp ved oppstart av ubunto
 ========================================================
-sudo apt install gnome-startup-applications
-
-chmod +x /home/pi/can_start_oppstart.sh
-
-nano ~/.config/autostart/can_start_oppstart.desktop
 
 
-[Desktop Entry]
-Type=Application
-Exec=/home/pi/can_start_oppstart.sh
-Hidden=false
-NoDisplay=false
-X-GNOME-Autostart-enabled=true
-Name=CAN Start Oppstart
-Comment=Starter CAN-bus automatisk ved oppstart
+sudo nano /etc/systemd/system/can-start.service
+
+kopier dette inn can-start.service:
+--------------------------------
+[Unit]
+Description=Start CAN interface can0
+After=network.target
+
+[Service]
+Type=oneshot
+ExecStart=/usr/local/bin/oppstart_can0.sh
+RemainAfterExit=true
+
+[Install]
+WantedBy=multi-user.target
+--------------------------------
+
+
+enable:
+--------------------------------
+sudo systemctl enable can-start.service
+--------------------------------
+
+
+start og sjekk:
+--------------------------------
+sudo systemctl start can-start.service
+sudo systemctl status can-start.service
+--------------------------------
 ========================================================
+
+
+
+
 
 icon GUI method:
-sudo apt install gnome-startup-applications
-
-gedit ~/Desktop/myscript.desktop
 ========================================================
+gedit ~/Desktop/myscript.desktop
 
 [Desktop Entry]
 Name=meny_velger
