@@ -11,19 +11,16 @@ except OSError as e:
 
 def receive_sensor_data():
     msg = bus.recv(timeout=1.0)
-    if msg and msg.arbitration_id == MSG_ID and msg.dlc == 1:
-        byte = msg.data[0]
 
-        # Pakk ut hver bit i byte'en som separate sensorer
-        sensor_values = {
-            'sensor_0': (byte >> 0) & 1,
-            'sensor_1': (byte >> 1) & 1,
-            'sensor_2': (byte >> 2) & 1,
-            'sensor_3': (byte >> 3) & 1
+    if msg and msg.arbitration_id == MSG_ID and msg.dlc == 4:
+        distances = {
+            'Front': msg.data[0],   # Avstand i cm fra sensor foran
+            'Right': msg.data[1],   # Høyre
+            'Left':  msg.data[2],   # Venstre
+            'Rear':  msg.data[3]    # Bak
         }
-
-        print(f"Mottatt sensorverdier: {sensor_values}")
-        return sensor_values
+        print(f"Mottatt avstander: {distances}")
+        return distances
     return None
 
 
