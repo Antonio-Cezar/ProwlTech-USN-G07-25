@@ -1,8 +1,16 @@
 #!/bin/bash
 
+# (PROWLTECH25 - CA).
+# Dette er menyen for å velge de forskjellige opperasjonene for can0 (CAN-Bus kommunikasjon).
+
+# Setter opp CAN-grensesnitt og bitrate.
+#================================================================
 CAN_INTERFACE="can0"
 BITRATE=125000
+VESC_ID=10
+#================================================================
 
+# Funksjonen viser en enkel "laste-animasjon" med roterende tegn.
 loading_animation() {
     spinner="/|\\-"
     duration=0.6
@@ -20,33 +28,7 @@ loading_animation() {
     printf "\b Ferdig!\n"
 }
 
-start_canbus() {
-    echo "Starter $CAN_INTERFACE med bitrate $BITRATE ..."
-    sudo ip link set $CAN_INTERFACE down
-    sudo ip link set $CAN_INTERFACE type can bitrate $BITRATE
-    sudo ip link set $CAN_INTERFACE up
-    sleep 1
-}
-
-show_status() {
-    echo ""
-    echo "===================================="
-    echo "=== CAN-status ==="
-    echo "===================================="
-    ip -details link show $CAN_INTERFACE | grep -A 5 "$CAN_INTERFACE"
-    echo "===================================="
-    echo ""
-}
-
-get_can_status() {
-    local state=$(ip link show $CAN_INTERFACE | grep -o "state [A-Z]*" | awk '{print $2}')
-    if [[ $state == "UP" ]]; then
-        echo "(can0 status: AKTIV)"
-    else
-        echo "(can0 status: INAKTIV)"
-    fi
-}
-
+# Funksjonen pauser og venter til bruker trykker x etter at en annen funkjson har blitt kalt på for å vise operasjonen så lenge bruker ønsker 
 pause_for_return() {
     echo ""
     echo "Trykk x for å gå tilbake til menyen..."
@@ -58,11 +40,41 @@ pause_for_return() {
     done
 }
 
-# meny
+# Funksjon for å starter opp CAN-bussen med spesifisert bitrate når den blir valgt i menyen.
+start_canbus() {
+    echo "Starter $CAN_INTERFACE med bitrate $BITRATE ..."
+    sudo ip link set $CAN_INTERFACE down
+    sudo ip link set $CAN_INTERFACE type can bitrate $BITRATE
+    sudo ip link set $CAN_INTERFACE up
+    sleep 1
+}
+# Funksjonen viser CAN status når den blir valgt i menyen.
+show_status() {
+    echo ""
+    echo "===================================="
+    echo "=== CAN-status ==="
+    echo "===================================="
+    ip -details link show $CAN_INTERFACE | grep -A 5 "$CAN_INTERFACE" #(-A 5) -> Dette filtrerer ut deler av teksten som vises.
+    echo "===================================="
+    echo ""
+}
+
+# Funksjonen som viser CAN status aktiv og innaktiv på toppen av menyen.
+get_can_status() {
+    local state=$(ip link show $CAN_INTERFACE | grep -o "state [A-Z]*" | awk '{print $2}') #-o betyr "bare vis det som matcher mønsteret", Det ser etter SATE UP/DOWN og da tar denlinja og viser.
+    if [[ $state == "UP" ]]; then
+        echo "(can0 status: AKTIV)"
+    else
+        echo "(can0 status: INAKTIV)"
+    fi
+}
+
+# === HOVEDMENY ===
 while true; do
     clear
     loading_animation
     clear
+    # Viser statuslinje for can0.
     echo "===================================="
     echo "$(get_can_status)"
     echo "===================================="
@@ -83,13 +95,15 @@ while true; do
     echo
 
     case $valg in
-        1)
+        # Alternativ 1: Start CAN-bus på nytt
+        1) 
             clear
             start_canbus
             show_status
             loading_animation
             pause_for_return
             ;;
+        # Alternativ 2: Skru av can0 manuelt
         2)
             clear
             echo "Manuelt: Skru AV $CAN_INTERFACE ..."
@@ -98,6 +112,7 @@ while true; do
             sleep 0.2
             loading_animation
             ;;
+        # Alternativ 3: Skru på can0 manuelt
         3)
             clear
             echo "Manuelt: Skru PÅ $CAN_INTERFACE ..."
@@ -107,12 +122,14 @@ while true; do
             sleep 0.2
             loading_animation
             ;;
+        # Alternativ 4: Vis CAN-status
         4)
             clear
             show_status
             loading_animation
             pause_for_return
             ;;
+        # Alternativ 5: Kjør `candump` og vis CAN-trafikk
         5)
             clear
             echo "Starter CAN-dump... Trykk x for å avslutte."
@@ -130,12 +147,14 @@ while true; do
                 fi
             done
             ;;
+         # Alternativ x: Avslutt programmet
         x)
             echo "Avslutter."
             loading_animation
             clear
             exit 0
             ;;
+        # Default: Ugyldig valg
         *)
             clear
             echo "Ugyldig valg. Prøv igjen."

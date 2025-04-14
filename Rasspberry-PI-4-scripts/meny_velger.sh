@@ -1,12 +1,27 @@
 #!/bin/bash
 
+# (PROWLTECH25 - CA).
+# Dette er menyen for å velge de forskjellige menyen for can0, motorkontroller og kontroller operasjoner.
+
+# Hvis ikke skriptet kjører i en terminal, åpne et nytt terminalvindu og kjør dette skriptet der
+if [ -z "$DISPLAY" ] || ! tty -s; then
+    gnome-terminal -- bash -c "$0; exec bash"
+    exit
+fi
+
+# Setter opp CAN-grensesnitt og bitrate.
+#================================================================
 CAN_INTERFACE="can0"
 BITRATE=125000
+$VESC_ID=10
+#================================================================
 
+# Sti til undermenyer.
 canbus_kontrollmeny=./canbus_meny.sh
 motorkontroller_kontrollmeny=./motorkontroller_meny.sh
 kontroller_meny=./kontroller_meny.sh
 
+# Funksjonen viser en enkel "laste-animasjon" med roterende tegn.
 loading_animation() {
     spinner="/|\\-"
     duration=0.6
@@ -24,6 +39,7 @@ loading_animation() {
     printf "\b Ferdig!\n"
 }
 
+# Funksjonen som viser CAN status aktiv og innaktiv på toppen av menyen.
 get_can_status() {
     local state=$(ip link show $CAN_INTERFACE | grep -o "state [A-Z]*" | awk '{print $2}')
     if [[ $state == "UP" ]]; then
@@ -33,53 +49,46 @@ get_can_status() {
     fi
 }
 
+# Funksjonen bruker Python-skript for å hente status på motorkontrolleren (via CAN)
 get_motor_status() {
-    python3 /home/prowltech/prowltech-script/vesc_cmd.py --can_id 10 --get_status >/dev/null 2>&1
+    python3 /home/prowltech/prowltech-script/vesc_cmd.py --can_id $VESC_ID --get_status >/dev/null 2>&1
     case $? in
         0)
-            echo "(MOTORSTATUS: PÅ)"
-            ;;
+            echo "(MOTORSTATUS: PÅ)";;
         3)
-            echo "(MOTORSTATUS: AV)"
-            ;;
+            echo "(MOTORSTATUS: AV)";;
         1)
-            echo "(MOTORSTATUS: IKKE TILKOBLET)"
-            ;;
+            echo "(MOTORSTATUS: IKKE TILKOBLET)";;
         2)
-            echo "(MOTORSTATUS: CAN FEIL)"
-            ;;
+            echo "(MOTORSTATUS: CAN FEIL)";;
         4)
-            echo "(MOTORSTATUS: UKJENT SVAR)"
-            ;;
+            echo "(MOTORSTATUS: UKJENT SVAR)";;
         *)
-            echo "(MOTORSTATUS: FEIL)"
-            ;;
+            echo "(MOTORSTATUS: FEIL)";;
     esac
 }
 
+# Funksjonen sjekker om VESC (motorstyring komponenten) er koblet til.
 check_vesc_status() {
-    python3 /home/prowltech/prowltech-script/vesc_cmd.py --can_id 10 --check_status >/dev/null 2>&1
+    python3 /home/prowltech/prowltech-script/vesc_cmd.py --can_id $VESC_ID --check_status >/dev/null 2>&1
     case $? in
         0)
-            echo "(VESC status: TILKOBLET)"
-            ;;
+            echo "(VESC status: TILKOBLET)";;
         1)
-            echo "(VESC status: IKKE TILKOBLET)"
-            ;;
+            echo "(VESC status: IKKE TILKOBLET)";;
         2)
-            echo "(VESC status: FEIL I CAN-GRENSESNITT)"
-            ;;
+            echo "(VESC status: FEIL I CAN-GRENSESNITT)";;
         *)
-            echo "(VESC status: UKJENT)"
-            ;;
+            echo "(VESC status: UKJENT)";;
     esac
 }
 
-# meny
+# === HOVEDMENYEN ===
 while true; do
     clear
     loading_animation
     clear
+    # Viser statuslinje for can0, VESC og motor.
     echo "===================================="
     echo "$(get_can_status)"
     echo""
@@ -103,6 +112,7 @@ while true; do
     echo
 
     case $valg in
+        # Alternativ 1: Åpner CAN-bus kontrollmeny
         1)
             clear
             echo "Åpner opp: "
@@ -117,6 +127,7 @@ while true; do
                 loading_animation
             fi
             ;;
+        # Alternativ 2: Åpner Motorkontrollere-meny
         2)
             clear
             echo "Åpner opp: "
@@ -131,6 +142,7 @@ while true; do
                 loading_animation
             fi
             ;;
+        # Alternativ 3: Åpner kontroller-meny
         3)
             clear
             echo "Åpner opp: "
@@ -145,12 +157,14 @@ while true; do
                 loading_animation
             fi
             ;;
+        # Alternativ x: Avslutt programmet
         x)
             echo "Avslutter."
             loading_animation
             clear
             exit 0
             ;;
+        # Default: Ugyldig valg
         *)
             clear
             echo "Ugyldig valg. Prøv igjen."
