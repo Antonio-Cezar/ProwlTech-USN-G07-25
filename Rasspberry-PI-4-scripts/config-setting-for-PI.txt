@@ -17,9 +17,34 @@ dtoverlay=spi-bcm2835
 
 
 konfigurer for å at can0 skal starte opp ved oppstart av ubunto
+step 1:
+========================================================
+sudo nano /usr/local/bin/oppstart_can0.sh
+
+kopier dette inn i oppstart_can0.sh:
+--------------------------------
+#!/bin/bash
+CAN_INTERFACE="can0"
+BITRATE=125000
+
+ip link set $CAN_INTERFACE down
+ip link set $CAN_INTERFACE type can bitrate $BITRATE
+ip link set $CAN_INTERFACE up
+--------------------------------
+
+Endre scriptet til kjørbar:
+--------------------------------
+sudo chmod +x /usr/local/bin/start_can.sh
+--------------------------------
 ========================================================
 
 
+
+
+
+konfigurer for å at can0 skal starte opp ved oppstart av ubunto
+step 2:
+========================================================
 sudo nano /etc/systemd/system/can-start.service
 
 kopier dette inn can-start.service:
@@ -38,33 +63,15 @@ WantedBy=multi-user.target
 --------------------------------
 
 
-enable:
+Gjør den om til enable:
 --------------------------------
 sudo systemctl enable can-start.service
 --------------------------------
 
 
-start og sjekk:
+Start og sjekk:
 --------------------------------
 sudo systemctl start can-start.service
 sudo systemctl status can-start.service
 --------------------------------
-========================================================
-
-
-
-
-
-icon GUI method:
-========================================================
-gedit ~/Desktop/myscript.desktop
-
-[Desktop Entry]
-Name=meny_velger
-Comment=can0_kontroller_motorkontroller
-Exec=/path/to/your/script.sh
-Icon=utilities-terminal
-Terminal=true
-Type=Application
-Categories=Utility;
 ========================================================
