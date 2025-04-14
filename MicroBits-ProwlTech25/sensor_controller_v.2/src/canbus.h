@@ -19,5 +19,4 @@ void can_rx_callback(const struct device *dev, struct can_frame *frame, void *us
 
 const char* can_state_to_str(enum can_state state);
 void send_byte(const struct device *can_dev, uint8_t sensor_byte);
-void send_sensor_distance(const struct device *can_dev, uin8_t *distance);
 #endif
