@@ -1,31 +1,24 @@
-use_mock = False # Sett til False når Linux brukes 
+import can
 
-# ---------- Mock-versjon for å teste i windows
-if use_mock:
-    import random 
-    import time
+MSG_ID = 0x3
+CHANNEL = 'can0'
 
-    def receive_sensor_data():
-        time.sleep(1)
-        return random.choice([0, 1])
-    import can
+try:
+    bus = can.interface.Bus(channel=CHANNEL, bustype='socketcan')
+except OSError as e:
+    print(f"Kunne ikke åpne CAN-grensesnittet: {e}")
+    bus = None
 
-# ---------- Ekte versjon for Linux
-else:
-    import can
+def receive_sensor_data():
+    if bus is None:
+        print("CAN-bus ikke tilgjengelig")
+        return None
 
-    MSG_ID = 0x3  # Fra Zephyr-definisjonen
-    CHANNEL = 'can0'  # Standard SocketCAN-grensesnitt på Raspberry Pi
-
-    def receive_sensor_data():
-        with can.interface.Bus(channel=CHANNEL, bustype='socketcan') as bus:
-            print(f"Lytter på CAN-ID {hex(MSG_ID)}...")
-        
-        while True:
-            msg = bus.recv(timeout=1.0)
-            if msg and msg.arbitration_id == MSG_ID and msg.dlc == 1:
-                sensor_byte = msg.data[0]
-                print(f"Mottatt sensorverdi: {sensor_byte}")
-                return sensor_byte  # Du kan returnere eller sende dette til GUI
+    msg = bus.recv(timeout=1.0)
+    if msg and msg.arbitration_id == MSG_ID and msg.dlc == 1:
+        sensor_byte = msg.data[0]
+        print(f"Mottatt sensorverdi: {sensor_byte}")
+        return sensor_byte
+    return None
 
 
