@@ -182,6 +182,11 @@ class ProwlTechApp(ctk.CTk):
         self.mid_section()
         self.bot_section()
 
+        self.running = True
+        self.sensor_value = "__"
+        threading.Thread(target=self.get_sensor_data, daemon=True).start()
+        self.update_sensor_display()
+
     # Funksjon: Avslutte programmet (ESC)
     def exit_fullscreen(self, event=None):
         self.destroy()
@@ -297,6 +302,21 @@ class ProwlTechApp(ctk.CTk):
             self.status_label.configure(text=f"Kunne ikke koble til {name}", text_color="red")
             self.connection_status.configure(text=f"Ingen kontroller tilkoblet", text_color="red")
 
+    # Henter sensorverdier fra CAN-bus kontinuerlig i bakgrunnen
+    def get_sensor_data(self):
+        while self.running:
+            val = receive_sensor_data() # Funksjonen som leser CAN-melding
+            if val is not None:
+                self.sensor_value = val
+            else:
+                self.sensor_value = "__"
+
+    # Oppdaterer sensorverdi med jevne mellomrom
+    def update_sensor_display(self):
+        self.sensor_value_label.configure(text=f"Sensorverdi: {self.sensor_value}") # Viser nyeste mottatte verdi
+        self.after(500, self.update_sensor_display)
+
+
     # Midtseksjon: viser batteri, temperatur, tilkobling og sensor
     def mid_section(self):
         self.mid_frame = ctk.CTkFrame(self, fg_color=background_color)
@@ -396,7 +416,17 @@ class ProwlTechApp(ctk.CTk):
 
         # Sensormåling - Ramme
         self.sensor_frame = ctk.CTkFrame(self.sensor_container, height=70, width=300, fg_color=frame_color, corner_radius=20, border_color=frame_border_color, border_width=8)
-        self.sensor_frame.pack(side="top", expand=True, padx=30, pady=(0, 0))
+        self.sensor_frame.pack(side="top", expand=True, padx=20, pady=(0, 10))
+        self.sensor_frame.pack_propagate(False)
+
+        # Sensormåling - Innhold
+        self.sensor_value_label = ctk.CTkLabel(
+            self.sensor_frame,
+            text="Ingen data",
+            font=("Century Gothic", 12),
+            text_color="white"
+        )
+        self.sensor_value_label.pack(expand=True)
 
     # Bunnseksjon: viser feilmeldinger
     def bot_section(self):  
@@ -424,8 +454,12 @@ class ProwlTechApp(ctk.CTk):
         self.error_frame = ctk.CTkFrame(self.error_container, height=80, width=750, fg_color=error_section, corner_radius=30)
         self.error_frame.pack(side="top", expand=True, padx=10, pady=5)
 
+    def on_closing(self):
+        self.running = False
+        self.destroy()
        
 
 # Starter GUI-applikasjon
 app = ProwlTechApp()
+app.protocol("WM_DELETE_WINDOW", app.on_closing)
 app.mainloop()
