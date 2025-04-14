@@ -1,14 +1,14 @@
 can0 konfigurasjoner:
 ========================================================
 
-
+# Åpne konfigurasjonsfil for firmware (Raspberry Pi)
 sudo nano /boot/frimware/config.txt
 
-kopier dette inn i config.txt
+# kopier dette inn i config.txt
 --------------------------------
-dtparam=api=on
-dtoverlay=mcp2515-can0,oscillator=16000000,interrupt=25
-dtoverlay=spi-bcm2835
+dtparam=api=on                                               # Aktiverer Device Tree API
+dtoverlay=mcp2515-can0,oscillator=16000000,interrupt=25      # Legger til overlay for MCP2515 CAN-modul, med riktig krystall og interrupt
+dtoverlay=spi-bcm2835                                        # Aktiverer SPI-brikken som brukes av MCP2515
 --------------------------------
 ========================================================
 
@@ -16,23 +16,23 @@ dtoverlay=spi-bcm2835
 
 
 
-konfigurer for å at can0 skal starte opp ved oppstart av ubunto
-step 1:
+# Konfigurer for at can0 skal starte opp automatisk i Ubuntu
+# STEP 1: Opprett og fyll inn oppstartsskriptet
 ========================================================
-sudo nano /usr/local/bin/oppstart_can0.sh
+sudo nano /usr/local/bin/oppstart_can0.sh                   # Oppretter nytt shell-skript
 
-kopier dette inn i oppstart_can0.sh:
+#kopier dette inn i oppstart_can0.sh:
 --------------------------------
 #!/bin/bash
 CAN_INTERFACE="can0"
 BITRATE=125000
 
-ip link set $CAN_INTERFACE down
-ip link set $CAN_INTERFACE type can bitrate $BITRATE
-ip link set $CAN_INTERFACE up
+ip link set $CAN_INTERFACE down                            # Stopper grensesnittet hvis det kjører
+ip link set $CAN_INTERFACE type can bitrate $BITRATE       # Konfigurerer CAN med valgt bitrate
+ip link set $CAN_INTERFACE up                              # Starter grensesnittet
 --------------------------------
 
-Endre scriptet til kjørbar:
+# Endre scriptet til kjørbar:
 --------------------------------
 sudo chmod +x /usr/local/bin/start_can.sh
 --------------------------------
@@ -42,36 +42,36 @@ sudo chmod +x /usr/local/bin/start_can.sh
 
 
 
-konfigurer for å at can0 skal starte opp ved oppstart av ubunto
-step 2:
+# Konfigurer for å at can0 skal starte opp ved oppstart av ubunto
+# Step 2:
 ========================================================
 sudo nano /etc/systemd/system/can-start.service
 
-kopier dette inn can-start.service:
+# kopier dette inn can-start.service:
 --------------------------------
 [Unit]
-Description=Start CAN interface can0
-After=network.target
+Description=Start CAN interface can0                        # Navn og beskrivelse
+After=network.target                                        # Venter til nettverk er klart
 
 [Service]
-Type=oneshot
-ExecStart=/usr/local/bin/oppstart_can0.sh
-RemainAfterExit=true
+Type=oneshot                                                # Kjøres kun én gang
+ExecStart=/usr/local/bin/oppstart_can0.sh                   # Kjører oppstartsskriptet vi laget
+RemainAfterExit=true                                        # Beholder "aktiv" status etter utførelse
 
 [Install]
-WantedBy=multi-user.target
+WantedBy=multi-user.target                                  # Starter ved normal system-oppstart
 --------------------------------
 
 
-Gjør den om til enable:
+# Aktiver tjenesten slik at den kjøres automatisk ved oppstart
 --------------------------------
-sudo systemctl enable can-start.service
+sudo systemctl enable can-start.service                     
 --------------------------------
 
 
-Start og sjekk:
+# Start tjenesten manuelt og sjekk at alt fungerer
 --------------------------------
 sudo systemctl start can-start.service
-sudo systemctl status can-start.service
+sudo systemctl status can-start.service                     # Sjekk status og se om den kjørte uten feil
 --------------------------------
 ========================================================
