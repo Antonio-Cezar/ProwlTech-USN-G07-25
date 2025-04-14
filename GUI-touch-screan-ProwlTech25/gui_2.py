@@ -313,7 +313,14 @@ class ProwlTechApp(ctk.CTk):
 
     # Oppdaterer sensorverdi med jevne mellomrom
     def update_sensor_display(self):
-        self.sensor_label.configure(text=f"Sensorverdi: {self.sensor_value}")
+        if isinstance(self.sensor_value, dict):
+            text = "\n".join(
+            [f"{key}: {'🟥 Aktiv' if val else '🟩 Inaktiv'}" for key, val in self.sensor_value.items()]
+        )
+        else:
+            text = "Sensorverdi: --"
+
+        self.sensor_value_label.configure(text=text)
         self.after(500, self.update_sensor_display)
 
 
