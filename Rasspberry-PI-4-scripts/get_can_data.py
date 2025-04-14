@@ -13,13 +13,13 @@ if use_mock:
 # ---------- Ekte versjon for Linux
 else:
     import can
-    
+
     MSG_ID = 0x3  # Fra Zephyr-definisjonen
     CHANNEL = 'can0'  # Standard SocketCAN-grensesnitt på Raspberry Pi
 
     def receive_sensor_data():
-        bus = can.interface.Bus(channel=CHANNEL, bustype='socketcan')
-        print(f"Lytter på CAN-ID {hex(MSG_ID)}...")
+        with can.interface.Bus(channel=CHANNEL, bustype='socketcan') as bus:
+            print(f"Lytter på CAN-ID {hex(MSG_ID)}...")
         
         while True:
             msg = bus.recv(timeout=1.0)
