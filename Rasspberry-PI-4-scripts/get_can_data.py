@@ -10,15 +10,21 @@ except OSError as e:
     bus = None
 
 def receive_sensor_data():
-    if bus is None:
-        print("CAN-bus ikke tilgjengelig")
-        return None
-
     msg = bus.recv(timeout=1.0)
     if msg and msg.arbitration_id == MSG_ID and msg.dlc == 1:
-        sensor_byte = msg.data[0]
-        print(f"Mottatt sensorverdi: {sensor_byte}")
-        return sensor_byte
+        byte = msg.data[0]
+
+        # Pakk ut hver bit i byte'en som separate sensorer
+        sensor_values = {
+            'sensor_0': (byte >> 0) & 1,
+            'sensor_1': (byte >> 1) & 1,
+            'sensor_2': (byte >> 2) & 1,
+            'sensor_3': (byte >> 3) & 1
+        }
+
+        print(f"Mottatt sensorverdier: {sensor_values}")
+        return sensor_values
     return None
+
 
 
