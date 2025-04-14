@@ -252,3 +252,4 @@ int kontroller_motorene(float ønsket_fart, float ønsket_vinkel, float ønsket_
 }
 
 
+//TODO under testing: -Prøve dynamisk endring_per_steg, -legg til toleranse på små forskjeller, -juster svingrespons
