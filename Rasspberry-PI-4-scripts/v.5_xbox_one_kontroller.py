@@ -178,11 +178,11 @@ while True:
         # === Input Knapper ===
         a = joystick.get_button(0)  # A-knapp
         b = joystick.get_button(1)  # B-knapp
-        y = joystick.get_button(3)  # Y-knapp
+        y = joystick.get_button(4)  # Y-knapp
 
         # === Input kanpper for rotasjon LB og RB ===
-        rb = joystick.get_button(4)  # Høyre bumper
-        lb = joystick.get_button(5)  # Venstre bumper
+        rb = joystick.get_button(7)  # Høyre bumper
+        lb = joystick.get_button(6)  # Venstre bumper
 
         rotasjon = 0.0
         if rb:
@@ -195,8 +195,8 @@ while True:
         venstre_y = joystick.get_axis(3)
 
         # === Input Trigger RT og LT ===
-        rt = joystick.get_axis(5)  # Høyre trigger (RT)
-        lt = joystick.get_axis(4)  # Venstre trigger (LT)
+        rt = joystick.get_axis(4)  # Høyre trigger (RT)
+        lt = joystick.get_axis(5)  # Venstre trigger (LT)
 
         rt = (rt + 1.0) / 2.0
         lt = (lt + 1.0) / 2.0
