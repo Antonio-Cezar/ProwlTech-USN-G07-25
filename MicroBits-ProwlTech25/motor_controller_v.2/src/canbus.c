@@ -13,7 +13,8 @@
 #include "canbus.h"
 #include "motorstyring.h" 
 
- //lagt til av RAS (PROWLTECH25)
+//Lagt til av RAS (PROWLTECH25)
+//Lagt til av CA (PROWLTECH25)
 //Motorstyringen i denne filen er endret av RAS(PROWLTECH25)
 // Commented and coded by OA
 
@@ -113,34 +114,35 @@ void send_string(const struct device *can_dev, const char *str){ // Function for
         }*/
 }
 
-// cezar husk å kommentere og endre
+//Lagt til av CA (PROWLTECH25)
 void can_rx_callback(const struct device *dev, struct can_frame *frame, void *user_data) {
     if (frame->id == RECEIVE_ID && frame->dlc == 6) {
         // Korrekt endian-konvertering
+        //leser int16_t (2 byt hver) 
         int16_t fart_i     = sys_le16_to_cpu(*(int16_t *)&frame->data[0]);
         int16_t vinkel_i   = sys_le16_to_cpu(*(int16_t *)&frame->data[2]);
         int16_t rotasjon_i = sys_le16_to_cpu(*(int16_t *)&frame->data[4]);
 
-        // Konverter til float
+        // Konverter til float (verdiene skaleres ned)
         float fart     = fart_i / 100.0f;
         float vinkel   = vinkel_i / 100.0f;
         float rotasjon = rotasjon_i / 100.0f;
 
-        // Print verdier
-        printf("[PI → Motor-MB] Mottatt:\n");
-        printf("  Fart     : %.2f\n", fart);
-        printf("  Vinkel   : %.2f\n", (vinkel * 180.0f / (float)M_PI));
-        printf("  Rotasjon : %.2f\n", rotasjon);
-        printf("-----------------------------\n");
+        // Print verdier for debug
+        //printf("[PI → Motor-MB] Mottatt:\n");
+        //printf("  Fart     : %.2f\n", fart);
+        //printf("  Vinkel   : %.2f\n", (vinkel * 180.0f / (float)M_PI));
+        //printf("  Rotasjon : %.2f\n", rotasjon);
+        //printf("-----------------------------\n");
 
         // Velg joystick-modus ut ifra rotasjon
         bool joystick_mode = (rotasjon == 0.0f);
 
-        // Klargjør for motorstyring
+        // Klargjør for motorstyring (sender til)
         kontroller_motorene(fart, vinkel, rotasjon);
 
     } else {
-        printf("CAN frame ignorert: ID 0x%X, DLC %d\n", frame->id, frame->dlc);
+        printf("CAN frame ignorert: ID 0x%X, DLC %d\n", frame->id, frame->dlc); //Hvis meldingen ikke har riktig ID eller ikke er 6 byte lang, ignoreres den og det skrives ut en feilmelding.
     }
 }
 
