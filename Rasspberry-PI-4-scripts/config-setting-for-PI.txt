@@ -14,6 +14,8 @@ dtoverlay=spi-bcm2835
 
 kjøre scriptet for oppstart av can0 ved ubunto oppstart
 ========================================================
+sudo apt install gnome-startup-applications
+
 chmod +x /home/pi/can_start_oppstart.sh
 
 nano ~/.config/autostart/can_start_oppstart.desktop
@@ -27,4 +29,20 @@ NoDisplay=false
 X-GNOME-Autostart-enabled=true
 Name=CAN Start Oppstart
 Comment=Starter CAN-bus automatisk ved oppstart
+========================================================
+
+icon GUI method:
+sudo apt install gnome-startup-applications
+
+gedit ~/Desktop/myscript.desktop
+========================================================
+
+[Desktop Entry]
+Name=meny_velger
+Comment=can0_kontroller_motorkontroller
+Exec=/path/to/your/script.sh
+Icon=utilities-terminal
+Terminal=true
+Type=Application
+Categories=Utility;
 ========================================================
