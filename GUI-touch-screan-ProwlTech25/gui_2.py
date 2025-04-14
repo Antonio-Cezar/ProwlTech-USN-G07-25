@@ -42,9 +42,9 @@ class ProwlTechApp(ctk.CTk):
         self.title("ProwlTech Kontrollpanel")           # Setter vindutittel
         self.geometry("800x480")                        # Setter størrelse 
         #self.resizable(False,False)                     # Hindrer at vinduet kan skaleres
-        self.attributes("-fullscreen", True)            # Fullskjerm på Raspberry Pi
+        #self.attributes("-fullscreen", True)            # Fullskjerm på Raspberry Pi
         self.bind("<Escape>", self.exit_fullscreen)     # ESC lukker programmet
-        self.config(cursor="none")                      # Skjuler musepeker når GUI er i gang
+        #self.config(cursor="none")                      # Skjuler musepeker når GUI er i gang
 
         self.bluetooth_devices = []                      # Liste for bluetooth-enheter
         self.device_menu = None 
@@ -313,13 +313,7 @@ class ProwlTechApp(ctk.CTk):
 
     # Oppdaterer sensorverdi med jevne mellomrom
     def update_sensor_display(self):
-        if isinstance(self.sensor_value, dict):
-            # Formater visningen pent i GUI
-            text = "\n".join([f"{key}: {val} cm" for key, val in self.sensor_value.items()])
-        else:
-            text = "Sensorverdi: --"
-
-        self.sensor_value_label.configure(text=text)
+        self.sensor_label.configure(text=f"Sensorverdi: {self.sensor_value}")
         self.after(500, self.update_sensor_display)
 
 
