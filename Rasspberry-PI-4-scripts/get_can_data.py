@@ -12,6 +12,8 @@ if use_mock:
 
 # ---------- Ekte versjon for Linux
 else:
+    import can
+    
     MSG_ID = 0x3  # Fra Zephyr-definisjonen
     CHANNEL = 'can0'  # Standard SocketCAN-grensesnitt på Raspberry Pi
 
