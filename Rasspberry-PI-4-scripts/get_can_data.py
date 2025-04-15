@@ -40,10 +40,10 @@ else:
         if msg and msg.arbitration_id == MSG_ID and msg.dlc == 1:
             byte = msg.data[0]
             sensor_states = {
-                'Front': (byte >> 0) & 1,
-                'Right': (byte >> 1) & 1,
-                'Left':  (byte >> 2) & 1,
-                'Rear':  (byte >> 3) & 1
+                'Foran': (byte >> 0) & 1,
+                'Høyre': (byte >> 1) & 1,
+                'Venstre':  (byte >> 2) & 1,
+                'Bak':  (byte >> 3) & 1
             }
             print(f"[CAN] Mottatt sensorstatus: {sensor_states}")
             return sensor_states
