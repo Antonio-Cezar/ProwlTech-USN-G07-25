@@ -8,6 +8,7 @@ import os
 script_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "Rasspberry-PI-4-scripts"))
 sys.path.append(script_dir)
 from get_can_data import receive_sensor_data
+from can_menu_gui import CanMenuWindow 
 
 from popup_window import PopupWindow
 from assets import info_icon, bluetooth_icon, bolt_icon, can_icon, cross_icon, loading_icon, menu_icon, prowltech_logo, usn_logo, sensor_icon, signal_icon, temp_icon, update_icon, warning_icon, start_icon
@@ -288,7 +289,7 @@ class ProwlTechApp(ctk.CTk):
 
         # Feilmeldinger:----------------------------------------------
         self.error_container = ctk.CTkFrame(self.mid_frame, fg_color=background_color)
-        self.error_container.grid(row=1, column=0, columnspan=3, padx=10, pady=10, sticky="nsew")
+        self.error_container.grid(row=1, column=0, columnspan=3, padx=10, pady=5, sticky="nsew")
 
         # Feilmeldinger - Tittel
         self.error_label = ctk.CTkLabel(
@@ -304,7 +305,7 @@ class ProwlTechApp(ctk.CTk):
         
 
         # Feilmeldinger - Ramme
-        self.error_frame = ctk.CTkFrame(self.error_container, height=75, width=750, fg_color=error_section, corner_radius=30)
+        self.error_frame = ctk.CTkFrame(self.error_container, height=90, width=750, fg_color=error_section, corner_radius=30)
         self.error_frame.pack(expand=True)
         self.error_frame.pack_propagate(False)
 
@@ -316,7 +317,7 @@ class ProwlTechApp(ctk.CTk):
             fg_color=error_section,
             wrap="word"
         )
-        self.error_textbox.pack(expand=True, fill="both", padx=20, pady=10)
+        self.error_textbox.pack(expand=True, fill="both", padx=20, pady=5)
         self.error_textbox.insert("end", "Ingen feilmeldinger.\n")
         self.error_textbox.configure(state="disabled")
 
@@ -461,7 +462,9 @@ class ProwlTechApp(ctk.CTk):
         self.destroy()
        
     def run_can_script(self):
-        subprocess.Popen(["bash", "../Rasspberry-PI-4-scripts/meny_velger.sh"])
+        #subprocess.Popen(["bash", "../Rasspberry-PI-4-scripts/meny_velger.sh"])
+        print("Knappen ble trykket")
+        CanMenuWindow(self)
 
     # Funksjon: Åpne kontrollpanel
     def open_control_panel(self):
@@ -474,6 +477,9 @@ class ProwlTechApp(ctk.CTk):
         self.sensor_value = "__"
         threading.Thread(target=self.get_sensor_data, daemon=True).start()
         self.update_sensor_display()
+
+        self.log_error("Test: Kontrollpanelet ble åpnet.")
+
 
     # Logger feilmeldinger
     def log_error(self, message: str):
