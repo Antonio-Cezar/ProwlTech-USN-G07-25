@@ -2,7 +2,6 @@ USE_MOCK = True # Sett til False når Linux brukes
 
 # ---------- Mock-versjon for å teste i windows
 if USE_MOCK:
-    import random 
     import time
 
     def receive_sensor_data():

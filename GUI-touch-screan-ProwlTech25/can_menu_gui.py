@@ -10,10 +10,10 @@ class CanMenuWindow(ctk.CTkToplevel):
         self.resizable(False, False)
 
         # Sørg for at vinduet åpnes som et popup-vindu foran hoved-GUI
-        self.transient(master)
-        self.grab_set()
-        self.focus()
-        self.lift()
+        self.transient(master)      # Koblet opp mot hovedvinduet
+        self.grab_set()     # Må lukkes før noe annet
+        self.focus()    # Legger vinduet foran det andre
+        self.lift()     # Legger vinduet foran det andre 
     
 
         # Toppseksjon
