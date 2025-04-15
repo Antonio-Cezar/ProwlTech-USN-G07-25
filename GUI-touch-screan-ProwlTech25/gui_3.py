@@ -19,7 +19,7 @@ ctk.set_appearance_mode("dark")
 
 # Definerer farger brukt i designet for konsistens og enkel endring
 text_color = "#FFFFFF"
-background_color = "#68548D"
+background_color = "#0D0D1F"
 top_panel_color = "#230F46"
 error_section = "#503C74"
 frame_color = "#230F46"
@@ -271,7 +271,7 @@ class ProwlTechApp(ctk.CTk):
         self.sensor_value_label = ctk.CTkLabel(
             self.sensor_frame,
             text="Ingen data",
-            font=("Century Gothic", 15),
+            font=("Century Gothic", 18),
             text_color="white"
         )
         self.sensor_value_label.pack(expand=True)
