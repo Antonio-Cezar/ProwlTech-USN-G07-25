@@ -423,15 +423,21 @@ class ProwlTechApp(ctk.CTk):
         else:
             self.status_label.configure(text=f"Kunne ikke koble til {name}", text_color="red")
             self.connection_status.configure(text=f"Ingen kontroller tilkoblet", text_color="red")
+            self.log_error(f"Klarte ikke koble til {name}")     # Logger feilmelding
 
 #--------------------SENSORDATA-------------------------  
     def get_sensor_data(self):
+            no_data_logged = False  # Flagg for å unngå spam
             while self.running:
                 val = receive_sensor_data() # Funksjonen som leser CAN-melding
                 if val is not None:
                     self.sensor_value = val
+                    no_data_logged = False  # Tilbakestill hvis data er ok
                 else:
                     self.sensor_value = "__"
+                    if not no_data_logged:
+                        self.log_error("Ingen data mottatt fra sensor (CAN).")  # Logger feilmelding
+                        no_data_logged = True
 
     # Oppdaterer sensorverdi med jevne mellomrom
     def update_sensor_display(self):
@@ -455,7 +461,7 @@ class ProwlTechApp(ctk.CTk):
         self.destroy()
        
     def run_can_script(self):
-        subprocess.Popen(["bash", "../Rasspberry-PI-4-scripts/canbus_meny.sh"])
+        subprocess.Popen(["bash", "../Rasspberry-PI-4-scripts/meny_velger.sh"])
 
     # Funksjon: Åpne kontrollpanel
     def open_control_panel(self):
