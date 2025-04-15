@@ -4,6 +4,8 @@
 #include <zephyr/types.h>
 #include <stdbool.h>
 
+#define RECEIVE_ID_TONE 0x0000005
+
 //(FENRIS24) Commented and coded by OA
 
 #define RING_BUF_SIZE 1024 //(FENRIS24) Defining the size of the ring-buffer

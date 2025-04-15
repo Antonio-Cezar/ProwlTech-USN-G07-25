@@ -14,7 +14,9 @@ BITRATE = 500000           # Bitrate
 EXTENDED_ID = True         # Brukes fordi Zephyr bruker 29-bit ID (IDE flag satt definert fra før)
 
 # ID til scriptet for sending av kontroller verdier
-MSG_ID = 0x0000001  # samme som RECEIVE_ID hos motor-MB
+MSG_ID_motor = 0x0000001  # samme som RECEIVE_ID hos motor-MB
+MSG_ID_COM = 0x0000005
+
 #================================================================
 
 
@@ -34,7 +36,7 @@ def send_data(bus, fart, vinkel, rotasjon=0.0, sving_js=0.0):
 
 
         melding = can.Message(
-            arbitration_id=MSG_ID,
+            arbitration_id=MSG_ID_motor,
             data=data,
             is_extended_id=EXTENDED_ID
         )
@@ -46,6 +48,19 @@ def send_data(bus, fart, vinkel, rotasjon=0.0, sving_js=0.0):
         print(f"→ Fart={fart}, Vinkel={vinkel}, Rotasjon={rotasjon}, Sving={sving_js}")
         print(f"Feilmelding: {e}")
 
+def send_tone_command(bus, aktiv=True):
+    try:
+        # 1 byte: tone på/av
+        data = struct.pack('<B', 1 if aktiv else 0)
+        melding = can.Message(
+            arbitration_id=MSG_ID_COM,  # Ny ID for tone-melding
+            data=data,
+            is_extended_id=True
+        )
+        bus.send(melding)
+        print(f"{'Starter' if aktiv else 'Stopper'} tone på microbit")
+    except Exception as e:
+        print("FEIL ved sending av tone-kommando:", e)
 
 def vis_data(fart, vinkel, rotasjon, sving_js, data):
     os.system('clear')  # Bruk 'cls' i stedet for 'clear' hvis du kjører på Windows
@@ -203,6 +218,15 @@ while True:
 
         # Håndter rotasjon (RB og LB)
         # Bestem rotasjon basert på bumpere
+
+        x = joystick.get_button(2)  # X-knappen (typisk nr. 2)
+
+        # Hvis x trykkes ned → start tone
+        if x:
+            send_tone_command(bus, aktiv=True)
+        else:
+            send_tone_command(bus, aktiv=False)
+
 
         # === Endre hastighetsmoduser ===
         if y:

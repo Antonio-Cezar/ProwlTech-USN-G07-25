@@ -5,6 +5,7 @@
 #include <zephyr/device.h>
 #include "canbus.h"
 #include <stdio.h>
+#include "tone.h"
 //(FENRIS24) Commented and coded by OA
 
 uint8_t received_byte;
@@ -57,9 +58,16 @@ int setup_can_filter(const struct device *dev, can_rx_callback_t rx_cb, void *cb
         .mask = CAN_EXT_ID_MASK
     };
 
+    struct can_filter filter_tone = { //(PROWLTECH25) fiktrere for tone cezar husk å kommenter
+        .flags = CAN_FILTER_DATA | CAN_FILTER_IDE,
+        .id = 0x0000005,  // Ny ID for tone
+        .mask = CAN_EXT_ID_MASK
+    };
+    
     int filter_id_str = can_add_rx_filter(dev, rx_cb, cb_data, &filter_str); //(FENRIS24) Setting the filter for the string as a variable
     int filter_id_byte = can_add_rx_filter(dev, rx_cb, cb_data, &filter_byte); //(FENRIS24) Setting the filter for the byte as a variable
     int filter_id_pi = can_add_rx_filter(dev, rx_cb, cb_data, &filter_pi); //(PROWLTECH25) filter for kontroller values from PI 
+    int filter_id_tone = can_add_rx_filter(dev, rx_cb, cb_data, &filter_tone); //(PROWLTECH25) Cezar husk å kommenter...
 
     return (filter_id_str >= 0 && filter_id_byte >= 0 && filter_id_pi >= 0) ? 0 : -1;  //(FENRIS24) Return 0 if both filters are added successfully //(PROWLTECH25) Pi also return to 0
 }
@@ -79,6 +87,16 @@ void can_rx_callback(const struct device *dev, struct can_frame *frame, void *us
     //(PROWLTECH25) Sjekker fis frame fra BUS har den samme ID og frame data som blir sendt
     else if (frame->id == RECEIVE_ID_PI) {
         handle_pi_controller_data(frame); 
+    }
+    //(PROWLTECH25) Cezar husk å kommenter....
+    else if (frame->id == 0x0000005 && frame->dlc == 1) {
+        uint8_t play_tone = frame->data[0];
+        if (play_tone) {
+            play_tone();
+        } else {
+            stop_tone();
+        }
+    }    
     else {
         printk("Unexpected data format or ID\n");
     }
