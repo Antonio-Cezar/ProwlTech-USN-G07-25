@@ -414,7 +414,7 @@ class ProwlTechApp(ctk.CTk):
     def update_sensor_display(self):
         if isinstance(self.sensor_value, dict):
             text = "\n".join(
-            [f"{key}: {'🟥 Aktiv' if val else '🟩 Inaktiv'}" for key, val in self.sensor_value.items()]
+            [f"{key}: {'Aktiv' if val else 'Inaktiv'}" for key, val in self.sensor_value.items()]
         )
         else:
             text = "Sensorverdi: --"
@@ -440,7 +440,6 @@ class ProwlTechApp(ctk.CTk):
 
         self.top_section()
         self.mid_section()
-        self.bot_section()
 
         self.running = True
         self.sensor_value = "__"

@@ -1,7 +1,7 @@
-use_mock = True # Sett til False når Linux brukes 
+USE_MOCK = True # Sett til False når Linux brukes 
 
 # ---------- Mock-versjon for å teste i windows
-if use_mock:
+if USE_MOCK:
     import random 
     import time
 
@@ -10,10 +10,10 @@ if use_mock:
         byte = 1
 
         sensor_states = {
-            'Front': (byte >> 0) & 1,
-            'Right': (byte >> 1) & 1,
-            'Left':  (byte >> 2) & 1,
-            'Rear':  (byte >> 3) & 1
+            'Foran': (byte >> 0) & 1,
+            'Høyre': (byte >> 1) & 1,
+            'Venstre':  (byte >> 2) & 1,
+            'Bak':  (byte >> 3) & 1
         }
         print(f"[MOCK] Mottatt sensorstatus: {sensor_states}")
         return sensor_states
