@@ -308,6 +308,18 @@ class ProwlTechApp(ctk.CTk):
         self.error_frame.pack(expand=True)
         self.error_frame.pack_propagate(False)
 
+        # Feilmeldinger - Tekstboks
+        self.error_textbox = ctk.CTkTextbox(
+            self.error_frame,
+            font=("Century Gothic", 14),
+            text_color="white",
+            fg_color=error_section,
+            wrap="word"
+        )
+        self.error_textbox.pack(expand=True, fill="both", padx=20, pady=10)
+        self.error_textbox.insert("end", "Ingen feilmeldinger.\n")
+        self.error_textbox.configure(state="disabled")
+
 #--------------------POPUP-VINDUER------------------------- 
     # Åpner koble_til_kontroller-popup
     def open_connection_window(self):
@@ -456,6 +468,13 @@ class ProwlTechApp(ctk.CTk):
         self.sensor_value = "__"
         threading.Thread(target=self.get_sensor_data, daemon=True).start()
         self.update_sensor_display()
+
+    # Logger feilmeldinger
+    def log_error(self, message: str):
+        self.error_textbox.configure(state="normal")
+        self.error_textbox.insert("end", f"{message}\n")
+        self.error_textbox.see("end")   # Scroller til bunnen
+        self.error_textbox.configure(state="disabled")
 
 # Starter GUI-applikasjon
 app = ProwlTechApp()
