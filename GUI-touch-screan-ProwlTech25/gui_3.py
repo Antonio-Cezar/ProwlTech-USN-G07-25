@@ -21,7 +21,7 @@ ctk.set_appearance_mode("dark")
 text_color = "#FFFFFF"
 background_color = "#0D0D1F"
 top_panel_color = "#230F46"
-error_section = "#503C74"
+error_section = "#2C161F"
 frame_color = "#230F46"
 frame_border_color = "#503C74"
 
@@ -132,7 +132,7 @@ class ProwlTechApp(ctk.CTk):
 
         # Legger til USN-logo           
         self.logo_label = ctk.CTkLabel(self.top_frame, image=usn_logo, text="")      
-        self.logo_label.place(x=720, y=25)                                               
+        self.logo_label.place(x=700, y=15)                                               
 
         # Titteltekst i midten av toppseksjonen
         self.title_label = ctk.CTkLabel(
@@ -176,7 +176,7 @@ class ProwlTechApp(ctk.CTk):
         self.battery_container.grid(row=0, column=0, padx=(30, 5), pady=10, sticky="nsew")
         self.battery_container.grid_propagate(False)
 
-        # Titteltekst
+        # Batteristatus - Titteltekst
         self.battery_label = ctk.CTkLabel(
             self.battery_container, 
             text="BATTERISTATUS  ",
@@ -188,11 +188,21 @@ class ProwlTechApp(ctk.CTk):
         )
         self.battery_label.pack(side="top", anchor="w", padx=40, pady=(40, 0))
 
-        # Ramme
+        # Batteristatus - Ramme
         self.battery_frame = ctk.CTkFrame(self.battery_container, height=150, width=150, fg_color=frame_color, corner_radius=corner, border_color=frame_border_color, border_width=border_size)
         self.battery_frame.pack(side="top", expand=True, padx=10, pady=(0, 30))
+        self.battery_frame.pack_propagate(False)
 
-        
+        # Batteristatus - Innhold
+        self.battery_status = ctk.CTkLabel(
+            self.battery_frame,
+            text="- %",
+            font=("Century Gothic", 18),
+            text_color="white",
+            anchor="center",
+            justify="left"
+        )
+        self.battery_status.pack(expand=True)
 
         # Tilkoblingsstatus:----------------------------------------------
         self.connection_containter = ctk.CTkFrame(self.mid_frame, fg_color=background_color)
@@ -220,7 +230,7 @@ class ProwlTechApp(ctk.CTk):
         self.connection_status = ctk.CTkLabel(
             self.connection_frame,
             text="Ingen kontroller tilkoblet",
-            font=("Century Gothic", 15),
+            font=("Century Gothic", 16),
             text_color="white",
             anchor="center",
             justify="left"
@@ -291,6 +301,7 @@ class ProwlTechApp(ctk.CTk):
             justify="left"
         )
         self.error_label.pack(side="top", anchor="w", padx=35, pady=0)
+        
 
         # Feilmeldinger - Ramme
         self.error_frame = ctk.CTkFrame(self.error_container, height=75, width=750, fg_color=error_section, corner_radius=30)
@@ -396,7 +407,7 @@ class ProwlTechApp(ctk.CTk):
         success = bluetooth_dbus.connect_to_device(name)
         if success:
             self.status_label.configure(text=f"Koblet til {name}", text_color="white")
-            self.connection_status.configure(text=f"Tilkoblet: {name}", text_color="white")
+            self.connection_status.configure(text=f"Kontroller: Tilkoblet \n\n {name}", text_color="white")
         else:
             self.status_label.configure(text=f"Kunne ikke koble til {name}", text_color="red")
             self.connection_status.configure(text=f"Ingen kontroller tilkoblet", text_color="red")

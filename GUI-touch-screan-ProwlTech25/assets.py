@@ -6,7 +6,7 @@ def load_image(path, size):
 
 # Logoer
 prowltech_logo = load_image("Image/prowltech_logo2.png", (550, 550))
-usn_logo = load_image("Image/USN_logo2.png", (60, 40))
+usn_logo = load_image("Image/USN_logo.png", (60, 70))
 
 # Ikoner
 info_icon = load_image("Image/info.png", (20, 20))
