@@ -3,6 +3,7 @@ import struct
 import time
 import pygame
 import math
+import os
 
 
 #================================================================
@@ -22,13 +23,15 @@ MSG_ID = 0x0000001  # samme som RECEIVE_ID hos motor-MB
 # Kontroller verdi sending.
 
 # Funksjonen for pakken som blir sendt
-def send_data(bus, fart, vinkel, rotasjon=0.0):
+def send_data(bus, fart, vinkel, rotasjon=0.0, sving_js=0.0):
     try:
         vinkel_i = int(vinkel * 100)  # OBS: må bruke samme faktor som Zephyr → /100
         fart_i = int(fart * 100)
         rotasjon_i = int(rotasjon * 100)
+        sving_js_i = int(sving_js * 100)
 
-        data = struct.pack('<hhh', fart_i, vinkel_i, rotasjon_i)  # 6 byte → matcher C
+        data = struct.pack('<hhhh', fart_i, vinkel_i, rotasjon_i, sving_js_i)# # 8 byte → matcher C-struktur (4 x int16)
+
 
         melding = can.Message(
             arbitration_id=MSG_ID,
@@ -36,36 +39,29 @@ def send_data(bus, fart, vinkel, rotasjon=0.0):
             is_extended_id=EXTENDED_ID
         )
         bus.send(melding)
-        print(" ")
-        print(" ")
-        print("-----------------------")
-        print(f"SENDT → Fart: {fart:.2f}, Vinkel (rad): {vinkel:.2f}, Rotasjon: {rotasjon:+.2f}")
-        print(f"SENDT → Fart: {fart:.2f}, Vinkel: {radianer_til_grader(vinkel):.1f}°, Rotasjon: {rotasjon:+.2f}")
-        print(" ")
-        print(" ")
-        print(f"[DEBUG] Skal sende → Fart: {fart}, Vinkel: {vinkel}, Rotasjon: {rotasjon}")
-        print(f"[DEBUG] RB: {rb}, LB: {lb}, rotasjon: {rotasjon}")
-        print(f"[DEBUG] Data-lengde: {len(data)} byte")
-        print("RAW DATA (hex):", data.hex())
-        print("-----------------------")
-        print(" ")
-        print(" ")
+        vis_data(fart, vinkel, rotasjon, sving_js, data)
+
     except Exception as e:
-        print(" ")
-        print(" ")
-        print("-----------------------")
-        print("Feil ved sending! :", e)
-        print(f"→ Fart: {fart:.2f}, Vinkel (rad): {vinkel:.2f}, Rotasjon: {rotasjon:+.2f}")
-        print(f"→ Fart: {fart:.2f}, Vinkel: {radianer_til_grader(vinkel):.1f}°, Rotasjon: {rotasjon:+.2f}")
-        print(" ")
-        print(" ")
-        print(f"[DEBUG] Skal sende → Fart: {fart}, Vinkel: {vinkel}, Rotasjon: {rotasjon}")
-        print(f"[DEBUG] RB: {rb}, LB: {lb}, rotasjon: {rotasjon}")
-        print(f"[DEBUG] Data-lengde: {len(data)} byte")
-        print("RAW DATA (hex):", data.hex())
-        print("-----------------------")
-        print(" ")
-        print(" ")
+        print("FEIL VED SENDING!!!")
+        print(f"→ Fart={fart}, Vinkel={vinkel}, Rotasjon={rotasjon}, Sving={sving_js}")
+        print(f"Feilmelding: {e}")
+
+
+def vis_data(fart, vinkel, rotasjon, sving_js, data):
+    os.system('clear')  # Bruk 'cls' i stedet for 'clear' hvis du kjører på Windows
+    print("========================================")
+    print("SENDT DATA TIL CAN-BUS")
+    print("========================================")
+    print(f"Fart       : {fart:.2f}")
+    print(f"Vinkel     : {vinkel:.2f} rad / {radianer_til_grader(vinkel):.1f}°")
+    print(f"Rotasjon   : {rotasjon:+.2f}")
+    print(f"Sving_js   : {sving_js:+.2f}")
+    print("----------------------------------------")
+    print(f"Int-verdier: Fart={int(fart*100)}, Vinkel={int(vinkel*100)}, "
+          f"Rotasjon={int(rotasjon*100)}, Sving={int(sving_js*100)}")
+    print(f"Data-lengde: {len(data)} byte")
+    print(f"RAW-data   : {data.hex()}")
+    print("========================================\n")
 
 # Funksjon for å beregne fart og vinkel.
 def beregn_fart_og_vinkel(x, y):
@@ -190,9 +186,13 @@ while True:
         elif lb:
             rotasjon = -1.0
 
-        # == Input Joystick ===
+        # == Input Joystick høyre ===
         venstre_x = joystick.get_axis(2)
         venstre_y = joystick.get_axis(3)
+
+        # === Input sving akse (venstre joystick) ===
+        sving_js = joystick.get_axis(0)
+        sving_js = 0.0 if abs(sving_js) < 0.1 else sving_js  # Død-sone
 
         # === Input Trigger RT og LT ===
         rt = joystick.get_axis(4)  # Høyre trigger (RT)
@@ -229,7 +229,8 @@ while True:
             vinkel = 0.0  # Radianer
             fart_r = round(fart, 2)
             vinkel_r = round(vinkel, 2)
-            send_data(bus, fart_r, vinkel_r, rotasjon=rotasjon * rotasjon_faktor)
+            send_data(bus, fart_r, vinkel_r, rotasjon=rotasjon, sving_js=sving_js)
+
             aktiv_joystick = True
             continue  # hopp over resten av loopen
 
@@ -239,7 +240,8 @@ while True:
             vinkel = math.pi  # 180°
             fart_r = round(fart, 2)
             vinkel_r = round(vinkel, 2)
-            send_data(bus, fart_r, vinkel_r, rotasjon=rotasjon * rotasjon_faktor)
+            send_data(bus, fart_r, vinkel_r, rotasjon=rotasjon, sving_js=sving_js)
+
             aktiv_joystick = True
             continue # hopp over resten av loopen
 
@@ -270,51 +272,58 @@ while True:
                 fart_r = 0.3  # fallback
 
             vinkel_r = 0.0  # fast retning for rotasjon
-            send_data(bus, fart_r, vinkel_r, rotasjon=rotasjon * rotasjon_faktor)
+            send_data(bus, fart_r, vinkel_r, rotasjon=rotasjon, sving_js=sving_js)
             aktiv_joystick = True
             sist_sendte_fart = fart_r
             sist_sendte_vinkel = vinkel_r
             continue
 
-
-
         # Bare send hvis fart er stor nok så vil den sende til bus
         if fart_r > 0.01:
             if fart_r != sist_sendte_fart or vinkel_r != sist_sendte_vinkel:
-                send_data(bus, fart_r, vinkel_r, rotasjon=rotasjon * rotasjon_faktor)
+                send_data(bus, fart_r, vinkel_r, rotasjon=rotasjon, sving_js=sving_js)
                 sist_sendte_fart = fart_r
                 sist_sendte_vinkel = vinkel_r
                 aktiv_joystick = True
+                continue
         else:
             if rotasjon != 0.0:
                 vinkel = 0.0  # Kan være hva som helst egentlig
-                send_data(bus, fart, vinkel, rotasjon=rotasjon * rotasjon_faktor)
+                send_data(bus, fart_r, vinkel_r, rotasjon=rotasjon, sving_js=sving_js)
                 aktiv_joystick = True
                 sist_sendte_fart = fart
                 sist_sendte_vinkel = vinkel
 
             elif aktiv_joystick:
                 # Stoppbevegelse kun én gang
-                send_data(bus, 0.0, 0.0, rotasjon=0.0)
+                send_data(bus, 0.0, 0.0, rotasjon=0.0, sving_js=0.0)
                 aktiv_joystick = False
                 sist_sendte_fart = 0.0
                 sist_sendte_vinkel = 0.0
 
+        # Håndterer sving funksjonaliteten
+        # Håndterer sving-funksjonalitet uten å endre vinkel
+        if abs(sving_js) > 0.01:
+            # La vinkel være uendret – vi bare sender sving_js
+            send_data(bus, fart_r, vinkel_r, rotasjon=rotasjon, sving_js=sving_js)
+            aktiv_joystick = True
+            sist_sendte_fart = fart_r
+            sist_sendte_vinkel = vinkel_r
+            continue
 
-            print(" ")
-            print(" ")
-            print("-----------------------")
-            print("[IDLE] Joystick i ro – fart for lav")
-            print(f"→ Fart: {fart:.2f}, Vinkel (rad): {vinkel:.2f}, Rotasjon: {rotasjon:+.2f}")
-            print(f"→ Fart: {fart:.2f}, Vinkel: {radianer_til_grader(vinkel):.1f}°, Rotasjon: {rotasjon:+.2f}")
-            print(f"Aktiv hastighetsmodus: {Hastighetsmodus}")
-            print(" ")
-            print(" ")
-            print(f"[DEBUG] Skal sende → Fart: {fart}, Vinkel: {vinkel}, Rotasjon: {rotasjon}")
-            print(f"[DEBUG] RB: {rb}, LB: {lb}, rotasjon: {rotasjon}")
-            print("-----------------------")
-            print(" ")
-            print(" ")
+        print(" ")
+        print(" ")
+        os.system('clear')
+        print("========================================")
+        print("IDLE – Joystick i ro")
+        print("========================================")
+        print(f"Fart       : {fart:.2f}")
+        print(f"Vinkel     : {vinkel:.2f} rad / {radianer_til_grader(vinkel):.1f}°")
+        print(f"Rotasjon   : {rotasjon:+.2f}")
+        print(f"Sving_js   : {sving_js:+.2f}")
+        print("========================================\n")
+        print(" ")
+        print(" ")
 
 
     except pygame.error:
