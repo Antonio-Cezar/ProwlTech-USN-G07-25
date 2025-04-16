@@ -52,7 +52,7 @@ class PopupWindow:
             fg_color="#6C3DAF",
             hover_color="#6C578A",
             text_color="white",
-            corner_radius=10,
+            corner_radius=40,
             width=120,
             height=40,
             command=self.close

@@ -37,6 +37,7 @@ popup_button_color = "#6C3DAF"
 border_size = 10
 corner = 30
 container_text_size = 14
+button_corner = 40
 
 # Hovedklasse for GUI-et
 class ProwlTechApp(ctk.CTk):
@@ -44,12 +45,13 @@ class ProwlTechApp(ctk.CTk):
         super().__init__()
         self.title("ProwlTech Kontrollpanel")           # Setter vindutittel
         self.geometry("800x480")                        # Setter størrelse 
-        self.attributes("-fullscreen", True)            # Fullskjerm på Raspberry Pi
+        #self.attributes("-fullscreen", True)            # Fullskjerm på Raspberry Pi
         self.bind("<Escape>", self.exit_fullscreen)     # ESC lukker programmet
-        self.config(cursor="none")                      # Skjuler musepeker når GUI er i gang
+        #self.config(cursor="none")                      # Skjuler musepeker når GUI er i gang
 
         self.bluetooth_devices = []                      # Liste for bluetooth-enheter
         self.device_menu = None 
+        self.connected_device = None
 
         # Konfigurerer rutenett for strukturen
 
@@ -86,7 +88,7 @@ class ProwlTechApp(ctk.CTk):
             text_color="white",
             image=start_icon,
             compound="right",
-            corner_radius=30,
+            corner_radius=button_corner,
             command=self.open_control_panel
         )
         self.start_button.place(relx=0.5, rely=0.9, anchor="center")
@@ -103,7 +105,7 @@ class ProwlTechApp(ctk.CTk):
             text_color="white",
             image=info_icon,
             compound="right",
-            corner_radius=30,
+            corner_radius=button_corner,
             command=self.open_info_window
         )
         self.info_button.place(relx=0.8, rely=0.9, anchor="center")
@@ -120,8 +122,8 @@ class ProwlTechApp(ctk.CTk):
             text_color="white",
             image=can_icon,
             compound="right",
-            corner_radius=30,
-            command=self.run_can_script
+            corner_radius=button_corner,
+            command=self.open_can_window
         )
         self.can_bus_button.place(relx=0.2, rely=0.9, anchor="center")
 
@@ -137,7 +139,7 @@ class ProwlTechApp(ctk.CTk):
             text_color="white",
             image=cross_icon,
             compound="right",
-            corner_radius=30,
+            corner_radius=button_corner,
             command=self.on_closing
         )
         self.exit_button.place(relx=0.9, rely=0.1, anchor="center")
@@ -175,7 +177,8 @@ class ProwlTechApp(ctk.CTk):
             compound="right",
             fg_color=button_color,
             hover_color=button_hover_color,
-            corner_radius=40,command=self.front_page
+            corner_radius=button_corner,
+            command=self.front_page
         )
         self.home_button.grid(row=0, column=0, padx=60, pady=30)
 
@@ -267,7 +270,7 @@ class ProwlTechApp(ctk.CTk):
             fg_color=button_color,
             hover_color=button_hover_color,
             text_color="white",
-            corner_radius=30,
+            corner_radius=button_corner,
             command=self.open_connection_window
         )
         self.connect_button.pack(pady=(5, 20))
@@ -355,25 +358,21 @@ class ProwlTechApp(ctk.CTk):
             fg_color=popup_button_color,
             hover_color=button_hover_color,
             text_color="white",
-            corner_radius=10,
+            corner_radius=button_corner,
             command=self.start_update
         )
         self.update_button.place(relx=0.05, rely=0.5, anchor="w")
 
-        # Prosessbar (skjult når inaktiv)
-        self.progress = ctk.CTkProgressBar(self.popup.bottom, progress_color=frame_color)
-        self.progress.pack(pady=10, padx=20, fill="x")
-        self.progress.configure(mode="indeterminate")
-        self.progress.set(0)
-        self.progress.pack_forget()
+        
 
-        self.status_label = ctk.CTkLabel(
-            self.popup.bottom,
-            text="",
-            font=("Century Gothic", 16),
-            text_color="white"
-        )
-        self.status_label.pack(pady=(10, 0))
+        #self.status_label = ctk.CTkLabel(
+         #   self.popup.bottom,
+          #  text="",
+           # font=("Century Gothic", 16),
+            #text_color="white"
+        #)
+        #self.status_label.pack(pady=(10, 0))
+        
 
     # Åpner info-popup
     def open_info_window(self):
@@ -387,13 +386,57 @@ class ProwlTechApp(ctk.CTk):
         )
         self.popup.add_widget(info_label, padx=30, pady=20)
 
+    # Åpner CAN-meny
+    def open_can_window(self):
+        self.popup = PopupWindow(self, title="CAN-Meny")
+
+        # Alternativ 1: CAN-bus meny
+        self.can_button = ctk.CTkButton(
+            self.popup.bottom,
+            text="1. CAN-bus kontrollmeny",
+            font=("Century Gothic", 16),
+            fg_color="#6C3DAF",
+            hover_color="#7D4CC3",
+            corner_radius=20,
+            command=None
+        )
+        self.can_button.pack(pady=10, padx=20, fill="x")
+
+        # Alternativ 2: Motorkontroller meny
+        self.motor_button = ctk.CTkButton(
+            self.popup.bottom,
+            text="2. Motorkontroller meny",
+            font=("Century Gothic", 16),
+            fg_color="#6C3DAF",
+            hover_color="#7D4CC3",
+            corner_radius=20,
+            command=None
+        )
+        self.motor_button.pack(pady=10, padx=20, fill="x")
+
+        # Alternativ 3: Kontroller meny
+        self.controller_button = ctk.CTkButton(
+            self.popup.bottom,
+            text="3. Kontroller meny",
+            font=("Century Gothic", 16),
+            fg_color="#6C3DAF",
+            hover_color="#7D4CC3",
+            corner_radius=20,
+            command=None
+        )
+        self.controller_button.pack(pady=10, padx=20, fill="x")
+
 #--------------------KOBLE TIL KONTROLLER-------------------------  
     # Oppdaterer søk etter kontrollere
     def start_update(self):
         self.update_button.configure(text="Søker...", state="disabled")
-        self.progress.pack(pady=10)
-        self.progress.start()
-        #self.after(3000, self.finish_update)
+
+        # Prosessbar
+        self.progress = ctk.CTkProgressBar(self.popup.bottom, progress_color=frame_color)   # Oppretter progressbar
+        self.progress.pack(pady=10, padx=20, fill="x")
+        self.progress.configure(mode="indeterminate")
+        self.progress.set(0)
+        self.progress.start()   # Starter progressbar
 
         threading.Thread(target=self.scan_and_show).start() # Kjører skanning i egen tråd slik at GUI ikke fryser
 
@@ -403,45 +446,91 @@ class ProwlTechApp(ctk.CTk):
         self.popup.bottom.after(0, lambda: self.show_devices(devices))
 
     def show_devices(self, devices):
-        self.progress.stop() 
-        self.progress.pack_forget() 
+        self.progress.stop()    # Stopper progressbar
+        self.progress.destroy()     # Sletter progressbar
+
 
         # Fjerner gamle synlige enheter om det er noen
         for widget in self.popup.bottom.winfo_children():
-                if isinstance(widget, ctk.CTkButton) or (isinstance(widget, ctk.CTkLabel) and widget != self.status_label):
                     widget.destroy()
 
         if devices:
             for name in devices.values():
-                btn = ctk.CTkButton(
-                    self.popup.bottom,
+                row = ctk.CTkFrame(self.popup.bottom, fg_color="#50256D", height=50, width=400, corner_radius=30)
+                row.pack(fill="x", pady=5, padx=20)
+                row.pack_propagate(False)
+
+                # Navn på enhet
+                name_label = ctk.CTkLabel(
+                    row,
                     text=name,
+                    text_color="white",
+                    font=("Century Gothic", 14),
+                    anchor="w"
+                )
+                name_label.pack(side="left", padx=(15, 10))
+
+                # Status
+                is_connected = self.connected_device == name
+                status_label = ctk.CTkLabel(
+                    row,
+                    text="Tilkoblet" if is_connected else "",
+                    text_color="green" if is_connected else "white",
+                    font=("Century Gothic", 14)
+                )
+                status_label.pack(side="left", padx=(5, 20))
+
+                # Koble til/fra
+                btn = ctk.CTkButton(
+                    row,
+                    text="Koble fra" if is_connected else "Koble til",
+                    font=("Century Gothic", 16),
+                    width=90,
+                    height=30,
                     fg_color=popup_button_color,
                     hover_color=button_hover_color,
                     text_color="white",
-                    corner_radius=10,
-                    command=lambda n=name: self.connect_to_device(n)
+                    corner_radius=button_corner,
+                    command=lambda n=name: self.toggle_connection(n)
                 )
-                btn.pack(pady=5, padx=20, fill="x")
+                btn.pack(side="right", padx=(10, 15))
 
         else:
             no_devices_label = ctk.CTkLabel(
-                self.bottom,
+                self.popup.bottom,
                 text="Ingen enheter funnet",
                 text_color="white",
                 font=("Century Gothic", 16)
             )
             no_devices_label.pack(pady=10)
 
-    def connect_to_device(self, name):
-        success = bluetooth_dbus.connect_to_device(name)
-        if success:
-            self.status_label.configure(text=f"Koblet til {name}", text_color="white")
-            self.connection_status.configure(text=f"Kontroller: Tilkoblet \n\n {name}", text_color="white")
+        self.update_button.configure(text="Oppdater", state="normal")   # Gjør det mulig å trykke på søke-knappen igjen
+
+    def toggle_connection(self, name):
+
+        # Koblet til - koble fra
+        if self.connected_device == name:
+            success = bluetooth_dbus.disconnect_from_device(name)
+
+            if success:
+                self.connected_device = None
+                #self.status_label.configure(text=f"Koblet fra {name}", text_color="orange")
+                self.connection_status.configure(text="Ingen kontroller tilkoblet", text_color="white")
+
+        # Ikke tilkoblet - koble til
         else:
-            self.status_label.configure(text=f"Kunne ikke koble til {name}", text_color="red")
-            self.connection_status.configure(text=f"Ingen kontroller tilkoblet", text_color="red")
-            self.log_error(f"Klarte ikke koble til {name}")     # Logger feilmelding
+            success = bluetooth_dbus.connect_to_device(name)
+
+            if success:
+                self.connected_device = name
+                #self.status_label.configure(text=f"Koblet til {name}", text_color="green")
+                self.connection_status.configure(text=f"Kontroller: Tilkoblet \n\n {name}", text_color="white")
+            else:
+                #self.status_label.configure(text=f"Kunne ikke koble til {name}", text_color="red")
+                self.connection_status.configure(text=f"Ingen kontroller tilkoblet", text_color="red")
+                self.log_error(f"Klarte ikke koble til {name}")     # Logger feilmelding
+
+        self.start_update()
 
 #--------------------SENSORDATA-------------------------  
     def get_sensor_data(self):
