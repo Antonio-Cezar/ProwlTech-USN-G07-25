@@ -305,7 +305,7 @@ class ProwlTechApp(ctk.CTk):
         
 
         # Feilmeldinger - Ramme
-        self.error_frame = ctk.CTkFrame(self.error_container, height=120, width=750, fg_color=error_section, corner_radius=30)
+        self.error_frame = ctk.CTkFrame(self.error_container, height=100, width=750, fg_color=error_section, corner_radius=30)
         self.error_frame.pack(expand=True)
         self.error_frame.pack_propagate(False)
 
