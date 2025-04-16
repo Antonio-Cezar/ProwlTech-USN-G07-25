@@ -21,7 +21,7 @@ if USE_MOCK:
 else:
     import can
 
-    MSG_ID = 0x3  # Fra Zephyr-definisjonen
+    MSG_ID = 0x1  # Fra Zephyr-definisjonen
     CHANNEL = 'can0'  # Standard SocketCAN-grensesnitt på Raspberry Pi
 
     try:
@@ -31,22 +31,17 @@ else:
         bus = None
 
     def receive_sensor_data():
-        if bus is None:
-            print("CAN-bus ikke tilgjengelig")
-            return None
-
         msg = bus.recv(timeout=1.0)
-        if msg and msg.arbitration_id == MSG_ID and msg.dlc >= 1:
-            byte = msg.data[0]
-            sensor_states = {
-                'Foran': (byte >> 0) & 1,
-                'Høyre': (byte >> 1) & 1,
-                'Venstre':  (byte >> 2) & 1,
-                'Bak':  (byte >> 3) & 1
+        if msg and msg.arbitration_id == MSG_ID and msg.dlc == 5:
+            print(f"[CAN] Mottok rådata: {msg.data.hex()}")
+            # Du kan gjøre hva du vil med msg.data[0] til msg.data[4] her
+            return {
+                'Front': msg.data[0],
+                'Right': msg.data[1],
+                'Left': msg.data[2],
+                'Rear': msg.data[3]
             }
-            print(f"[CAN] Mottatt sensorstatus: {sensor_states}")
-            return sensor_states
-        print(f"[CAN] Mottok ingen godkjent melding – ID: {msg.arbitration_id if msg else 'None'}, dlc: {msg.dlc if msg else 'None'}")
+        print("[CAN] Ingen gyldig melding mottatt")
         return None
 
 
