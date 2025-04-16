@@ -36,7 +36,7 @@ else:
             return None
 
         msg = bus.recv(timeout=1.0)
-        if msg and msg.arbitration_id == MSG_ID and msg.dlc == 1:
+        if msg and msg.arbitration_id == MSG_ID and msg.dlc >= 1:
             byte = msg.data[0]
             sensor_states = {
                 'Foran': (byte >> 0) & 1,
@@ -46,6 +46,7 @@ else:
             }
             print(f"[CAN] Mottatt sensorstatus: {sensor_states}")
             return sensor_states
+        print(f"[CAN] Mottok ingen godkjent melding – ID: {msg.arbitration_id if msg else 'None'}, dlc: {msg.dlc if msg else 'None'}")
         return None
 
 
