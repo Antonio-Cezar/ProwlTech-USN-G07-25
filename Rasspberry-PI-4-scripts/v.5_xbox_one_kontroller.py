@@ -6,34 +6,40 @@ import math
 import os
 
 
-#================================================================
 # (PROWLTECH25 - CA)
-# Konfigurasjon (tilpasset Zephyt microbit oppsett)
-CHANNEL = 'can0'           # CAN på PI
-BITRATE = 500000           # Bitrate
-EXTENDED_ID = True         # Brukes fordi Zephyr bruker 29-bit ID (IDE flag satt definert fra før)
+#================================================================
+# KONFIGURASJON
+#================================================================
+# Konfigurasjon for CAN-oppsett, brukt på Raspberry Pi med Zephyr-enhet
+CHANNEL = 'can0'           # CAN-enhetens navn
+BITRATE = 500000           # Hastighet på CAN-bussen
+EXTENDED_ID = True         # Zephyr bruker 29-bit ID, så vi setter extended ID
 
-# ID til scriptet for sending av kontroller verdier
-MSG_ID_motor = 0x0000001  # samme som RECEIVE_ID hos motor-MB
-MSG_ID_COM = 0x0000020
+# CAN-meldings-IDer (brukes for å identifisere meldinger på bussen)
+MSG_ID_motor = 0x0000001   # Melding til motorstyring
+MSG_ID_COM = 0x0000020     # Melding for kommandoer (eks. tone)
+
 
 #================================================================
-
-
+# FUNKSJONER FOR CAN-KOMMUNIKASJON
 #================================================================
-# (PROWLTECH25 - CA)
 # Kontroller verdi sending.
-
 # Funksjonen for pakken som blir sendt
 def send_data(bus, fart, vinkel, rotasjon=0.0, sving_js=0.0):
+    # Sender kontrollkommando til motor via CAN-bussen.
+    # Parametrene representerer:
+    # fart: linær hastighet (0.0 til 1.0)
+    # vinkel: retning i radianer (0–2π), styrer hvilken vei bilen skal
+    # rotasjon: rotasjonshastighet, vanligvis -1.0 (venstre) til +1.0 (høyre)
+    # sving_js: verdi fra sving-joystick, brukes til finjustering av sving
     try:
+        # Skalere flyttall til heltall (matchende format med Zephyr-C-struktur)
         vinkel_i = int(vinkel * 100)  # OBS: må bruke samme faktor som Zephyr → /100
         fart_i = int(fart * 100)
         rotasjon_i = int(rotasjon * 100)
         sving_js_i = int(sving_js * 100)
 
         data = struct.pack('<hhhh', fart_i, vinkel_i, rotasjon_i, sving_js_i)# # 8 byte → matcher C-struktur (4 x int16)
-
 
         melding = can.Message(
             arbitration_id=MSG_ID_motor,
@@ -48,7 +54,8 @@ def send_data(bus, fart, vinkel, rotasjon=0.0, sving_js=0.0):
         print(f"→ Fart={fart}, Vinkel={vinkel}, Rotasjon={rotasjon}, Sving={sving_js}")
         print(f"Feilmelding: {e}")
 
-def send_tone_command(bus, aktiv=True):
+def send_tone(bus, aktiv=True):
+    #Sender tone-kommando til microbit (start/stop lyd)
     try:
         # 1 byte: tone på/av
         data = struct.pack('<B', 1 if aktiv else 0)
@@ -63,7 +70,8 @@ def send_tone_command(bus, aktiv=True):
         print("FEIL ved sending av tone-kommando:", e)
 
 def vis_data(fart, vinkel, rotasjon, sving_js, data):
-    os.system('clear')  # Bruk 'cls' i stedet for 'clear' hvis du kjører på Windows
+    """Viser verdier sendt til CAN, nyttig for debug"""
+    os.system('clear')
     print("========================================")
     print("SENDT DATA TIL CAN-BUS")
     print("========================================")
@@ -78,8 +86,14 @@ def vis_data(fart, vinkel, rotasjon, sving_js, data):
     print(f"RAW-data   : {data.hex()}")
     print("========================================\n")
 
+
+
+#================================================================
+# HJELPEFUNKSJONER
+#================================================================
 # Funksjon for å beregne fart og vinkel.
 def beregn_fart_og_vinkel(x, y):
+    #Beregner fart og vinkel basert på joystickens posisjon
     # Død-sone – ignorer små bevegelser
     if abs(x) < 0.1:
         x = 0.0
@@ -103,6 +117,7 @@ def beregn_fart_og_vinkel(x, y):
 
 # Bestem fart basert på valgt profil
 def skaler_fart(fart, profil):
+    #Tilpasser fart etter valgt hastighetsmodus
     if profil == 1:
         return fart * 0.3
     elif profil == 2:
@@ -113,7 +128,8 @@ def skaler_fart(fart, profil):
 
 
 # Funksjon for vibrasjon av kontroller
-def rumble_ganger(joystick, antall, varighet=50, mellomrom=0.1):
+def vibrer_kont_funk(joystick, antall, varighet=50, mellomrom=0.1):
+     #Vibrerer kontrolleren for tilbakemelding ved modusbytte
     for _ in range(antall):
         try:
             joystick.rumble(1.0, 1.0, varighet)
@@ -128,8 +144,13 @@ def rumble_ganger(joystick, antall, varighet=50, mellomrom=0.1):
 def radianer_til_grader(rad):
     return (math.degrees(rad) + 360) % 360
 
+
+
+#================================================================
+# INITIALISERING AV CAN OG KONTROLLER
+#================================================================
 # Starter opp CAN-bus sending
-def initialize_bus():
+def start_bus():
     try:
         print("Starter CAN kommunikajson...")
         bus = can.interface.Bus(channel=CHANNEL, bustype='socketcan', bitrate=BITRATE)
@@ -139,7 +160,8 @@ def initialize_bus():
         print("FEIL: CAN er IKKE på", e)
         return None
 
-def initialize_joystick():
+def start_joystick():
+    # Søker etter og initialiserer første tilkoblede joystick
     pygame.joystick.quit()
     pygame.joystick.init()
 
@@ -163,9 +185,12 @@ def initialize_joystick():
 
 
 
+#================================================================
+# HOVEDPROGRAM
+#================================================================
 # bibliotek pygame og kontroller
 pygame.init()
-bus = initialize_bus()
+bus = start_bus()
 
 if bus is None:
     exit()
@@ -178,11 +203,10 @@ Hastighetsmodus = 1
 forrige_x = 0
 tone_aktiv = False
 
-#================================================================
 # Loop som registrerer verdier og sender verdier til pakke funsjonene (send_data)
 while True:
     if joystick is None:
-        joystick = initialize_joystick()
+        joystick = start_joystick()
         continue  # prøv igjen neste runde
 
     try:
@@ -245,9 +269,9 @@ while True:
         # Send tone på når knappen trykkes ned, og tone av når den slippes
         if x != forrige_x:
             if x == 1:
-                send_tone_command(bus, aktiv=True)
+                send_tone(bus, aktiv=True)
             else:
-                send_tone_command(bus, aktiv=False)
+                send_tone(bus, aktiv=False)
 
         forrige_x = x  # Oppdater knappestatus
 
@@ -257,17 +281,17 @@ while True:
         if y:
             Hastighetsmodus = 1
             print("Hastighetsmodus 1 valgt (0.0-0.3)")
-            rumble_ganger(joystick, 1)
+            vibrer_kont_funk(joystick, 1)
 
         elif b:
             Hastighetsmodus = 2
             print("Hastighetsmodus 2 valgt (0.3-0.6)")
-            rumble_ganger(joystick, 2)
+            vibrer_kont_funk(joystick, 2)
 
         elif a:
             Hastighetsmodus = 3
             print("Hastighetsmodus 3 valgt (0.4-1.0)")
-            rumble_ganger(joystick, 3)
+            vibrer_kont_funk(joystick, 3)
 
         # Velg rotasjonsfart som faktor
         rotasjon_faktor = {1: 0.2, 2: 0.5, 3: 0.7}.get(Hastighetsmodus, 0.2)
