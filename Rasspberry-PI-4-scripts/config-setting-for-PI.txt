@@ -86,10 +86,7 @@ nano ~/.config/autostart/kontroller_autostart.desktop
 [Desktop Entry]
 Type=Application
 Name=Start Kontroller Script
-Exec=python3 /full/sti/til/v.5_xbox_one_kontroller.py
+Exec=python3 /home/prowltech/prowltech_script/v.5_xbox_one_kontroller.py
 Terminal=true
 X-GNOME-Autostart-enabled=true
-
-# Gjør den kjørbar
-chmod +x /full/sti/til/v.5_xbox_one_kontroller.py
 ========================================================
