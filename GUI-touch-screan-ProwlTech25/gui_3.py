@@ -125,6 +125,23 @@ class ProwlTechApp(ctk.CTk):
         )
         self.can_bus_button.place(relx=0.2, rely=0.9, anchor="center")
 
+        # Avslutt-knapp
+        self.exit_button = ctk.CTkButton(
+            self.front_frame,
+            text="Avslutt",
+            font=("Century Gothic", 20),
+            width=130,
+            height=40,
+            fg_color="#503C74",
+            hover_color=button_hover_color,
+            text_color="white",
+            image=cross_icon,
+            compound="right",
+            corner_radius=30,
+            command=self.on_closing
+        )
+        self.exit_button.place(relx=0.9, rely=0.1, anchor="center")
+
     # Toppseksjon: logo, tittel og knapper
     def top_section(self):
         self.top_frame = ctk.CTkFrame(self, fg_color=top_panel_color, height=100)
