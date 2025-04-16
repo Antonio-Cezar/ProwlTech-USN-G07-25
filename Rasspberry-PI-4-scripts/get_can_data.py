@@ -32,16 +32,19 @@ else:
 
     def receive_sensor_data():
         msg = bus.recv(timeout=1.0)
-        if msg and msg.arbitration_id == MSG_ID and msg.dlc == 5:
-            print(f"[CAN] Mottok rådata: {msg.data.hex()}")
-            # Du kan gjøre hva du vil med msg.data[0] til msg.data[4] her
-            return {
-                'Front': msg.data[0],
-                'Right': msg.data[1],
-                'Left': msg.data[2],
-                'Rear': msg.data[3]
+        if msg and msg.arbitration_id == MSG_ID and msg.dlc >= 1:
+            byte = msg.data[0]  # Bare bruk første byte til bitmasken
+            sensor_states = {
+                'Front': (byte >> 0) & 1,
+                'Right': (byte >> 1) & 1,
+                'Left':  (byte >> 2) & 1,
+                'Rear':  (byte >> 3) & 1
             }
+            print(f"[CAN] Mottatt sensorstatus: {sensor_states}")
+            return sensor_states
+
         print("[CAN] Ingen gyldig melding mottatt")
         return None
+
 
 
