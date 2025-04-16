@@ -328,7 +328,7 @@ while True:
             fart = (fart * 0.3) + (0.3 if fart > 0 else 0.0)
         elif Hastighetsmodus == 3:
             fart = (fart * 0.6) + (0.4 if fart > 0 else 0.0)
-
+        
         # Rund av og send
         fart_r = round(fart, 2)
         vinkel_r = round(vinkel, 2)
