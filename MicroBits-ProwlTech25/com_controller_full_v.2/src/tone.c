@@ -1,3 +1,4 @@
+#include <zephyr/kernel.h>
 #include <zephyr/device.h>
 #include <zephyr/drivers/pwm.h>
 #include "tone.h"
@@ -16,8 +17,8 @@ void tone_init(void) {
 void play_tone(void) {
     if (!device_is_ready(pwm_dev)) return;
 
-    // 1 kHz tone, 50% duty cycle
-    pwm_set(pwm_dev, SPEAKER_CHANNEL, 1000000U, 500000U, 0);
+    // 750 Hz tone (mellom 1 kHz og 500 Hz), 60% duty cycle
+    pwm_set(pwm_dev, SPEAKER_CHANNEL, 1333333U, 800000U, 0);
 }
 
 void stop_tone(void) {

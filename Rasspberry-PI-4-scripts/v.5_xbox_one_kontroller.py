@@ -15,7 +15,7 @@ EXTENDED_ID = True         # Brukes fordi Zephyr bruker 29-bit ID (IDE flag satt
 
 # ID til scriptet for sending av kontroller verdier
 MSG_ID_motor = 0x0000001  # samme som RECEIVE_ID hos motor-MB
-MSG_ID_COM = 0x0000005
+MSG_ID_COM = 0x0000020
 
 #================================================================
 
@@ -80,7 +80,7 @@ def vis_data(fart, vinkel, rotasjon, sving_js, data):
 
 # Funksjon for å beregne fart og vinkel.
 def beregn_fart_og_vinkel(x, y):
-    # dodsone – ignorer små bevegelser
+    # Død-sone – ignorer små bevegelser
     if abs(x) < 0.1:
         x = 0.0
     if abs(y) < 0.1:
@@ -92,12 +92,14 @@ def beregn_fart_og_vinkel(x, y):
     if fart < 0.1:
         fart = 0.0
 
-    # Vinkel: 0° = opp, 90° = høyre, 180° = ned, 270° = venstre
-    vinkel = math.atan2(x, -y)  # OBS: bytt rekkefølge og tegn
+    # Justert vinkel:
+    vinkel = math.atan2(-x, -y)  # bytter x og y + inverterer x for å snu retningen
+
     if vinkel < 0:
         vinkel += 2 * math.pi
 
     return fart, vinkel
+
 
 # Bestem fart basert på valgt profil
 def skaler_fart(fart, profil):
@@ -138,23 +140,27 @@ def initialize_bus():
         return None
 
 def initialize_joystick():
+    pygame.joystick.quit()
     pygame.joystick.init()
-    antall = pygame.joystick.get_count()
-    print(f"Antall kontrollere funnet: {antall}")
-    
-    if antall > 0:
-        for i in range(antall):
-            js = pygame.joystick.Joystick(i)
-            js.init()
-            print(f"Joystick {i}: {js.get_name()}")
-        joystick = pygame.joystick.Joystick(0)
-        joystick.init()
-        print(f"Bruker joystick 0: {joystick.get_name()}")
-        return joystick
-    else:
-        print("Feil: ingen kontroller funnet.")
-        time.sleep(1)
-        return None
+
+    while True:
+        antall = pygame.joystick.get_count()
+
+        if antall > 0:
+            for i in range(antall):
+                js = pygame.joystick.Joystick(i)
+                js.init()
+                print(f"Joystick {i}: {js.get_name()}")
+            joystick = pygame.joystick.Joystick(0)
+            joystick.init()
+            print(f"Bruker joystick 0: {joystick.get_name()}")
+            return joystick
+        else:
+            print("Ingen kontroller funnet. Venter på tilkobling...")
+            time.sleep(1)
+            pygame.joystick.quit()
+            pygame.joystick.init()
+
 
 
 # bibliotek pygame og kontroller
@@ -169,20 +175,35 @@ sist_sendte_fart = None # Husk forrige vinkel for å sjekke endring
 sist_sendte_vinkel = None  # Husk forrige vinkel for å sjekke endring
 aktiv_joystick = False
 Hastighetsmodus = 1
+forrige_x = 0
+tone_aktiv = False
 
 #================================================================
 # Loop som registrerer verdier og sender verdier til pakke funsjonene (send_data)
 while True:
-
     if joystick is None:
         joystick = initialize_joystick()
-    if joystick is None:
-        print("Ingen kontroller funnet. Søker igjen snart...")
+        continue  # prøv igjen neste runde
+
+    try:
+        pygame.event.pump()
+
+        antall = pygame.joystick.get_count()
+        if antall == 0:
+            raise pygame.error("Ingen kontroller funnet – kan være frakoblet")
+
+        # Test ved å lese knapp
+        _ = joystick.get_button(0)
+
+    except (pygame.error, OSError):
+        print("Kontroller frakoblet! Søker etter ny tilkobling...")
+        joystick = None
+        pygame.joystick.quit()
+        pygame.joystick.init()
         time.sleep(1)
         continue
 
     try:
-        pygame.event.pump() # Den oppdaterer interne verdier for kontrolleren (og andre input-enheter).
         rotasjon = 0.0
         rotasjon_aktiv = False
 
@@ -219,13 +240,17 @@ while True:
         # Håndter rotasjon (RB og LB)
         # Bestem rotasjon basert på bumpere
 
-        x = joystick.get_button(2)  # X-knappen (typisk nr. 2)
+        x = joystick.get_button(3)
 
-        # Hvis x trykkes ned → start tone
-        if x:
-            send_tone_command(bus, aktiv=True)
-        else:
-            send_tone_command(bus, aktiv=False)
+        # Send tone på når knappen trykkes ned, og tone av når den slippes
+        if x != forrige_x:
+            if x == 1:
+                send_tone_command(bus, aktiv=True)
+            else:
+                send_tone_command(bus, aktiv=False)
+
+        forrige_x = x  # Oppdater knappestatus
+
 
 
         # === Endre hastighetsmoduser ===

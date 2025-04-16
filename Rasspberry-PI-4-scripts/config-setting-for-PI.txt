@@ -75,3 +75,21 @@ sudo systemctl start can-start.service
 sudo systemctl status can-start.service                     # Sjekk status og se om den kjørte uten feil
 --------------------------------
 ========================================================
+
+
+
+# Konfigurer at v.5_xbox_one_kontroller.py skal starte ved oppsart av ubuntu
+========================================================
+nano ~/.config/autostart/kontroller_autostart.desktop
+
+# Kopier dette inn 
+[Desktop Entry]
+Type=Application
+Name=Start Kontroller Script
+Exec=python3 /full/sti/til/v.5_xbox_one_kontroller.py
+Terminal=true
+X-GNOME-Autostart-enabled=true
+
+# Gjør den kjørbar
+chmod +x /full/sti/til/v.5_xbox_one_kontroller.py
+========================================================
