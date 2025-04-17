@@ -90,24 +90,6 @@ else:
             print(f"Fant ikke enhet med navn {name}")
             return False
         
-        def disconnect_from_device(name):
-            address = get_device(name)
-            if not address:
-                print(f"Fant ikke enhet med navn {name}")
-                return False
-
-            bus = SystemBus()
-            device_path = f"/org/bluez/hci0/dev_{address.replace(':', '_')}"
-            try:
-                device = bus.get("org.bluez", device_path)
-                device.Disconnect()
-                print(f"Koblet fra {name} ({address})")
-                return True
-            except Exception as e:
-                print(f"Feil ved frakobling av {name}: {e}")
-                return False
-
-
         bus = SystemBus()
         device_path = f"/org/bluez/hci0/dev_{address.replace(':', '_')}"
         try:
@@ -118,3 +100,23 @@ else:
         except Exception as e:
             print(f"Feil ved tilkobling til {name}: {e}")
             return False
+        
+    def disconnect_from_device(name):
+        address = get_device(name)
+        if not address:
+            print(f"Fant ikke enhet med navn {name}")
+            return False
+
+        bus = SystemBus()
+        device_path = f"/org/bluez/hci0/dev_{address.replace(':', '_')}"
+        try:
+            device = bus.get("org.bluez", device_path)
+            device.Disconnect()
+            print(f"Koblet fra {name} ({address})")
+            return True
+        except Exception as e:
+            print(f"Feil ved frakobling av {name}: {e}")
+            return False
+
+
+    
