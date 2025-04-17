@@ -16,7 +16,7 @@
 // Commented and coded by OA and EAH
 
 
-void main(void) {
+ int main(void) {
     printf("Starter CAN...\n");
     const struct device *const can_dev = get_can_dev(); // Getting the CAN device connected to the system
     canBegin(can_dev); // Function for startring up and initializing the CAN device

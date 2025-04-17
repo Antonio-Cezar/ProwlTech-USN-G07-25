@@ -86,7 +86,7 @@ void can_rx_callback(const struct device *dev, struct can_frame *frame, void *us
     if (frame->id == RECEIVE_ID && frame->dlc == 8) {
 
         siste_mottatt_tid = k_uptime_get();
-        sett_nødstopp(false);  
+        //sett_nødstopp(false);  
 
         // Debug: print rå data
         printf("RÅ CAN-data (hex): ");
