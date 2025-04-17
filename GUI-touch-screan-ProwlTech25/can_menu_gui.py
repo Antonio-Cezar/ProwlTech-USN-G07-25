@@ -19,7 +19,8 @@ class CanMenuWindow(ctk.CTkToplevel):
         self.transient(master)      # Koblet opp mot hovedvinduet
         self.focus()    # Legger vinduet foran det andre
         self.lift()     # Legger vinduet foran det andre 
-        self.after(100, lambda: self.grab_set())
+        self.wait_visibility()
+        self.grab_set()
 
     
         # Toppseksjon
