@@ -118,38 +118,43 @@ void send_string(const struct device *can_dev, const char *str){ // Function for
 
 // cezar husk å kommentere og endre
 void can_rx_callback(const struct device *dev, struct can_frame *frame, void *user_data) {
-    if (frame->id == RECEIVE_ID && frame->dlc == 6) {
+    // Sjekk at vi faktisk fikk 8 byte som forventet
+    if (frame->id == RECEIVE_ID && frame->dlc == 8) {
 
-        //oppdaterer tidspunkt
-        siste_mottatt_tid = k_uptime_get(); //ras
+        siste_mottatt_tid = k_uptime_get();
         sett_nødstopp(false);  
-        // ras
 
-        // Korrekt endian-konvertering
-        int16_t fart_i     = sys_le16_to_cpu(*(int16_t *)&frame->data[0]);
-        int16_t vinkel_i   = sys_le16_to_cpu(*(int16_t *)&frame->data[2]);
-        int16_t rotasjon_i = sys_le16_to_cpu(*(int16_t *)&frame->data[4]);
+        // Debug: print rå data
+        printf("RÅ CAN-data (hex): ");
+        for (int i = 0; i < frame->dlc; i++) {
+            printf("%02X ", frame->data[i]);
+        }
+        printf("\n");
 
-        // Konverter til float
-        float fart     = fart_i / 100.0f;
-        float vinkel   = vinkel_i / 100.0f;
-        float rotasjon = rotasjon_i / 100.0f;
+        // Lese inn 4x int16_t fra frame->data, liten endian
+        int16_t fart_i      = sys_le16_to_cpu(*(int16_t *)&frame->data[0]);
+        int16_t vinkel_i    = sys_le16_to_cpu(*(int16_t *)&frame->data[2]);
+        int16_t rotasjon_i  = sys_le16_to_cpu(*(int16_t *)&frame->data[4]);
+        int16_t sving_js_i  = sys_le16_to_cpu(*(int16_t *)&frame->data[6]);
 
-        // Print verdier
+        float fart      = fart_i / 100.0f;
+        float vinkel    = vinkel_i / 100.0f;
+        float rotasjon  = rotasjon_i / 100.0f;
+        float sving_js  = sving_js_i / 100.0f;
+
         printf("[PI → Motor-MB] Mottatt:\n");
-        printf("  Fart     : %.2f\n", fart);
-        printf("  Vinkel   : %.2f\n", (vinkel * 180.0f / (float)M_PI));
-        printf("  Rotasjon : %.2f\n", rotasjon);
+        printf("  Fart      : %.2f\n", fart);
+        printf("  Vinkel    : %.2f°\n", (vinkel * 180.0f / (float)M_PI));
+        printf("  Rotasjon  : %.2f\n", rotasjon);
+        printf("  Sving JS  : %.2f\n", sving_js);
         printf("-----------------------------\n");
 
-        // Velg joystick-modus ut ifra rotasjon
-        bool joystick_mode = (rotasjon == 0.0f);
-
-        // Klargjør for motorstyring
-        kontroller_motorene(fart, vinkel, rotasjon);
+        kontroller_motorene(fart, vinkel, rotasjon); // legg evt. til sving_js
 
     } else {
         printf("CAN frame ignorert: ID 0x%X, DLC %d\n", frame->id, frame->dlc);
     }
 }
+
+
 
