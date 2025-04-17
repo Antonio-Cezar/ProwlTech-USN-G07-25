@@ -1,6 +1,10 @@
 import customtkinter as ctk
 from popup_window import PopupWindow
 import subprocess
+import os 
+
+SCRIPT_DIR = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "Raspberry-PI-4-scripts"))
+VESC_SCRIPT = os.path.join(SCRIPT_DIR, "vesc_cmd.py")
 
 class CanMenuWindow(ctk.CTkToplevel):
     def __init__(self, master):
@@ -86,7 +90,65 @@ class CanMenuWindow(ctk.CTkToplevel):
 
     def open_canbus_meny(self):
         print("Åpner CAN-bus meny...")
-        # Her kan du åpne ny popup, vise status, eller kjøre funksjon
+        self.popup = PopupWindow(self, title="CAN-bus meny")
+
+        # Statusfelt
+        self.can_status_label = ctk.CTKLavel(
+            self.popup.top,
+            text="Henter status...",
+            font=("Century Gothic", 16),
+            text_color="white"
+        )
+        self.can_status_label.pack(pady(0, 10))
+        self.update_can_status()
+
+        # Start CAN-bus
+        self.start_can_button = ctk.CTkButton(
+            self.popup.bottom,
+            text="Start CAN-bus på nytt",
+            font=("Century Gothic", 16),
+            fg_color="#6C3DAF",
+            hover_color="#7D4CC3",
+            corner_radius=20,
+            command=self.restart_canbus
+        )
+        self.start_can_button.pack(padx=40, pady=10, fill="x")
+
+        # Slå av can0
+        self.turn_off_button = ctk.CTkButton(
+            self.popup.bottom,
+            text="Slå av can0",
+            font=("Century Gothic", 16),
+            fg_color="#6C3DAF",
+            hover_color="#7D4CC3",
+            corner_radius=20,
+            command=self.turn_off_can
+        )
+        self.turn_off_button.pack(padx=40, pady=10, fill="x")
+
+        # Slå på can0
+        self.turn_on_button = ctk.CTkButton(
+            self.popup.bottom,
+            text="Skru på can0",
+            font=("Century Gothic", 16),
+            fg_color="#6C3DAF",
+            hover_color="#7D4CC3",
+            corner_radius=20,
+            command=self.turn_on_can
+        )
+        self.turn_on_button.pack(padx=40, pady=10, fill="x")
+
+        # Vis detaljer
+        self.status_button = ctk.CTkButton(
+            self.popup.bottom,
+            text="Vis CAN-status",
+            font=("Century Gothic", 16),
+            fg_color="#6C3DAF",
+            hover_color="#7D4CC3",
+            corner_radius=20,
+            command=self.show_can_status
+        )
+        self.status_button.pack(padx=40, pady=10, fill="x")
 
     def open_motor_meny(self):
         print("Åpner motorkontroller meny...")
@@ -156,22 +218,48 @@ class CanMenuWindow(ctk.CTkToplevel):
 
 #----------------------------------------DIV. FUNKSJONER---------------------------------------------------
     def update_motor_status(self):
-        status = subprocess.getoutput("python3 /home/prowltech/prowltech-script/vesc_cmd.py --can_id 10 --check_status")
-        motor = subprocess.getoutput("python3 /home/prowltech/prowltech-script/vesc_cmd.py --can_id 10 --get_status")
+        status = subprocess.getoutput(f"python3 {VESC_SCRIPT} --can_id 10 --check_status")
+        motor = subprocess.getoutput(f"python3 {VESC_SCRIPT} --can_id 10 --get_status")
         self.motor_status_label.configure(text=f"VESC-status: {status}\nMotorstatus: {motor}")
 
+
     def send_start(self):
-        subprocess.Popen(["python3", "vesc_cmd.py", "--can_id", "10", "--duty", "0.10"])
+        subprocess.Popen(["python3", VESC_SCRIPT, "--can_id", "10", "--duty", "0.10"])
         self.motor_status_label.configure(text="Start-kommando sendt")
 
+
     def send_stop(self):
-        subprocess.Popen(["python3", "vesc_cmd.py", "--can_id", "10", "--duty", "0.00"])
+        subprocess.Popen(["python3", VESC_SCRIPT, "--can_id", "10", "--duty", "0.00"])
         self.motor_status_label.configure(text="Stop-kommando sendt")
 
     def get_temp(self):
-        output = subprocess.getoutput("python3 vesc_cmd.py --can_id 10 --get_temp")
+        output = subprocess.getoutput(f"python3 {VESC_SCRIPT} --can_id 10 --get_temp")
         self.motor_status_label.configure(text=f"Temperatur:\n{output}")
 
+
+    def update_can_status(self):
+        output = subprocess.getoutput("ip link show can0")
+        status = "AKTIV" if "state UP" in output else "INAKTIV"
+        self.can_status_label.configure(text=f"CAN0 status: {status}")
+
+    def restart_canbus(self):
+        subprocess.call("sudo ip link set can0 down", shell=True)
+        subprocess.call("sudo ip link set can0 type can bitrate 125000", shell=True)
+        subprocess.call("sudo ip link set can0 up", shell=True)
+        self.update_can_status()
+
+    def turn_off_can(self):
+        subprocess.call("sudo ip link set can0 down", shell=True)
+        self.update_can_status()
+
+    def turn_on_can(self):
+        subprocess.call("sudo ip link set can0 type can bitrate 125000", shell=True)
+        subprocess.call("sudo ip link set can0 up", shell=True)
+        self.update_can_status()
+
+    def show_can_status(self):
+        output = subprocess.getoutput("ip -details link show can0")
+        self.can_status_label.configure(text=f"Detaljert status:\n{output}")
 
 
 
