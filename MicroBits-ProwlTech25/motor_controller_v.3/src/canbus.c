@@ -82,35 +82,41 @@ int setup_can_filter(const struct device *dev, can_rx_callback_t rx_cb, void *cb
 
 // Callback når en CAN-melding mottas
 void can_rx_callback(const struct device *dev, struct can_frame *frame, void *user_data) {
-    if (frame->id == RECEIVE_ID && frame->dlc == 6) {
-        siste_mottatt_tid = k_uptime_get(); // Oppdater siste mottatt tid
-        //sett_nødstopp(false); // Deaktiver nødstopp
+    // Sjekk at vi faktisk fikk 8 byte som forventet
+    if (frame->id == RECEIVE_ID && frame->dlc == 8) {
 
-        int16_t fart_i = sys_le16_to_cpu(*(int16_t *)&frame->data[0]);
-        int16_t vinkel_i = sys_le16_to_cpu(*(int16_t *)&frame->data[2]);
-        int16_t rotasjon_i = sys_le16_to_cpu(*(int16_t *)&frame->data[4]);
+        siste_mottatt_tid = k_uptime_get();
+        sett_nødstopp(false);  
 
-        float fart = fart_i / 100.0f;
-        float vinkel = vinkel_i / 100.0f;
-        float rotasjon = rotasjon_i / 100.0f;
+        // Debug: print rå data
+        printf("RÅ CAN-data (hex): ");
+        for (int i = 0; i < frame->dlc; i++) {
+            printf("%02X ", frame->data[i]);
+        }
+        printf("\n");
+
+        // Lese inn 4x int16_t fra frame->data, liten endian
+        int16_t fart_i      = sys_le16_to_cpu(*(int16_t *)&frame->data[0]);
+        int16_t vinkel_i    = sys_le16_to_cpu(*(int16_t *)&frame->data[2]);
+        int16_t rotasjon_i  = sys_le16_to_cpu(*(int16_t *)&frame->data[4]);
+        int16_t sving_js_i  = sys_le16_to_cpu(*(int16_t *)&frame->data[6]);
+
+        float fart      = fart_i / 100.0f;
+        float vinkel    = vinkel_i / 100.0f;
+        float rotasjon  = rotasjon_i / 100.0f;
+        float sving_js  = sving_js_i / 100.0f;
 
         printf("[PI → Motor-MB] Mottatt:\n");
-        printf("  Fart     : %.2f\n", fart);
-        printf("  Vinkel   : %.2f (%.1f°)\n", vinkel, vinkel * 180.0f / M_PI);
-        printf("  Rotasjon : %.2f\n", rotasjon);
+        printf("  Fart      : %.2f\n", fart);
+        printf("  Vinkel    : %.2f°\n", (vinkel * 180.0f / (float)M_PI));
+        printf("  Rotasjon  : %.2f\n", rotasjon);
+        printf("  Sving JS  : %.2f\n", sving_js);
         printf("-----------------------------\n");
 
-        struct can_ret_data data = {
-            .fart = fart,
-            .vinkel = vinkel,
-            .rotasjon = rotasjon
-        };
+        kontroller_motorene(fart, vinkel, rotasjon); // legg evt. til sving_js
 
-        if (k_msgq_put(&can_msgq, &data, K_NO_WAIT) != 0) {
-            printf("Advarsel: can_msgq er full, melding droppes\n");
-        }
     } else {
-        printf("Ignorert CAN-melding: ID 0x%X, DLC: %d\n", frame->id, frame->dlc);
+        printf("CAN frame ignorert: ID 0x%X, DLC %d\n", frame->id, frame->dlc);
     }
 }
 
