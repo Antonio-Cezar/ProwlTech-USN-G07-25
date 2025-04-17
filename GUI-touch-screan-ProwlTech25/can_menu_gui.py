@@ -17,11 +17,11 @@ class CanMenuWindow(ctk.CTkToplevel):
 
         # Sørg for at vinduet åpnes som et popup-vindu foran hoved-GUI
         self.transient(master)      # Koblet opp mot hovedvinduet
-        self.grab_set()     # Må lukkes før noe annet
         self.focus()    # Legger vinduet foran det andre
         self.lift()     # Legger vinduet foran det andre 
-    
+        self.after(100, lambda: self.grab_set())
 
+    
         # Toppseksjon
         self.top_frame = ctk.CTkFrame(self, fg_color="#3A2557")
         self.top_frame.pack(fill="x")
