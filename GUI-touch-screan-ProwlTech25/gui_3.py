@@ -52,6 +52,7 @@ class ProwlTechApp(ctk.CTk):
         self.bluetooth_devices = []                      # Liste for bluetooth-enheter
         self.device_menu = None 
         self.connected_device = None
+        self.device_widgets = {}  
 
         # Konfigurerer rutenett for strukturen
 
@@ -495,6 +496,11 @@ class ProwlTechApp(ctk.CTk):
                 )
                 btn.pack(side="right", padx=(10, 15))
 
+                self.device_widgets[name] = {
+                    "button": btn,
+                    "status": status_label
+                }
+
         else:
             no_devices_label = ctk.CTkLabel(
                 self.popup.bottom,
@@ -507,6 +513,12 @@ class ProwlTechApp(ctk.CTk):
         self.update_button.configure(text="Oppdater", state="normal")   # Gjør det mulig å trykke på søke-knappen igjen
 
     def toggle_connection(self, name):
+        widgets = self.device_widgets.get(name)
+        if not widgets:
+            return
+        
+        button = widgets["button"]
+        status_label = widgets["status"]
 
         # Koble fra
         if self.connected_device == name:
@@ -514,6 +526,8 @@ class ProwlTechApp(ctk.CTk):
 
             if success:
                 self.connected_device = None
+                button.configure(text="Koble til")
+                status_label.configure(text="", text_color="white")
                 #self.status_label.configure(text=f"Koblet fra {name}", text_color="orange")
                 self.connection_status.configure(text="Ingen kontroller tilkoblet", text_color="white")
                 print("Koblet fra")
@@ -527,6 +541,8 @@ class ProwlTechApp(ctk.CTk):
 
             if success:
                 self.connected_device = name
+                button.configure(text="Koble fra")
+                status_label.configure(text="Tilkoblet", text_color="green")
                 #self.status_label.configure(text=f"Koblet til {name}", text_color="green")
                 self.connection_status.configure(text=f"Kontroller: Tilkoblet \n\n {name}", text_color="white")
                 print("Tilkobling fullført")
