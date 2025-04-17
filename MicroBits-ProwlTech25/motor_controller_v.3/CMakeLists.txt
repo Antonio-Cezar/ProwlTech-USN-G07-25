@@ -3,4 +3,4 @@ find_package(Zephyr REQUIRED HINTS $ENV{ZEPHYR_BASE})
 
 project(motorkontroller)
 
-target_sources(app PRIVATE src/main.c src/motorstyring.c src/canbus.c vesc_uart.c)
+target_sources(app PRIVATE src/main.c src/motorstyring.c src/canbus.c src/vesc_uart.c)
