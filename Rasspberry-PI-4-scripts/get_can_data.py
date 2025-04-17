@@ -1,8 +1,9 @@
-USE_MOCK = True # Sett til False når Linux brukes 
+import platform
+import time
 
 # ---------- Mock-versjon for å teste i windows
-if USE_MOCK:
-    import time
+if platform.system() != "Linux":
+    print("Kjører i Windows")
 
     def receive_sensor_data():
         time.sleep(1)
