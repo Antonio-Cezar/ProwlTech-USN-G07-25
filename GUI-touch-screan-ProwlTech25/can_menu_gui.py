@@ -94,7 +94,7 @@ class CanMenuWindow(ctk.CTkToplevel):
         self.popup = PopupWindow(self, title="CAN-bus meny")
 
         # Statusfelt
-        self.can_status_label = ctk.CTKLavel(
+        self.can_status_label = ctk.CTKLabel(
             self.popup.top,
             text="Henter status...",
             font=("Century Gothic", 16),
