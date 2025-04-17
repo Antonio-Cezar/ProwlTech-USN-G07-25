@@ -44,7 +44,7 @@ else:
             print(f"[CAN] Mottatt sensorstatus: {sensor_states}")
             return sensor_states
 
-        print("[CAN] Ingen gyldig melding mottatt")
+        #print("[CAN] Ingen gyldig melding mottatt")
         return None
 
 

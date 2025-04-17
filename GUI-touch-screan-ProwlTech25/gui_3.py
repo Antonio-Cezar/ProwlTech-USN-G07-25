@@ -508,7 +508,7 @@ class ProwlTechApp(ctk.CTk):
 
     def toggle_connection(self, name):
 
-        # Koblet til - koble fra
+        # Koble fra
         if self.connected_device == name:
             success = bluetooth_dbus.disconnect_from_device(name)
 
@@ -516,8 +516,12 @@ class ProwlTechApp(ctk.CTk):
                 self.connected_device = None
                 #self.status_label.configure(text=f"Koblet fra {name}", text_color="orange")
                 self.connection_status.configure(text="Ingen kontroller tilkoblet", text_color="white")
+                print("Koblet fra")
 
-        # Ikke tilkoblet - koble til
+            else:
+                print("Klarte ikke koble fra")
+
+        # Koble til
         else:
             success = bluetooth_dbus.connect_to_device(name)
 
@@ -525,12 +529,14 @@ class ProwlTechApp(ctk.CTk):
                 self.connected_device = name
                 #self.status_label.configure(text=f"Koblet til {name}", text_color="green")
                 self.connection_status.configure(text=f"Kontroller: Tilkoblet \n\n {name}", text_color="white")
+                print("Tilkobling fullført")
             else:
                 #self.status_label.configure(text=f"Kunne ikke koble til {name}", text_color="red")
                 self.connection_status.configure(text=f"Ingen kontroller tilkoblet", text_color="red")
                 self.log_error(f"Klarte ikke koble til {name}")     # Logger feilmelding
+                print("Tilkobling mislykkes")
 
-        self.start_update()
+        #self.start_update()
 
 #--------------------SENSORDATA-------------------------  
     def get_sensor_data(self):
