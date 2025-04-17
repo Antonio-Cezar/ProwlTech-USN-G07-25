@@ -6,13 +6,34 @@ import os
 SCRIPT_DIR = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "Raspberry-PI-4-scripts"))
 VESC_SCRIPT = os.path.join(SCRIPT_DIR, "vesc_cmd.py")
 
+# Definerer farger brukt i designet for konsistens og enkel endring
+text_color = "#FFFFFF"
+background_color = "#0D0D1F"
+top_panel_color = "#230F46"
+error_section = "#2C161F"
+frame_color = "#230F46"
+frame_border_color = "#503C74"
+
+button_color = "#595992"
+button_border_color = "black"
+button_hover_color = "#6C578A"
+
+popup_background_color = "#200F2D"
+popup_top_color = "#3A2557"
+popup_button_color = "#6C3DAF"
+
+border_size = 10
+corner = 30
+container_text_size = 14
+button_corner = 40
+
 class CanMenuWindow(ctk.CTkToplevel):
     def __init__(self, master):
         super().__init__(master)
 
         self.title("CAN-meny")
         self.geometry("800x480")
-        self.configure(fg_color="#200F2D")
+        self.configure(fg_color="#0D0D1F")
         self.resizable(False, False)
 
         # Sørg for at vinduet åpnes som et popup-vindu foran hoved-GUI
@@ -24,7 +45,7 @@ class CanMenuWindow(ctk.CTkToplevel):
 
     
         # Toppseksjon
-        self.top_frame = ctk.CTkFrame(self, fg_color="#3A2557")
+        self.top_frame = ctk.CTkFrame(self, fg_color=top_panel_color)
         self.top_frame.pack(fill="x")
 
         self.title_label = ctk.CTkLabel(
@@ -36,7 +57,7 @@ class CanMenuWindow(ctk.CTkToplevel):
         self.title_label.pack(pady=20)
 
         # Bunnseksjon med knapper
-        self.button_frame = ctk.CTkFrame(self, fg_color="#200F2D")
+        self.button_frame = ctk.CTkFrame(self, fg_color=background_color)
         self.button_frame.pack(expand=True)
 
         # Alternativ 1: CAN-bus meny
@@ -44,8 +65,8 @@ class CanMenuWindow(ctk.CTkToplevel):
             self.button_frame,
             text="1. CAN-bus kontrollmeny",
             font=("Century Gothic", 16),
-            fg_color="#6C3DAF",
-            hover_color="#7D4CC3",
+            fg_color=button_color,
+            hover_color=button_hover_color,
             corner_radius=20,
             command=self.open_canbus_meny
         )
@@ -56,8 +77,8 @@ class CanMenuWindow(ctk.CTkToplevel):
             self.button_frame,
             text="2. Motorkontroller meny",
             font=("Century Gothic", 16),
-            fg_color="#6C3DAF",
-            hover_color="#7D4CC3",
+            fg_color=button_color,
+            hover_color=button_hover_color,
             corner_radius=20,
             command=self.open_motor_meny
         )
@@ -68,8 +89,8 @@ class CanMenuWindow(ctk.CTkToplevel):
             self.button_frame,
             text="3. Kontroller meny",
             font=("Century Gothic", 16),
-            fg_color="#6C3DAF",
-            hover_color="#7D4CC3",
+            fg_color=button_color,
+            hover_color=button_hover_color,
             corner_radius=20,
             command=self.open_controller_menu
         )
@@ -80,8 +101,8 @@ class CanMenuWindow(ctk.CTkToplevel):
             self.button_frame,
             text="Avslutt",
             font=("Century Gothic", 16),
-            fg_color="#333333",
-            hover_color="#444444",
+            fg_color=button_color,
+            hover_color=button_hover_color,
             corner_radius=20,
             command=self.destroy
         )
@@ -95,12 +116,12 @@ class CanMenuWindow(ctk.CTkToplevel):
 
         # Statusfelt
         self.can_status_label = ctk.CTkLabel(
-            self.popup.top,
+            self.popup.bottom,
             text="Henter status...",
             font=("Century Gothic", 16),
             text_color="white"
         )
-        self.can_status_label.pack(pady(0, 10))
+        self.can_status_label.pack(padx=40, pady=10)
         self.update_can_status()
 
         # Start CAN-bus
@@ -108,8 +129,8 @@ class CanMenuWindow(ctk.CTkToplevel):
             self.popup.bottom,
             text="Start CAN-bus på nytt",
             font=("Century Gothic", 16),
-            fg_color="#6C3DAF",
-            hover_color="#7D4CC3",
+            fg_color=button_color,
+            hover_color=button_hover_color,
             corner_radius=20,
             command=self.restart_canbus
         )
@@ -120,8 +141,8 @@ class CanMenuWindow(ctk.CTkToplevel):
             self.popup.bottom,
             text="Slå av can0",
             font=("Century Gothic", 16),
-            fg_color="#6C3DAF",
-            hover_color="#7D4CC3",
+            fg_color=button_color,
+            hover_color=button_hover_color,
             corner_radius=20,
             command=self.turn_off_can
         )
@@ -132,8 +153,8 @@ class CanMenuWindow(ctk.CTkToplevel):
             self.popup.bottom,
             text="Skru på can0",
             font=("Century Gothic", 16),
-            fg_color="#6C3DAF",
-            hover_color="#7D4CC3",
+            fg_color=button_color,
+            hover_color=button_hover_color,
             corner_radius=20,
             command=self.turn_on_can
         )
@@ -144,8 +165,8 @@ class CanMenuWindow(ctk.CTkToplevel):
             self.popup.bottom,
             text="Vis CAN-status",
             font=("Century Gothic", 16),
-            fg_color="#6C3DAF",
-            hover_color="#7D4CC3",
+            fg_color=button_color,
+            hover_color=button_hover_color,
             corner_radius=20,
             command=self.show_can_status
         )
@@ -157,12 +178,12 @@ class CanMenuWindow(ctk.CTkToplevel):
 
         # Statuslinje
         self.motor_status_label = ctk.CTkLabel(
-            self.popup.top,
+            self.popup.bottom,
             text="Henter status...",
             font=("Century Gothic", 16),
             text_color="white"
         )
-        self.motor_status_label.pack(pady=(0, 10))
+        self.motor_status_label.pack(padx=40, pady=10)
         self.update_motor_status()  # Henter og oppdaterer 
 
         # Start-knapp
@@ -170,8 +191,8 @@ class CanMenuWindow(ctk.CTkToplevel):
             self.popup.bottom,
             text="Send PÅ-kommando til VESC",
             font=("Century Gothic", 16),
-            fg_color="#6C3DAF",
-            hover_color="#7D4CC3",
+            fg_color=button_color,
+            hover_color=button_hover_color,
             corner_radius=20,
             command=self.send_start
         )
@@ -182,8 +203,8 @@ class CanMenuWindow(ctk.CTkToplevel):
             self.popup.bottom,
             text="Send AV-kommando til VESC",
             font=("Century Gothic", 16),
-            fg_color="#6C3DAF",
-            hover_color="#7D4CC3",
+            fg_color=button_color,
+            hover_color=button_hover_color,
             corner_radius=20,
             command=self.send_stop
         )
@@ -194,8 +215,8 @@ class CanMenuWindow(ctk.CTkToplevel):
             self.popup.bottom,
             text="Hent temperatur fra VESC",
             font=("Century Gothic", 16),
-            fg_color="#6C3DAF",
-            hover_color="#7D4CC3",
+            fg_color=button_color,
+            hover_color=button_hover_color,
             corner_radius=20,
             command=self.get_temp
         )
@@ -210,8 +231,8 @@ class CanMenuWindow(ctk.CTkToplevel):
             self.popup.bottom,
             text="Start Xbox One-kontroller",
             font=("Century Gothic", 16),
-            fg_color="#6C3DAF",
-            hover_color="#7D4CC3",
+            fg_color=button_color,
+            hover_color=button_hover_color,
             corner_radius=20,
             command=None
         )
