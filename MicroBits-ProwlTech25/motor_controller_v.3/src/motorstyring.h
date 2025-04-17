@@ -12,8 +12,9 @@ struct MotorVerdier {
 
 struct MotorVerdier kalkulerMotorVerdier(float fart, float vinkel, float rotasjon);
 int kontroller_motorene(float fart, float vinkel, float rotasjon);
-void sett_nødstopp(bool aktivert);
-bool er_nødstopp_aktivert();
+//void sett_nødstopp(bool aktivert);
+
+//bool er_nødstopp_aktivert();
 
 
 #endif //MOTORSTYRING_H

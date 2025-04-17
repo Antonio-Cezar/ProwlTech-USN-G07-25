@@ -84,7 +84,7 @@ int setup_can_filter(const struct device *dev, can_rx_callback_t rx_cb, void *cb
 void can_rx_callback(const struct device *dev, struct can_frame *frame, void *user_data) {
     if (frame->id == RECEIVE_ID && frame->dlc == 6) {
         siste_mottatt_tid = k_uptime_get(); // Oppdater siste mottatt tid
-        sett_nødstopp(false); // Deaktiver nødstopp
+        //sett_nødstopp(false); // Deaktiver nødstopp
 
         int16_t fart_i = sys_le16_to_cpu(*(int16_t *)&frame->data[0]);
         int16_t vinkel_i = sys_le16_to_cpu(*(int16_t *)&frame->data[2]);
@@ -122,13 +122,13 @@ void process_can_data(void) {
     }
 
     // Sjekk om det er lenge siden siste melding → aktiver nødstopp
-    int64_t nåtid = k_uptime_get();
-    if ((nåtid - siste_mottatt_tid) > 1000) {
-        if (!er_nødstopp_aktivert()) {
-            printf("Advarsel: Ingen meldinger på over 1 sekund → nødstopp aktivert\n");
-            sett_nødstopp(true);
-        }
-    }
+    //int64_t nåtid = k_uptime_get();
+    //if ((nåtid - siste_mottatt_tid) > 1000) {
+        //if (!er_nødstopp_aktivert()) {
+            //printf("Advarsel: Ingen meldinger på over 1 sekund → nødstopp aktivert\n");
+            //sett_nødstopp(true);
+        //}
+    //}
 }
 
 // Send en streng over CAN (brukes til testing)

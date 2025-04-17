@@ -13,27 +13,27 @@
 #define MOTOR_ID_REAR_RIGHT 3
 
 //Global flagg for nødstopp - under arbeid
-static bool nødstopp = false;
+//static bool nødstopp = false;
 
-void sett_nødstopp(bool aktivert) {
-    nødstopp = aktivert;
+//void sett_nødstopp(bool aktivert) {
+    //nødstopp = aktivert;
 
-    if (aktivert) {
-        printf("nødstopp aktivert! alle motor stoppes.\n");
-        for (int i = 0; i < 4; ++i) {
-            send_duty_uart_motor(i, 0.0f);
-        }
+    //if (aktivert) {
+        //printf("nødstopp aktivert! alle motor stoppes.\n");
+        //for (int i = 0; i < 4; ++i) {
+            //send_duty_uart_motor(i, 0.0f);
+        //}
 
-    } else {
-        printf("Nødstopp deaktivert. Motorer aktive igjen.\n");
-    }
+   // } else {
+        //printf("Nødstopp deaktivert. Motorer aktive igjen.\n");
+   // }
 
-}
+//}
 
 
-bool er_nødstopp_aktivert(){
-    return nødstopp;
-}
+//bool er_nødstopp_aktivert(){
+    //return nødstopp;
+//}
 
 
 //funksjon som beregn motorverdier fra fart, vinkel og rotasjon. regner ut hvor mye hver av de 4 motorene skal kjøre.
@@ -110,10 +110,10 @@ bool er_nødstopp_aktivert(){
 int kontroller_motorene(float ønsket_fart, float ønsket_vinkel, float ønsket_rotasjon) {
     printf("kontrollerer motorene. Fart: %.2f, Vinkel: %.2f, rotasjon: %.2f\n", ønsket_fart, ønsket_vinkel, ønsket_rotasjon); //printer ut hvilke kommandoer vi har fått
 
-    if (nødstopp) {
-        printf("Nødstopp aktiv - motorstyring stoppes.\n");
-        return -1;
-    }
+    //if (nødstopp) {
+        //printf("Nødstopp aktiv - motorstyring stoppes.\n");
+        //return -1;
+    //}
 
     if (!isfinite(ønsket_fart) || !isfinite(ønsket_vinkel) || !isfinite(ønsket_rotasjon)) {
         printf("Feil: en eller flere inputverdier er uendelige (inf) eller NaN\n");

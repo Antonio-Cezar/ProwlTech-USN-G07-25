@@ -30,9 +30,9 @@ void main(void) {
         printf("In the while loop\n");
         canState(can_dev);// Function for checking the CAN state
         process_can_data(); // Using the process_can_data function
-        if (er_nødstopp_aktivert()) { 
-            printf("nødstopp aktivert\n"); // RAS og linja over
-        }
+        //if (er_nødstopp_aktivert()) { 
+            //printf("nødstopp aktivert\n"); // RAS og linja over
+        //}
 
         send_string(can_dev, "Hello"); // Using the send_string function to send the string "Hello"
         k_msleep(50); // Sleep for 50ms, letting the callback handle messages
