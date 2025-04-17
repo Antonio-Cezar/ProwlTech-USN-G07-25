@@ -350,7 +350,7 @@ class ProwlTechApp(ctk.CTk):
         # Knapp for å oppdatere søket etter tilgjengelige kontrollere
         self.update_button = ctk.CTkButton(
             self.popup.top,
-            text="Oppdater",
+            text="Søk",
             width=120,
             height=40,
             image=update_icon,
@@ -364,15 +364,6 @@ class ProwlTechApp(ctk.CTk):
         )
         self.update_button.place(relx=0.05, rely=0.5, anchor="w")
 
-        
-
-        #self.status_label = ctk.CTkLabel(
-         #   self.popup.bottom,
-          #  text="",
-           # font=("Century Gothic", 16),
-            #text_color="white"
-        #)
-        #self.status_label.pack(pady=(10, 0))
         
 
     # Åpner info-popup
@@ -510,7 +501,7 @@ class ProwlTechApp(ctk.CTk):
             )
             no_devices_label.pack(pady=10)
 
-        self.update_button.configure(text="Oppdater", state="normal")   # Gjør det mulig å trykke på søke-knappen igjen
+        self.update_button.configure(text="Søk", state="normal")   # Gjør det mulig å trykke på søke-knappen igjen
 
     def toggle_connection(self, name):
         widgets = self.device_widgets.get(name)
