@@ -1,11 +1,13 @@
 import customtkinter as ctk
+from popup_window import PopupWindow
+import subprocess
 
 class CanMenuWindow(ctk.CTkToplevel):
     def __init__(self, master):
         super().__init__(master)
 
         self.title("CAN-meny")
-        self.geometry("500x400")
+        self.geometry("800x480")
         self.configure(fg_color="#200F2D")
         self.resizable(False, False)
 
@@ -64,7 +66,7 @@ class CanMenuWindow(ctk.CTkToplevel):
             fg_color="#6C3DAF",
             hover_color="#7D4CC3",
             corner_radius=20,
-            command=self.open_kontroller_meny
+            command=self.open_controller_menu
         )
         self.controller_button.pack(pady=10, padx=20, fill="x")
 
@@ -80,14 +82,96 @@ class CanMenuWindow(ctk.CTkToplevel):
         )
         self.exit_button.pack(pady=(20, 10))
 
+#-------------------Popup-vinduer---------------------------------------------------
+
     def open_canbus_meny(self):
         print("Åpner CAN-bus meny...")
         # Her kan du åpne ny popup, vise status, eller kjøre funksjon
 
     def open_motor_meny(self):
         print("Åpner motorkontroller meny...")
-        # Samme som over
+        self.popup = PopupWindow(self, title="Motorkontroller-meny")
 
-    def open_kontroller_meny(self):
+        # Statuslinje
+        self.motor_status_label = ctk.CTkLabel(
+            self.popup.top,
+            text="Henter status...",
+            font=("Century Gothic", 16),
+            text_color="white"
+        )
+        self.motor_status_label.pack(pady=(0, 10))
+        self.update_motor_status()  # Henter og oppdaterer 
+
+        # Start-knapp
+        self.start_button = ctk.CTkButton(
+            self.popup.bottom,
+            text="Send PÅ-kommando til VESC",
+            font=("Century Gothic", 16),
+            fg_color="#6C3DAF",
+            hover_color="#7D4CC3",
+            corner_radius=20,
+            command=self.send_start
+        )
+        self.start_button.pack(padx=40, pady=10, fill="x")
+
+        # Stopp-knapp
+        self.stop_button = ctk.CTkButton(
+            self.popup.bottom,
+            text="Send AV-kommando til VESC",
+            font=("Century Gothic", 16),
+            fg_color="#6C3DAF",
+            hover_color="#7D4CC3",
+            corner_radius=20,
+            command=self.send_stop
+        )
+        self.stop_button.pack(padx=40, pady=10, fill="x")
+
+        # Temperatur-knapp
+        self.temp_button = ctk.CTkButton(
+            self.popup.bottom,
+            text="Hent temperatur fra VESC",
+            font=("Century Gothic", 16),
+            fg_color="#6C3DAF",
+            hover_color="#7D4CC3",
+            corner_radius=20,
+            command=self.get_temp
+        )
+        self.temp_button.pack(padx=40, pady=10, fill="x")
+
+    def open_controller_menu(self):
         print("Åpner kontroller meny...")
-        # Samme som over
+        self.popup = PopupWindow(self, title="Kontroller-meny")
+
+        # Start Xbox One-kontroller
+        self.xbox_button = ctk.CTkButton(
+            self.popup.bottom,
+            text="Start Xbox One-kontroller",
+            font=("Century Gothic", 16),
+            fg_color="#6C3DAF",
+            hover_color="#7D4CC3",
+            corner_radius=20,
+            command=None
+        )
+        self.xbox_button.pack(pady=20, padx=40, fill="x")
+
+#----------------------------------------DIV. FUNKSJONER---------------------------------------------------
+    def update_motor_status(self):
+        status = subprocess.getoutput("python3 /home/prowltech/prowltech-script/vesc_cmd.py --can_id 10 --check_status")
+        motor = subprocess.getoutput("python3 /home/prowltech/prowltech-script/vesc_cmd.py --can_id 10 --get_status")
+        self.motor_status_label.configure(text=f"VESC-status: {status}\nMotorstatus: {motor}")
+
+    def send_start(self):
+        subprocess.Popen(["python3", "vesc_cmd.py", "--can_id", "10", "--duty", "0.10"])
+        self.motor_status_label.configure(text="Start-kommando sendt")
+
+    def send_stop(self):
+        subprocess.Popen(["python3", "vesc_cmd.py", "--can_id", "10", "--duty", "0.00"])
+        self.motor_status_label.configure(text="Stop-kommando sendt")
+
+    def get_temp(self):
+        output = subprocess.getoutput("python3 vesc_cmd.py --can_id 10 --get_temp")
+        self.motor_status_label.configure(text=f"Temperatur:\n{output}")
+
+
+
+

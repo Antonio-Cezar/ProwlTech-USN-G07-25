@@ -124,7 +124,7 @@ class ProwlTechApp(ctk.CTk):
             image=can_icon,
             compound="right",
             corner_radius=button_corner,
-            command=self.open_can_window
+            command=self.run_can_script
         )
         self.can_bus_button.place(relx=0.2, rely=0.9, anchor="center")
 
@@ -378,45 +378,6 @@ class ProwlTechApp(ctk.CTk):
         )
         self.popup.add_widget(info_label, padx=30, pady=20)
 
-    # Åpner CAN-meny
-    def open_can_window(self):
-        self.popup = PopupWindow(self, title="CAN-Meny")
-
-        # Alternativ 1: CAN-bus meny
-        self.can_button = ctk.CTkButton(
-            self.popup.bottom,
-            text="1. CAN-bus kontrollmeny",
-            font=("Century Gothic", 16),
-            fg_color="#6C3DAF",
-            hover_color="#7D4CC3",
-            corner_radius=20,
-            command=None
-        )
-        self.can_button.pack(pady=10, padx=20, fill="x")
-
-        # Alternativ 2: Motorkontroller meny
-        self.motor_button = ctk.CTkButton(
-            self.popup.bottom,
-            text="2. Motorkontroller meny",
-            font=("Century Gothic", 16),
-            fg_color="#6C3DAF",
-            hover_color="#7D4CC3",
-            corner_radius=20,
-            command=None
-        )
-        self.motor_button.pack(pady=10, padx=20, fill="x")
-
-        # Alternativ 3: Kontroller meny
-        self.controller_button = ctk.CTkButton(
-            self.popup.bottom,
-            text="3. Kontroller meny",
-            font=("Century Gothic", 16),
-            fg_color="#6C3DAF",
-            hover_color="#7D4CC3",
-            corner_radius=20,
-            command=None
-        )
-        self.controller_button.pack(pady=10, padx=20, fill="x")
 
 #--------------------KOBLE TIL KONTROLLER-------------------------  
     # Oppdaterer søk etter kontrollere
