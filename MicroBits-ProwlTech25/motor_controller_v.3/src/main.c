@@ -40,7 +40,7 @@
 
         //FOR Testing: kjører eksempelverdier
         
-        printf("tester motor: fart=%.2f, vinkel=%.2f, rotasjon=%.2f\n");
+        printf("tester motor: fart=%.2f, vinkel=%.2f, rotasjon=%.2f\n", test_fart, test_vinkel, test_rotasjon);
 
         kontroller_motorene(test_fart, test_vinkel, test_rotasjon);
 

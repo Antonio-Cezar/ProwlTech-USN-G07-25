@@ -4,16 +4,16 @@
 #include <stdio.h>
 #include <string.h>
 
-#define UART_DEVICE_NODE DEVICE_DT_GET(DT_NODELABEL(uart0)) //kan endres til uart1
+#define UART_DEVICE_NODE DEVICE_DT_GET(DT_NODELABEL(uart1)) //kan endres til uart1
 
 const struct device *uart_dev;
 
 void uart_init(void) {
-    uart_dev = DEVICE_DT_GET(DT_NODELABEL(uart0));
+    uart_dev = DEVICE_DT_GET(DT_NODELABEL(uart1));
     if (!device_is_ready(uart_dev)) {
         printf("Finner ikke UART enhet!\n");
     }else {
-        printf("uart initialisert\n");
+        printf("uart initialisert: %s\n", uart_dev->name);
     }
     
 }
@@ -41,6 +41,7 @@ void send_duty_uart_motor(int motor_id, float duty){
 
     for (int i = 0; i < sizeof(buffer); ++i) {
         uart_poll_out(uart_dev, buffer[i]);
+        k_msleep(10); // ← Sette inn liten pause mellom hver byte under feilsøking
     }
 
     printf("sendt til motpr %d: duty=%.2f\n", motor_id, duty);
@@ -58,10 +59,17 @@ void send_duty_uart_alle_motor(float duty_array[4]){
 
     uint8_t buffer[18];
     buffer[0] = 0xA5; // startbyte
+    
+    printf("Sender til alle motorer:\n");
 
     //pakk 4 floatverdier 4x4 byte
     for (int i = 0; i < 4; ++i){
         float d = duty_array[i];
+        if (!isfinite(d)) {
+            printf("Duty[%d] er ikke et tall\n", i);
+            d = 0.0f;
+        }
+
         if (d < -1.0f) d = -1.0f;
         if (d > 1.0f) d = 1.0f;
         memcpy(&buffer[1 + i * 4], &d, sizeof(float));
@@ -74,10 +82,12 @@ void send_duty_uart_alle_motor(float duty_array[4]){
 
     } 
     buffer [17] = checksum; 
+    printf("   Checksum: 0x%02X\n", checksum);
     
     //send alle bytes
     for (int i = 0; i < sizeof(buffer); ++i){
         uart_poll_out(uart_dev, buffer[i]);
+        k_msleep(10); // ← Sette inn liten pause mellom hver byte under feilsøking
     }
 
     printf("sendt 4 motorverdier med checksum: %.2f %.2f %.2f %.2f\n", duty_array[0], duty_array[1], duty_array[2], duty_array[3]);

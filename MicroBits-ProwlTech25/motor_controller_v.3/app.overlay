@@ -27,8 +27,16 @@
 
 	};
 
-
 };
+
+//(RAS) legger til UART1 for VESC motorstyring
+&uart1 {
+    status = "okay";
+    current-speed = <115200>;
+    pinctrl-0 = <&uart1_default>;
+    pinctrl-names = "default";
+};
+
 // pinCtrl seksjonen definerer pin konfigurasjonen for de ulike periferene.
 // pwmX_default_alt og pwmX_sleep_alt  er ulik konfigurasjoner eller moduser pinen kan ha.
 // Den kan enten sove eller være aktiv. 
@@ -45,117 +53,19 @@
 					<NRF_PSEL(SPIM_MISO, 0, 1)>;
 		};
 	};
-    // Atkiv modus for PWM kanal 0. PWM kanal 0 skal settes opp til å bruke PIN 1.
-    // For å bruke PIN 1 må psels defineres. NRF_PSEL velger hvilke kanaler og pins som skal
-    // brukes internt i NRF kortet:
-    // PWM_OUT0 spesifiserer perifer-funksjonen som tilhører pinnen.
-    // 0 velger hvilket GPIO port nummer som brukes
-    // 2 viser til hvilket PIN som skal brukes i GPIO-porten
-    // Sammen vil dette gjøre det mulig å sende PWM-signal på PIN 1 på GPIO-brettet ved å definere
-    // hvilke "vei" signalet skal ta i microbiten sin chip.
-    // nordic, invert definerer signaltypen som sendes på pinnen.
-    pwm0_default_alt: pwm0_default_alt {
-        group1  {
-            psels = <NRF_PSEL(PWM_OUT0,0,2)>;
-            nordic,invert;
+   
+    //(ras)
+    uart1_default: uart1_default {
+        group1 {
+            psels = <NRF_PSEL(UART_TX, 0, 0)>, //TX = P0
+                    <NRF_PSEL(UART_RX, 0, 4)>; //RX = P4
         };
     };
-    // Sovemodus for PWM kanal 0. Oppsettet for å bruke PIN 1 er den samme,
-    // mens det er en forskjell i generert signaltype på pinnen ved sovemodus kontra 
-    // aktiv modus.
-    pwm0_sleep_alt: pwm0_sleep_alt_alt {
-        group1  {
-            psels = <NRF_PSEL(PWM_OUT0,0,2)>;
-            low-power-enable;
-        };
-    };
-    // Aktivmodus for PWM kanal 1. PWM kanal 1 skal settes opp til å bruke PIN 2 på GPIO-brettet.
-    // Eneste forskjellen mellom aktiv modus for PWM kanal 0,1,2,3 er at de bruker unike perifer-funksjoner
-    // og har egne pins.
-	pwm1_default_alt: pwm1_default_alt {
-        group1  {
-            psels = <NRF_PSEL(PWM_OUT1,0,3)>;
-            nordic,invert;
-        };
-    };
-    //Sovemodus for PWM kanal 1. Oppsettet for å bruke PIN 2 på GPIO-brettet. 
-    pwm1_sleep_alt: pwm1_sleep_alt_alt {
-        group1  {
-            psels = <NRF_PSEL(PWM_OUT1,0,3)>;
-            low-power-enable;
-        };
-    };
-    //Aktivmodus for PWM kanal 2. Oppsettet for å bruke PIN 3 på GPIO-brettet. 
-	pwm2_default_alt: pwm2_default_alt {
-        group1  {
-            psels = <NRF_PSEL(PWM_OUT2,0,4)>;
-            nordic,invert;
-        };
-    };
-    //Sovemodus for PWM kanal 2. Oppsettet for å bruke PIN 3 på GPIO-brettet.
-    pwm2_sleep_alt: pwm2_sleep_alt_alt {
-        group1  {
-            psels = <NRF_PSEL(PWM_OUT2,0,4)>;
-            low-power-enable;
-        };
-    };
-    //Aktivmodus for PWM kanal 3. Oppsettet for å bruke PIN 4 på GPIO-brettet.
-	pwm3_default_alt: pwm3_default_alt {
-        group1  {
-            psels = <NRF_PSEL(PWM_OUT3,0,31)>;
-            nordic,invert;
-        };
-    };
-    //Sovemodus for PWM kanal 3. Oppsettet for å bruke PIN 4 på GPIO-brettet.
-    pwm3_sleep_alt: pwm3_sleep_alt_alt {
-        group1  {
-            psels = <NRF_PSEL(PWM_OUT3,0,31)>;
-            low-power-enable;
-        };
-    };
-};
+ };
 
-// PWM seksjonen under kommentarfeltet her konfigurerer hver PWM kanal.
-// For å i det hele tatt klare å bruke konfigurasjonen må statusen til kanalen settes.
-// Det er derfor viktig at når kanalen konfigureres, så settes statusen til "okay".
-// pinctrl-0 og pinctrl-1 definerer hvilken modus kanalen skal alternere mellom når signal
-// sendes gjennom kanalen.
-// pinctrl-names navnsetter modusene slik at de blir enkelere å hente/bruke.
-// label er en måte å enkelt hente kanal og GPIO konfigurasjonen i initialiserings-prosessen.
-&pwm0 {
-	status = "okay";
-    pinctrl-0 = <&pwm0_default_alt>;
-    pinctrl-1 = <&pwm0_sleep_alt>;
-    pinctrl-names = "default", "sleep";
-
-    label="PWM_0";
-};
-&pwm1 {
-	status = "okay";
-    pinctrl-0 = <&pwm1_default_alt>;
-    pinctrl-1 = <&pwm1_sleep_alt>;
-    pinctrl-names = "default", "sleep";
-
-    label="PWM_1";
-};
-&pwm2 {
-	status = "okay";
-    pinctrl-0 = <&pwm2_default_alt>;
-    pinctrl-1 = <&pwm2_sleep_alt>;
-    pinctrl-names = "default", "sleep";
-
-    label="PWM_2";
-};
-&pwm3 {
-	status = "okay";
-    pinctrl-0 = <&pwm3_default_alt>;
-    pinctrl-1 = <&pwm3_sleep_alt>;
-    pinctrl-names = "default", "sleep";
-
-    label="PWM_3";
-};
-/ {
+ //Velger MCP2515 som can-bus for zephyr (fenris2024)
+ / {
     chosen {
         zephyr,canbus = &mcp2515_can;
     };
-};
+ };
