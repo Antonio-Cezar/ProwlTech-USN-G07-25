@@ -67,7 +67,7 @@ while true; do
     echo
 
     case $valg in
-        # Alternativ 1: Åpner CAN-bus kontrollmeny
+        # Alternativ 1: Åpner CAN-bus kontrollmeny.
         1)
             clear
             echo "Åpner opp: "
