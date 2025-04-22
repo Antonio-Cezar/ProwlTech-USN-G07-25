@@ -7,10 +7,8 @@
 #include <stdio.h> // for å bruke printf og skrive ut
 #include <stdlib.h> // for tilgang til minnehåndtering
 #include <stdbool.h>
-#define MOTOR_ID_FRONT_LEFT 0
-#define MOTOR_ID_FRONT_RIGHT 1
-#define MOTOR_ID_REAR_LEFT 2
-#define MOTOR_ID_REAR_RIGHT 3
+#include <zephyr/kernel.h>
+#define NUM_MOTORS 4
 
 //Global flagg for nødstopp - under arbeid
 //static bool nødstopp = false;
@@ -177,15 +175,17 @@ int kontroller_motorene(float ønsket_fart, float ønsket_vinkel, float ønsket_
 
     if (gjeldende_fart < 0.01f && fabsf(gjeldende_rotasjon) < 0.01f) { // Hvis det er ingen bevegelse eller rotasjon så skal motorene stoppes.
         printf("Motorene står stille. Fart: %.2f, rotasjon: %.2f\n", gjeldende_fart, gjeldende_rotasjon);
-        float stopp[4] = {0.0f, 0.0f, 0.0f, 0.0f};
-        send_duty_uart_alle_motor(stopp);
-        return 0;   
+        for (int i = 0; i < NUM_MOTORS; i++) {
+            send_set_duty(0.0f);
+            k_msleep(1);
+        }
+        return 0;
         }
 
     printf("motorene beveger seg jevnt. Fart: %.2f, vinkel: %.2f, rotasjon: %.2f\n", gjeldende_fart, gjeldende_vinkel, gjeldende_rotasjon);
 
     struct MotorVerdier motorVerdier = kalkulerMotorVerdier(gjeldende_fart, gjeldende_vinkel, gjeldende_rotasjon); //kalkulerer hva alle 4 motorene skal gjøre basert på fart,vinkel og rotasjon.
-    float motorer[4] = { //legger verdiene i en array så samme gjøres for hver motor
+    float duties[NUM_MOTORS] = { //legger verdiene i en array så samme gjøres for hver motor
         motorVerdier.front_left,
         motorVerdier.front_right,
         motorVerdier.rear_left,
@@ -193,12 +193,15 @@ int kontroller_motorene(float ønsket_fart, float ønsket_vinkel, float ønsket_
 
     };
 
-    send_duty_uart_alle_motor(motorer);
+    printf("sender duties: %.2f, %.2f, %.2f, %.2f\n",
+        duties[0], duties[1], duties[2], duties[3]);
+
+    for (int i = 0; i < NUM_MOTORS; i++) {
+        send_set_duty(duties[i]);
+        k_msleep(1);  // liten pause mellom pakker
+    }
+
+    
     return 0;
 }
 
-        
-
-
-
-//TODO under testing: -Prøve dynamisk endring_per_steg, -legg til toleranse på små forskjeller, -juster svingrespons

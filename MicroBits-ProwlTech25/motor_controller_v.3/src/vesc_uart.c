@@ -1,95 +1,94 @@
+// vesc_uart.c
+// Enkel VESC UART‑protokoll for å sette duty‑cycle på VESC via COMM_SET_DUTY
+
 #include "vesc_uart.h"
 #include <zephyr/drivers/uart.h>
 #include <zephyr/kernel.h>
+#include <zephyr/device.h>
+#include <zephyr/devicetree.h>
 #include <stdio.h>
 #include <string.h>
-#include <math.h>
+#include <stdint.h>
 
-#define UART_DEVICE_NODE DEVICE_DT_GET(DT_NODELABEL(uart1)) //kan endres til uart1
+#define UART_NODE_LABEL    DT_NODELABEL(uart1)
+#define VESC_STX_SHORT     0x02    // Startbyte for korte pakker
+#define VESC_ETX           0x03    // Sluttbyte
+#define VESC_CMD_SET_DUTY  5       // Kommando‑ID for COMM_SET_DUTY
 
-const struct device *uart_dev;
+static const struct device *uart_dev = NULL;
 
-void uart_init(void) {
-    uart_dev = DEVICE_DT_GET(DT_NODELABEL(uart1));
-    if (!device_is_ready(uart_dev)) {
-        printf("Finner ikke UART enhet!\n");
-    }else {
-        printf("uart initialisert: %s\n", uart_dev->name);
-    }
-    
-}
-
-void send_duty_uart_motor(int motor_id, float duty){
-    if (!uart_dev) {
-        printf("uart ikke initialisert\n");
-        return;
-    }
-
-    if (motor_id < 0 || motor_id > 3) {
-        printf("ugyldig motor id: %d\n", motor_id);
-        return;
-    }
-
-    if (duty < -1.0f) duty = -1.0f;
-    if (duty > 1.0f) duty = 1.0f;
-
-    //pakker float duty i binært format
-
-    uint8_t buffer[6];
-    buffer[0] = 0xA5; //start byte (valgfri)
-    buffer[1] = (uint8_t)motor_id;
-    memcpy(&buffer[2], &duty, sizeof(float));
-
-    for (int i = 0; i < sizeof(buffer); ++i) {
-        uart_poll_out(uart_dev, buffer[i]);
-        //k_msleep(10); // ← Sette inn liten pause mellom hver byte under feilsøking
-    }
-
-    printf("sendt til motpr %d: duty=%.2f\n", motor_id, duty);
-}
-
-void send_duty_uart(float duty){
-    send_duty_uart_motor(0, duty); //bruker motor 0 som default
-}
-
-void send_duty_uart_alle_motor(float duty_array[4]){
-    if (!uart_dev){
-        printf("UART ikke initialisert\n");
-        return;
-    }
-
-    uint8_t buffer[18];
-    buffer[0] = 0xA5; // startbyte
-    
-    printf("Sender til alle motorer:\n");
-
-    //pakk 4 floatverdier 4x4 byte
-    for (int i = 0; i < 4; ++i){
-        float d = duty_array[i];
-        if (!isfinite(d)) {
-            printf("Duty[%d] er ikke et tall\n", i);
-            d = 0.0f;
+/**
+ * compute_crc16() - Beregn CRC16‑ARC over en byte‑array
+ * @data: peker til data
+ * @len:  lengde på data i bytes
+ *
+ * Returnerer 16‑bits CRC.
+ */
+static uint16_t compute_crc16(const uint8_t *data, size_t len)
+{
+    uint16_t crc = 0;
+    for (size_t i = 0; i < len; i++) {
+        crc ^= (uint16_t)data[i] << 8;
+        for (int bit = 0; bit < 8; bit++) {
+            if (crc & 0x8000) {
+                crc = (crc << 1) ^ 0x1021;
+            } else {
+                crc <<= 1;
+            }
         }
+    }
+    return crc;
+}
 
-        if (d < -1.0f) d = -1.0f;
-        if (d > 1.0f) d = 1.0f;
-        memcpy(&buffer[1 + i * 4], &d, sizeof(float));
+/**
+ * uart_init() - Henter og sjekker at UART1 finnes
+ */
+void uart_init(void)
+{
+    uart_dev = DEVICE_DT_GET(UART_NODE_LABEL);
+    if (!device_is_ready(uart_dev)) {
+        printf("ERROR: UART1 device not ready\n");
+    } else {
+        printf("UART1 initialized: %s\n", uart_dev->name);
+    }
+}
+
+/**
+ * send_set_duty() - Sender COMM_SET_DUTY‑pakke med duty [-1.0 .. 1.0]
+ * @duty: ønsket duty cycle, clamped til [-1, +1]
+ */
+void send_set_duty(float duty)
+{
+    if (!uart_dev) {
+        printf("ERROR: UART not initialized\n");
+        return;
     }
 
-    //beregn checksum som XOR over byte 0-16
-    uint8_t checksum = 0;
-    for (int i = 0; i < 17; ++i) {
-        checksum ^= buffer[i];
+    // Klamp duty-verdien
+    if (duty < -1.0f) duty = -1.0f;
+    if (duty >  1.0f) duty =  1.0f;
 
-    } 
-    buffer [17] = checksum; 
-    printf("   Checksum: 0x%02X\n", checksum);
-    
-    //send alle bytes
-    for (int i = 0; i < sizeof(buffer); ++i){
-        uart_poll_out(uart_dev, buffer[i]);
-        //k_msleep(10); // ← Sette inn liten pause mellom hver byte under feilsøking
+    // Bygg payload: [kommando‑byte, 4 byte float]
+    uint8_t payload[1 + sizeof(float)];
+    payload[0] = VESC_CMD_SET_DUTY;
+    memcpy(&payload[1], &duty, sizeof(float));
+
+    // Beregn CRC over payload
+    uint16_t crc = compute_crc16(payload, sizeof(payload));
+
+    // Bygg hele UART‑rammen: STX | LEN | payload | CRC_H | CRC_L | ETX
+    uint8_t frame[2 + sizeof(payload) + 2 + 1];
+    size_t idx = 0;
+    frame[idx++] = VESC_STX_SHORT;        // Startbyte
+    frame[idx++] = (uint8_t)sizeof(payload); // Payload‑lengde
+    memcpy(&frame[idx], payload, sizeof(payload));
+    idx += sizeof(payload);
+    frame[idx++] = (uint8_t)(crc >> 8);   // CRC MSB
+    frame[idx++] = (uint8_t)(crc & 0xFF); // CRC LSB
+    frame[idx++] = VESC_ETX;              // Endbyte
+
+    // Send pakke byte for byte
+    for (size_t i = 0; i < idx; i++) {
+        uart_poll_out(uart_dev, frame[i]);
     }
-
-    printf("sendt 4 motorverdier med checksum: %.2f %.2f %.2f %.2f\n", duty_array[0], duty_array[1], duty_array[2], duty_array[3]);
 }
