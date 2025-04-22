@@ -32,6 +32,9 @@ else:
         bus = None
 
     def receive_sensor_data():
+        if bus is None:
+            return "CAN_INACTIVE"
+
         msg = bus.recv(timeout=1.0)
         if msg and msg.arbitration_id == MSG_ID and msg.dlc >= 1:
             byte = msg.data[0]  # Bare bruk første byte til bitmasken
