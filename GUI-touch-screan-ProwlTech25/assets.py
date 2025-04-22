@@ -16,6 +16,9 @@ def load_image(filename, size):
 prowltech_logo = load_image("prowltech_logo2.png", (550, 550))
 usn_logo = load_image("USN_logo.png", (60, 70))
 
+# Bilder
+controller_pic = load_image("kontroller.png", 500, 500)
+
 # Ikoner
 info_icon = load_image("info.png", (20, 20))
 can_icon = load_image("can_bus.png", (20, 20))
