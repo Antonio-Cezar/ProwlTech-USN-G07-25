@@ -11,7 +11,7 @@ from get_can_data import receive_sensor_data
 from can_menu_gui import CanMenuWindow 
 
 from popup_window import PopupWindow
-from assets import info_icon, bluetooth_icon, bolt_icon, can_icon, cross_icon, loading_icon, menu_icon, prowltech_logo, usn_logo, sensor_icon, signal_icon, temp_icon, update_icon, warning_icon, start_icon
+from assets import info_icon, bluetooth_icon, bolt_icon, can_icon, cross_icon, loading_icon, menu_icon, prowltech_logo, usn_logo, sensor_icon, signal_icon, temp_icon, update_icon, warning_icon, start_icon, controller_pic
 
 
 
@@ -370,15 +370,52 @@ class ProwlTechApp(ctk.CTk):
     def open_info_window(self):
         self.popup = PopupWindow(self, title="Informasjon")
 
-        info_label = ctk.CTkLabel(
-            self.popup.bottom,
+        self.info_content_frame = ctk.CTkFrame(self.popup.bottom, fg_color="transparent")
+        self.info_content_frame.pack(padx=30, pady=20)
+
+        self.info_label = ctk.CTkLabel(
+            self.info_content_frame,
             text="Denne bilen styres via en trådløs kontroller.\nStatus og feilmeldinger vises i kontrollpanelet.\n\nFør bilen skal kjøre: \n1. Koble til en kontroller via knappen i kontrollpanelet.   \n2. Sørg for at CAN-bus er aktiv.",
             font=("Century Gothic", 16),
             text_color="white",
             justify="left"
         )
-        info_label._label.configure(wraplength=700)
-        self.popup.add_widget(info_label, padx=30, pady=40)
+        self.info_label._label.configure(wraplength=700)
+        self.info_label.pack(padx=10, pady=40)
+
+        self.controller_label = ctk.CTkLabel(
+            self.info_content_frame,
+            image=controller_pic,
+             text=""
+        )
+        self.controller_label.pack(padx=10, pady=0)
+        self.controller_label.pack_forget() # Skjuler bildet
+
+        def toggle_image():
+            if self.controller_label.winfo_ismapped():
+                self.controller_label.pack_forget()
+                self.info_label.pack(padx=10, pady=20)
+                self.show_controller.configure(text="Kontrollerfunksjoner")
+            else:
+                self.info_label.pack_forget()
+                self.controller_label.pack(padx=10, pady=0)
+                self.show_controller.configure(text="Info")
+
+        # Knapp for å åpne kontroller-layout
+        self.show_controller = ctk.CTkButton(
+            self.popup.top,
+            text="Kontrollerfunksjoner",
+            width=120,
+            height=40,
+            font=("Century Gothic", 16),
+            fg_color=popup_button_color,
+            hover_color=button_hover_color,
+            text_color="white",
+            corner_radius=button_corner,
+            command=toggle_image
+        )
+        self.show_controller.place(relx=0.05, rely=0.5, anchor="w")
+        
 
 
 #--------------------KOBLE TIL KONTROLLER-------------------------  
