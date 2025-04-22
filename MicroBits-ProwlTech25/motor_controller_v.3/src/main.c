@@ -42,7 +42,7 @@
         //if (er_nødstopp_aktivert()) { 
             //printf("nødstopp aktivert\n"); // RAS og linja over
         //}
-
+        send_set_duty(0.2f); // Test: fast duty til VESC
         //send_string(can_dev, "Hello"); // Using the send_string function to send the string "Hello"
         k_msleep(50); // Sleep for 50ms, letting the callback handle messages
     }
