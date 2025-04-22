@@ -3,6 +3,7 @@
 #include <zephyr/kernel.h>
 #include <stdio.h>
 #include <string.h>
+#include <math.h>
 
 #define UART_DEVICE_NODE DEVICE_DT_GET(DT_NODELABEL(uart1)) //kan endres til uart1
 
