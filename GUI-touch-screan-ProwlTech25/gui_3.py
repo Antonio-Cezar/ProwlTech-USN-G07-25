@@ -372,11 +372,13 @@ class ProwlTechApp(ctk.CTk):
 
         info_label = ctk.CTkLabel(
             self.popup.bottom,
-            text="Kort beskrivelse av hvordan bilen fungerer.",
+            text="Denne bilen styres via en trådløs kontroller.\nStatus og feilmeldinger vises i kontrollpanelet.\n\nFør bilen skal kjøre: \n1. Koble til en kontroller via knappen i kontrollpanelet.   \n2. Sørg for at CAN-bus er aktiv.",
             font=("Century Gothic", 16),
-            text_color="white"
+            text_color="white",
+            justify="left"
         )
-        self.popup.add_widget(info_label, padx=30, pady=20)
+        info_label._label.configure(wraplength=700)
+        self.popup.add_widget(info_label, padx=30, pady=40)
 
 
 #--------------------KOBLE TIL KONTROLLER-------------------------  
@@ -509,8 +511,18 @@ class ProwlTechApp(ctk.CTk):
 #--------------------SENSORDATA-------------------------  
     def get_sensor_data(self):
             no_data_logged = False  # Flagg for å unngå spam
+            can_error_logged = False
+
             while self.running:
                 val = receive_sensor_data() # Funksjonen som leser CAN-melding
+
+                if val == "CAN_INACTIVE":
+                    self.sensor_value = "--"
+                    if not can_error_logged:
+                        self.log_error("CAN-bus er ikke aktiv. Sjekk at can0 er oppe. ")
+                        can_error_logged = True
+                    continue
+
                 if val is not None:
                     self.sensor_value = val
                     no_data_logged = False  # Tilbakestill hvis data er ok

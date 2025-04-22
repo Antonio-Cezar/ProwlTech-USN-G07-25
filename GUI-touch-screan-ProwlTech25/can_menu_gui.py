@@ -60,10 +60,10 @@ class CanMenuWindow(ctk.CTkToplevel):
         self.button_frame = ctk.CTkFrame(self, fg_color=background_color)
         self.button_frame.pack(expand=True)
 
-        # Alternativ 1: CAN-bus meny
+        # Åpne CAN-bus meny
         self.can_button = ctk.CTkButton(
             self.button_frame,
-            text="1. CAN-bus kontrollmeny",
+            text="Åpne CAN-bus-kontrollmeny",
             font=("Century Gothic", 16),
             fg_color=button_color,
             hover_color=button_hover_color,
@@ -72,6 +72,7 @@ class CanMenuWindow(ctk.CTkToplevel):
         )
         self.can_button.pack(pady=10, padx=20, fill="x")
 
+        '''
         # Alternativ 2: Motorkontroller meny
         self.motor_button = ctk.CTkButton(
             self.button_frame,
@@ -83,11 +84,12 @@ class CanMenuWindow(ctk.CTkToplevel):
             command=self.open_motor_meny
         )
         self.motor_button.pack(pady=10, padx=20, fill="x")
+        '''
 
-        # Alternativ 3: Kontroller meny
+        # Åpne kontroller meny
         self.controller_button = ctk.CTkButton(
             self.button_frame,
-            text="3. Kontroller meny",
+            text="Åpne kontroller-meny",
             font=("Century Gothic", 16),
             fg_color=button_color,
             hover_color=button_hover_color,
@@ -172,6 +174,7 @@ class CanMenuWindow(ctk.CTkToplevel):
         )
         self.status_button.pack(padx=40, pady=10, fill="x")
 
+    '''
     def open_motor_meny(self):
         print("Åpner motorkontroller meny...")
         self.popup = PopupWindow(self, title="Motorkontroller-meny")
@@ -222,6 +225,7 @@ class CanMenuWindow(ctk.CTkToplevel):
         )
         self.temp_button.pack(padx=40, pady=10, fill="x")
 
+    '''    
     def open_controller_menu(self):
         print("Åpner kontroller meny...")
         self.popup = PopupWindow(self, title="Kontroller-meny")
