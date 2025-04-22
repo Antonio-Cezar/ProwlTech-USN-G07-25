@@ -1,16 +1,20 @@
 import customtkinter as ctk
-from PIL import Image
-import threading
-import bluetooth_dbus
-import subprocess
+from PIL import Image   # Bildehåndtering
+import threading    # Prosesshåndtering
+import bluetooth_dbus   # Bluetoothhåndtering
+import subprocess   # Kjøring av eksterne script
 import sys
 import os
+
+# Sti til mappe med eksterne script
 script_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "Rasspberry-PI-4-scripts"))
 sys.path.append(script_dir)
-from get_can_data import receive_sensor_data
-from can_menu_gui import CanMenuWindow 
 
-from popup_window import PopupWindow
+from get_can_data import receive_sensor_data    # Funksjon til å hente ut sensordata via CAN-bus
+from can_menu_gui import CanMenuWindow  # Bruker egen klasse for CAN-menyen
+from popup_window import PopupWindow    # Bruker egen klasse for popup-vinduer
+
+# Importerer bilder og ikoner
 from assets import info_icon, bluetooth_icon, bolt_icon, can_icon, cross_icon, loading_icon, menu_icon, prowltech_logo, usn_logo, sensor_icon, signal_icon, temp_icon, update_icon, warning_icon, start_icon, controller_pic
 
 
@@ -34,6 +38,7 @@ popup_background_color = "#200F2D"
 popup_top_color = "#3A2557"
 popup_button_color = "#6C3DAF"
 
+# Definerer spesifikke størrelser 
 border_size = 10
 corner = 30
 container_text_size = 14
@@ -183,7 +188,7 @@ class ProwlTechApp(ctk.CTk):
         )
         self.home_button.grid(row=0, column=0, padx=60, pady=30)
 
-    # Midtseksjon: viser batteri, temperatur, tilkobling og sensor
+    # Midtseksjon: viser batteri, tilkobling og sensor
     def mid_section(self):
         self.mid_frame = ctk.CTkFrame(self, fg_color=background_color)
         self.mid_frame.grid(row=1, column=0, columnspan=3, sticky="nsew")
@@ -373,6 +378,7 @@ class ProwlTechApp(ctk.CTk):
         self.info_content_frame = ctk.CTkFrame(self.popup.bottom, fg_color="transparent")
         self.info_content_frame.pack(padx=30, pady=20)
 
+        # Info-tekst
         self.info_label = ctk.CTkLabel(
             self.info_content_frame,
             text="Denne bilen styres via en trådløs kontroller.\nStatus og feilmeldinger vises i kontrollpanelet.\n\nFør bilen skal kjøre: \n1. Koble til en kontroller via knappen i kontrollpanelet.   \n2. Sørg for at CAN-bus er aktiv.",
@@ -383,6 +389,7 @@ class ProwlTechApp(ctk.CTk):
         self.info_label._label.configure(wraplength=700)
         self.info_label.pack(padx=10, pady=40)
 
+        # Kontrollerbilde
         self.controller_label = ctk.CTkLabel(
             self.info_content_frame,
             image=controller_pic,
@@ -391,6 +398,7 @@ class ProwlTechApp(ctk.CTk):
         self.controller_label.pack(padx=10, pady=0)
         self.controller_label.pack_forget() # Skjuler bildet
 
+        # Funksjon som bytter mellom teksten og bildet
         def toggle_image():
             if self.controller_label.winfo_ismapped():
                 self.controller_label.pack_forget()
@@ -419,33 +427,36 @@ class ProwlTechApp(ctk.CTk):
 
 
 #--------------------KOBLE TIL KONTROLLER-------------------------  
-    # Oppdaterer søk etter kontrollere
+    # Starter søkeprosess 
     def start_update(self):
-        self.update_button.configure(text="Søker...", state="disabled")
+        self.update_button.configure(text="Søker...", state="disabled")     # Teksten på knappen endrer seg og knappen blir deaktivert under søk
 
-        # Prosessbar
+        # Progressbar
         self.progress = ctk.CTkProgressBar(self.popup.bottom, progress_color=frame_color)   # Oppretter progressbar
         self.progress.pack(pady=10, padx=20, fill="x")
-        self.progress.configure(mode="indeterminate")
+        self.progress.configure(mode="indeterminate")   # Skal ikke vise tid, bare animasjon
         self.progress.set(0)
-        self.progress.start()   # Starter progressbar
+        self.progress.start()   # Starter animasjon
 
-        threading.Thread(target=self.scan_and_show).start() # Kjører skanning i egen tråd slik at GUI ikke fryser
+        threading.Thread(target=self.scan_and_show).start() # Kjører skanning i egen tråd slik at GUI-et ikke fryser
 
+    # Skanner etter enheter og henter resultater
     def scan_and_show(self):
         bluetooth_dbus.scan_devices()   # Starter skanning
-        devices = bluetooth_dbus.get_devices()
-        self.popup.bottom.after(0, lambda: self.show_devices(devices))
+        devices = bluetooth_dbus.get_devices()  # Henter resultatene 
+        self.popup.bottom.after(0, lambda: self.show_devices(devices))  # Kjører show_devices() i GUI-tråd
 
+    # Viser resultatene
     def show_devices(self, devices):
         self.progress.stop()    # Stopper progressbar
         self.progress.destroy()     # Sletter progressbar
 
 
-        # Fjerner gamle synlige enheter om det er noen
+        # Fjerner gamle synlige enheter om det er noen slik at det ikke overlapper
         for widget in self.popup.bottom.winfo_children():
                     widget.destroy()
 
+        # Lager rader for hver enhet om det er funnet noen
         if devices:
             for name in devices.values():
                 row = ctk.CTkFrame(self.popup.bottom, fg_color="#50256D", height=50, width=400, corner_radius=30)
@@ -462,7 +473,7 @@ class ProwlTechApp(ctk.CTk):
                 )
                 name_label.pack(side="left", padx=(15, 10))
 
-                # Status
+                # Sjekker tilkoblingsstatus til enhet
                 is_connected = self.connected_device == name
                 status_label = ctk.CTkLabel(
                     row,
@@ -472,7 +483,7 @@ class ProwlTechApp(ctk.CTk):
                 )
                 status_label.pack(side="left", padx=(5, 20))
 
-                # Koble til/fra
+                # Koble til/fra-knapp
                 btn = ctk.CTkButton(
                     row,
                     text="Koble fra" if is_connected else "Koble til",
@@ -492,6 +503,7 @@ class ProwlTechApp(ctk.CTk):
                     "status": status_label
                 }
 
+        # Om ingen enheter blir funnet
         else:
             no_devices_label = ctk.CTkLabel(
                 self.popup.bottom,
@@ -504,6 +516,8 @@ class ProwlTechApp(ctk.CTk):
         self.update_button.configure(text="Søk", state="normal")   # Gjør det mulig å trykke på søke-knappen igjen
 
     def toggle_connection(self, name):
+
+        # Finner tilhørende status på enheten som ble trykket på
         widgets = self.device_widgets.get(name)
         if not widgets:
             return
@@ -511,34 +525,34 @@ class ProwlTechApp(ctk.CTk):
         button = widgets["button"]
         status_label = widgets["status"]
 
-        # Koble fra
+        # Hvis enheter allerede er koblet til. Funksjon for å koble fra enhet
         if self.connected_device == name:
             success = bluetooth_dbus.disconnect_from_device(name)
 
+            # Kobler fra enhet og endrer knapp
             if success:
                 self.connected_device = None
                 button.configure(text="Koble til")
                 status_label.configure(text="", text_color="white")
-                #self.status_label.configure(text=f"Koblet fra {name}", text_color="orange")
                 self.connection_status.configure(text="Ingen kontroller tilkoblet", text_color="white")
                 print("Koblet fra")
 
             else:
                 print("Klarte ikke koble fra")
 
-        # Koble til
+        # Hvis enheten ikke er koblet til. Funksjon til å koble til enhet
         else:
             success = bluetooth_dbus.connect_to_device(name)
 
+            # Kobler til enhet og endrer knapp
             if success:
                 self.connected_device = name
                 button.configure(text="Koble fra")
                 status_label.configure(text="Tilkoblet", text_color="green")
-                #self.status_label.configure(text=f"Koblet til {name}", text_color="green")
                 self.connection_status.configure(text=f"Kontroller: Tilkoblet \n\n {name}", text_color="white")
                 print("Tilkobling fullført")
+
             else:
-                #self.status_label.configure(text=f"Kunne ikke koble til {name}", text_color="red")
                 self.connection_status.configure(text=f"Ingen kontroller tilkoblet", text_color="red")
                 self.log_error(f"Klarte ikke koble til {name}")     # Logger feilmelding
                 print("Tilkobling mislykkes")
@@ -546,30 +560,37 @@ class ProwlTechApp(ctk.CTk):
         #self.start_update()
 
 #--------------------SENSORDATA-------------------------  
-    def get_sensor_data(self):
-            no_data_logged = False  # Flagg for å unngå spam
-            can_error_logged = False
 
+    # Leser CAN-data kontinuerlig i bakgrunnen
+    def get_sensor_data(self):
+            no_data_logged = False  # Unngå spam av samme feilmelding
+            can_error_logged = False    # Unngå spam av CAN-feilmelding
+
+            # Så lenge programmet kjører blir data hentet fra CAN-bus
             while self.running:
                 val = receive_sensor_data() # Funksjonen som leser CAN-melding
 
+                # Sjekker om CAN-bus er inaktiv
                 if val == "CAN_INACTIVE":
                     self.sensor_value = "--"
                     if not can_error_logged:
-                        self.log_error("CAN-bus er ikke aktiv. Sjekk at can0 er oppe. ")
+                        self.log_error("CAN-bus er ikke aktiv. Sjekk at can0 er oppe. ")    # Logger feilmelding
                         can_error_logged = True
                     continue
 
+                # Sjekker om data er mottatt
                 if val is not None:
-                    self.sensor_value = val
+                    self.sensor_value = val # Lagrer mottatt sensordata
                     no_data_logged = False  # Tilbakestill hvis data er ok
+
+                # Hvis CAN-bus er aktiv men får ikke inn data
                 else:
                     self.sensor_value = "__"
                     if not no_data_logged:
                         self.log_error("Ingen data mottatt fra sensor (CAN).")  # Logger feilmelding
                         no_data_logged = True
 
-    # Oppdaterer sensorverdi med jevne mellomrom
+    # Viser sensorstatus i GUI
     def update_sensor_display(self):
         if isinstance(self.sensor_value, dict):
             text = "\n".join(
