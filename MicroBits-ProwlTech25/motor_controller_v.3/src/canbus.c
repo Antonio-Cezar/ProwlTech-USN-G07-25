@@ -106,12 +106,18 @@ void can_rx_callback(const struct device *dev, struct can_frame *frame, void *us
         float rotasjon  = rotasjon_i / 100.0f;
         float sving_js  = sving_js_i / 100.0f;
 
+        printf(" ")
+        printf(" ")
+        printf(" ")
         printf("[PI → Motor-MB] Mottatt:\n");
         printf("  Fart      : %.2f\n", fart);
         printf("  Vinkel    : %.2f°\n", (vinkel * 180.0f / (float)M_PI));
         printf("  Rotasjon  : %.2f\n", rotasjon);
         printf("  Sving JS  : %.2f\n", sving_js);
         printf("-----------------------------\n");
+        printf(" ")
+        printf(" ")
+        printf(" ")
 
         kontroller_motorene(fart, vinkel, rotasjon); // legg evt. til sving_js
 
