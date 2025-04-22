@@ -26,32 +26,22 @@
 
     k_msleep(10);
 
-    float test_fart = 0.5f;
-    float test_vinkel = 0.0f;
-    float test_rotasjon = 0.0f;
+
+    const struct device *const can_dev = get_can_dev();
+    if (!can_dev) {
+        printf("error: fant ikke can device\n");
+        return -1;
+    }
+    canBegin(can_dev); // Function for startring up and initializing the CAN device
+    printf("CAN er klar. \n");
+
 
     while (1) {
-        printf("In the while loop\n");
         //canState(can_dev);// Function for checking the CAN state
-        //process_can_data(); // Using the process_can_data function
+        process_can_data(); // Using the process_can_data function
         //if (er_nødstopp_aktivert()) { 
             //printf("nødstopp aktivert\n"); // RAS og linja over
         //}
-
-        //FOR Testing: kjører eksempelverdier
-        
-        printf("tester motor: fart=%.2f, vinkel=%.2f, rotasjon=%.2f\n", test_fart, test_vinkel, test_rotasjon);
-
-        kontroller_motorene(test_fart, test_vinkel, test_rotasjon);
-
-        
-        test_fart += 0.1f; // Øk farten litt hver runde
-
-        if (test_fart > 1.0f) {
-            test_fart = 0.0f; // Når vi når max fart, start på nytt
-        }
-
-        k_msleep(500); // Vent 500ms mellom hver endring
 
         //send_string(can_dev, "Hello"); // Using the send_string function to send the string "Hello"
         k_msleep(50); // Sleep for 50ms, letting the callback handle messages

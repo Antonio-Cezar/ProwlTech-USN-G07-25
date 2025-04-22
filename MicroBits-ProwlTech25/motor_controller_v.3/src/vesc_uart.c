@@ -42,7 +42,7 @@ void send_duty_uart_motor(int motor_id, float duty){
 
     for (int i = 0; i < sizeof(buffer); ++i) {
         uart_poll_out(uart_dev, buffer[i]);
-        k_msleep(10); // ← Sette inn liten pause mellom hver byte under feilsøking
+        //k_msleep(10); // ← Sette inn liten pause mellom hver byte under feilsøking
     }
 
     printf("sendt til motpr %d: duty=%.2f\n", motor_id, duty);
@@ -88,7 +88,7 @@ void send_duty_uart_alle_motor(float duty_array[4]){
     //send alle bytes
     for (int i = 0; i < sizeof(buffer); ++i){
         uart_poll_out(uart_dev, buffer[i]);
-        k_msleep(10); // ← Sette inn liten pause mellom hver byte under feilsøking
+        //k_msleep(10); // ← Sette inn liten pause mellom hver byte under feilsøking
     }
 
     printf("sendt 4 motorverdier med checksum: %.2f %.2f %.2f %.2f\n", duty_array[0], duty_array[1], duty_array[2], duty_array[3]);
