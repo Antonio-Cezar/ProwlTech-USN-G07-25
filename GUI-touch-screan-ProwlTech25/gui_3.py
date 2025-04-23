@@ -15,7 +15,7 @@ from can_menu_gui import CanMenuWindow  # Bruker egen klasse for CAN-menyen
 from popup_window import PopupWindow    # Bruker egen klasse for popup-vinduer
 
 # Importerer bilder og ikoner
-from assets import info_icon, bluetooth_icon, bolt_icon, can_icon, cross_icon, loading_icon, menu_icon, prowltech_logo, usn_logo, sensor_icon, signal_icon, temp_icon, update_icon, warning_icon, start_icon, controller_pic
+from assets import  prowltech_logo, usn_logo, info_icon, bluetooth_icon, bolt_icon, can_icon, cross_icon, loading_icon, menu_icon, sensor_icon, signal_icon, temp_icon, update_icon, warning_icon, start_icon, controller_pic
 
 
 
@@ -50,9 +50,9 @@ class ProwlTechApp(ctk.CTk):
         super().__init__()
         self.title("ProwlTech Kontrollpanel")           # Setter vindutittel
         self.geometry("800x480")                        # Setter størrelse 
-        self.attributes("-fullscreen", True)            # Fullskjerm på Raspberry Pi
+        #self.attributes("-fullscreen", True)            # Fullskjerm på Raspberry Pi
         self.bind("<Escape>", self.exit_fullscreen)     # ESC lukker programmet
-        self.config(cursor="none")                      # Skjuler musepeker når GUI er i gang
+        #self.config(cursor="none")                      # Skjuler musepeker når GUI er i gang
 
         self.bluetooth_devices = []                      # Liste for bluetooth-enheter
         self.device_menu = None 
@@ -625,8 +625,8 @@ class ProwlTechApp(ctk.CTk):
 
         self.running = True
         self.sensor_value = "__"
-        threading.Thread(target=self.get_sensor_data, daemon=True).start()
-        self.update_sensor_display()
+        #threading.Thread(target=self.get_sensor_data, daemon=True).start()
+        #self.update_sensor_display()
 
         self.log_error("Test: Kontrollpanelet ble åpnet.")
 
