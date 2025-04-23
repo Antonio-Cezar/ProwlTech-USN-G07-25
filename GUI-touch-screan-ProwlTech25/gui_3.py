@@ -625,8 +625,8 @@ class ProwlTechApp(ctk.CTk):
 
         self.running = True
         self.sensor_value = "__"
-        #threading.Thread(target=self.get_sensor_data, daemon=True).start()
-        #self.update_sensor_display()
+        threading.Thread(target=self.get_sensor_data, daemon=True).start()
+        self.update_sensor_display()
 
         self.log_error("Test: Kontrollpanelet ble åpnet.")
 
