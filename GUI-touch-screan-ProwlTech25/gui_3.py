@@ -50,9 +50,9 @@ class ProwlTechApp(ctk.CTk):
         super().__init__()
         self.title("ProwlTech Kontrollpanel")           # Setter vindutittel
         self.geometry("800x480")                        # Setter størrelse 
-        #self.attributes("-fullscreen", True)            # Fullskjerm på Raspberry Pi
+        self.attributes("-fullscreen", True)            # Fullskjerm på Raspberry Pi
         self.bind("<Escape>", self.exit_fullscreen)     # ESC lukker programmet
-        #self.config(cursor="none")                      # Skjuler musepeker når GUI er i gang
+        self.config(cursor="none")                      # Skjuler musepeker når GUI er i gang
 
         self.bluetooth_devices = []                      # Liste for bluetooth-enheter
         self.device_menu = None 
