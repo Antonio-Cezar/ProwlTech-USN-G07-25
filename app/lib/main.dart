@@ -83,6 +83,7 @@ class _KontrollpanelState extends State<Kontrollpanel> {
                 color: const Color(0xFF2E1458),   // Bakgrunnsfarge i boksen
                 borderRadius: BorderRadius.circular(8),   // Avrunder hjørnene
               ),
+
               // Innholdet i boksen
               child: const Column(
                 children: [
@@ -90,17 +91,17 @@ class _KontrollpanelState extends State<Kontrollpanel> {
                   Text(
                     'ProwlTech',
                     style: TextStyle(
-                      fontSize: 32,
+                      fontSize: 40,
                       color: Colors.white,
                       fontWeight: FontWeight.bold,
                     ),
                   ),
-                  SizedBox(height: 8),    // Avstand mellom tekstlinjene
+                  SizedBox(height: 1),    // Avstand mellom tekstlinjene
                   // Andre linje i tekst
                   Text(
                     'Kontrollpanel',
                     style: TextStyle(
-                      fontSize: 26,
+                      fontSize: 36,
                       color: Colors.purpleAccent,
                       fontWeight: FontWeight.w500,
                     ),
@@ -128,15 +129,8 @@ class _KontrollpanelState extends State<Kontrollpanel> {
                     ),
                   ),
                   SizedBox(height: 8),  // Luft mellom linjene
-                  Text(
-                    'Input',
-                    style: TextStyle(
-                      color: Colors.white70,  // Lys grå tekst
-                      fontSize: 16,
-                    ),
-                  ),
-                  const SizedBox(height: 16),
-                  // Knapp (Koble til kontroller)
+                  
+                  // Tilkoblingstekst
                  Row(
                   children: [
                     Icon(
