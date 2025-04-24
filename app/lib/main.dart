@@ -247,6 +247,20 @@ class _KontrollpanelState extends State<Kontrollpanel> {
                     ],
                   ),
                  ),
+                 const SizedBox(height: 24),
+                 // ------------------Bilde av bilen
+                 Container(
+                  decoration: BoxDecoration(
+                    color: Color(0xFF4A3C6E), // Boks rundt bilde
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                  padding: const EdgeInsets.all(16),
+                  child: Image.asset(
+                    'images/prowltech_car.png',
+                    fit: BoxFit.contain,
+                    height: 160, 
+                  ),
+                 ),
           ],
         ),
       ),
