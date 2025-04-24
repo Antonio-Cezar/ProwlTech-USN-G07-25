@@ -53,10 +53,10 @@ int main(void) {
         return;
     } 
 
-    if (setup_can_filter(can_dev, can_rx_callback, NULL) < 0) { // Check to see if the CAN filter is set up or not.
-        printk("Failed to add CAN filter\n");
-        return;
-    }
+    //if (setup_can_filter(can_dev, can_rx_callback, NULL) < 0) { // Check to see if the CAN filter is set up or not.
+        //printk("Failed to add CAN filter\n");
+        //return;
+    //}
 
     hc_sr04_init(&sensors[0], "GPIO_0", 4, 3); //Forward sensor bit 000(0), Trigger on pin P2(P0.04), Echo on pin P1(P0.03)
     hc_sr04_init(&sensors[1], "GPIO_0", 10, 9); //Right Sensor bit 00(0)0, Trigger on pin P8(P0.10), Echo on pin P9(P0.09)
