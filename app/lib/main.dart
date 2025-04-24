@@ -1,4 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:http/http.dart' as http;
+import 'dart:convert';
+import 'dart:async';
+
 
 void main() {
   runApp(const ProwlTechApp());
@@ -19,8 +23,47 @@ class ProwlTechApp extends StatelessWidget {
 }
 
 // Innholdet i appen
-class Kontrollpanel extends StatelessWidget {
+class Kontrollpanel extends StatefulWidget {
   const Kontrollpanel({super.key});
+
+  @override
+  State<Kontrollpanel> createState() => _KontrollpanelState();
+
+}
+
+class _KontrollpanelState extends State<Kontrollpanel> {
+  bool kontrollerTilkoblet = false; // Mock-tilstand
+  List<String> feilmeldinger = []; 
+
+  Future<void> hentStatus() async {
+    try {
+      final response = await http.get(
+        Uri.parse('http://192.168.137.113:5000/status'),
+      );
+
+      if (response.statusCode == 200) {
+        final data = jsonDecode(response.body);
+        setState(() {
+          kontrollerTilkoblet = data['kontroller_tilkoblet'];
+          feilmeldinger = List<String>.from(data['feilmeldinger']);
+        });
+      } else {
+        print('Feil ved henting: ${response.statusCode}');
+      }
+    } catch (e) {
+      print('Klarte ikke å hente status: $e');
+    }
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    hentStatus();
+    Timer.periodic(const Duration(seconds: 5), (timer) {
+      hentStatus();
+    });
+  }
+
 
   @override
   Widget build(BuildContext context) {
@@ -94,27 +137,24 @@ class Kontrollpanel extends StatelessWidget {
                   ),
                   const SizedBox(height: 16),
                   // Knapp (Koble til kontroller)
-                  ElevatedButton.icon(
-                    onPressed: () {
-                      // Logikk for tilkobling
-                      print("Kobler til kontroller...");
-                    },
-                    icon: const Icon(Icons.bluetooth),
-                    label: const Text(
-                      'Koble til kontroller',
-                      style: TextStyle(
+                 Row(
+                  children: [
+                    Icon(
+                      kontrollerTilkoblet ? Icons.check_circle : Icons.cancel,
+                      color: kontrollerTilkoblet ? Colors.green : Colors.red,
+                    ),
+                    const SizedBox(width: 8),
+                    Text(
+                      kontrollerTilkoblet
+                        ? 'Kontroller tilkoblet'
+                        : 'Kontroller ikke tilkoblet',
+                      style: const TextStyle(
                         color: Colors.white,
-                        fontSize: 14,
-                      ),
-                      ),
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: Colors.deepPurpleAccent,
-                      padding: const EdgeInsets.symmetric(vertical: 14, horizontal: 20),
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(30),
+                        fontSize: 16,
                       ),
                     ),
-                  ),
+                  ],
+                 ),
                 ],
               ),
             ),
@@ -184,6 +224,35 @@ class Kontrollpanel extends StatelessWidget {
                 ),
               ],
             ),
+            const SizedBox(height: 24),
+                // ------------------------------------------------------------------------------------------Feilmeldingsboks
+                Container(
+                  padding: const EdgeInsets.all(16),
+                  decoration: BoxDecoration(
+                    color: Color(0xFF8B2C39),
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                  child: const Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        'FEILMELDINGER',
+                        style: TextStyle(
+                          color: Colors.white,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                      SizedBox(height: 12),
+                      Text(
+                        'Ingen feilmeldinger',
+                        style: TextStyle(
+                          color: Colors.white70,
+                          fontSize: 14,
+                          ),
+                      ),
+                    ],
+                  ),
+                 ),
           ],
         ),
       ),
