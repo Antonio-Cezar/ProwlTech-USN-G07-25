@@ -50,9 +50,9 @@ class ProwlTechApp(ctk.CTk):
         super().__init__()
         self.title("ProwlTech Kontrollpanel")           # Setter vindutittel
         self.geometry("800x480")                        # Setter størrelse 
-        self.attributes("-fullscreen", True)            # Fullskjerm på Raspberry Pi
+        #self.attributes("-fullscreen", True)            # Fullskjerm på Raspberry Pi
         self.bind("<Escape>", self.exit_fullscreen)     # ESC lukker programmet
-        self.config(cursor="none")                      # Skjuler musepeker når GUI er i gang
+        #self.config(cursor="none")                      # Skjuler musepeker når GUI er i gang
 
         self.bluetooth_devices = []                      # Liste for bluetooth-enheter
         self.device_menu = None 
@@ -188,18 +188,18 @@ class ProwlTechApp(ctk.CTk):
         )
         self.home_button.grid(row=0, column=0, padx=60, pady=30)
 
-    # Midtseksjon: viser batteri, tilkobling og sensor
-    def mid_section(self):
-        self.mid_frame = ctk.CTkFrame(self, fg_color=background_color)
-        self.mid_frame.grid(row=1, column=0, columnspan=3, sticky="nsew")
+    # Bunnseksjon: viser batteri, tilkobling, sensor og feilmeldinger
+    def bot_section(self):
+        self.bot_frame = ctk.CTkFrame(self, fg_color=background_color)
+        self.bot_frame.grid(row=1, column=0, columnspan=3, sticky="nsew")
         #self.mid_frame.grid_propagate(False)
 
-        self.mid_frame.grid_rowconfigure(0, weight=3)  # for batteri/sensor/tilkobling
-        self.mid_frame.grid_rowconfigure(1, weight=1)  # for feilmeldinger
-        self.mid_frame.grid_columnconfigure((0, 1, 2), weight=1)
+        self.bot_frame.grid_rowconfigure(0, weight=3)  # for batteri/sensor/tilkobling
+        self.bot_frame.grid_rowconfigure(1, weight=1)  # for feilmeldinger
+        self.bot_frame.grid_columnconfigure((0, 1, 2), weight=1)
 
         # Batteristatus----------------------------------------------
-        self.battery_container = ctk.CTkFrame(self.mid_frame, fg_color=background_color)
+        self.battery_container = ctk.CTkFrame(self.bot_frame, fg_color=background_color)
         self.battery_container.grid(row=0, column=0, padx=(30, 5), pady=10, sticky="nsew")
         self.battery_container.grid_propagate(False)
 
@@ -232,7 +232,7 @@ class ProwlTechApp(ctk.CTk):
         self.battery_status.pack(expand=True)
 
         # Tilkoblingsstatus:----------------------------------------------
-        self.connection_containter = ctk.CTkFrame(self.mid_frame, fg_color=background_color)
+        self.connection_containter = ctk.CTkFrame(self.bot_frame, fg_color=background_color)
         self.connection_containter.grid(row=0, column=1, padx=5, pady=10, sticky="nsew")
         self.connection_containter.grid_propagate(False)
 
@@ -283,7 +283,7 @@ class ProwlTechApp(ctk.CTk):
 
 
         # Sensormåling:----------------------------------------------
-        self.sensor_container = ctk.CTkFrame(self.mid_frame, fg_color=background_color)
+        self.sensor_container = ctk.CTkFrame(self.bot_frame, fg_color=background_color)
         self.sensor_container.grid(row=0, column=2, padx=(20, 10), pady=10, sticky="nsew")
         self.sensor_container.grid_propagate(False)
 
@@ -314,7 +314,7 @@ class ProwlTechApp(ctk.CTk):
         self.sensor_value_label.pack(expand=True)
 
         # Feilmeldinger:----------------------------------------------
-        self.error_container = ctk.CTkFrame(self.mid_frame, fg_color=background_color)
+        self.error_container = ctk.CTkFrame(self.bot_frame, fg_color=background_color)
         self.error_container.grid(row=1, column=0, columnspan=3, padx=10, pady=5, sticky="nsew")
 
         # Feilmeldinger - Tittel
@@ -621,7 +621,7 @@ class ProwlTechApp(ctk.CTk):
         self.front_frame.destroy()
 
         self.top_section()
-        self.mid_section()
+        self.bot_section()
 
         self.running = True
         self.sensor_value = "__"
