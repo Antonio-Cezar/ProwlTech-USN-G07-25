@@ -15,7 +15,7 @@ from can_menu_gui import CanMenuWindow  # Bruker egen klasse for CAN-menyen
 from popup_window import PopupWindow    # Bruker egen klasse for popup-vinduer
 
 # Importerer bilder og ikoner
-from assets import  prowltech_logo, usn_logo, info_icon, bluetooth_icon, bolt_icon, can_icon, cross_icon, loading_icon, menu_icon, sensor_icon, signal_icon, temp_icon, update_icon, warning_icon, start_icon, controller_pic
+from assets import  prowltech_logo, usn_logo, usn_logo_sort, info_icon, bluetooth_icon, bolt_icon, can_icon, cross_icon, loading_icon, menu_icon, sensor_icon, signal_icon, temp_icon, update_icon, warning_icon, start_icon, controller_pic
 
 
 
@@ -81,6 +81,10 @@ class ProwlTechApp(ctk.CTk):
         # Bilde av ProwlTech-logo
         self.logo_label = ctk.CTkLabel(self.front_frame, image=prowltech_logo, text="")
         self.logo_label.place(relx=0.5, rely=0.45, anchor="center")
+
+        # Legger til USN-logo           
+        self.logo_label = ctk.CTkLabel(self.front_frame, image=usn_logo_sort, text="")      
+        self.logo_label.place(x=700, y=15) 
 
         # Start-knapp
         self.start_button = ctk.CTkButton(
@@ -148,7 +152,7 @@ class ProwlTechApp(ctk.CTk):
             corner_radius=button_corner,
             command=self.on_closing
         )
-        self.exit_button.place(relx=0.9, rely=0.1, anchor="center")
+        self.exit_button.place(relx=0.1, rely=0.1, anchor="center")
 
     # Toppseksjon: logo, tittel og knapper
     def top_section(self):
