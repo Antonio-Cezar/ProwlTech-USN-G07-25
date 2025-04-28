@@ -45,7 +45,7 @@ else:
     found_devices = {}
 
     def is_paired(adapter_address, device_address):
-        path = f"/var/lib/bluetooth/{adapter_address}/{device_address}"
+        path = f"/var/lib/bluetooth/{adapter_address}/{device_address}/info"
         return os.path.exists(path)
 
     # Skanner etter enheter via Bluez D-Bus
@@ -57,7 +57,7 @@ else:
         bus = SystemBus()
         mngr = bus.get("org.bluez", "/")
         adapter = bus.get("org.bluez", "/org/bluez/hci0")
-        adapter_address = adapter.Address
+        adapter_address = adapter.Address.upper()   # Henter MAC-adressen til Bluetooth-adapteren
 
         # Start Bluetooth-skanning via BlueZ
         print("Starter søket...")
@@ -83,6 +83,7 @@ else:
                 if not name:
                     continue    # Ignorerer enheter uten navn
 
+                device_address = address.upper()
                 if is_paired(adapter_address, address):
                     found_devices[address] = name + " (Paret) "
                 else:
