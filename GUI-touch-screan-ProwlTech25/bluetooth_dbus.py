@@ -83,13 +83,14 @@ else:
                 if not name:
                     continue    # Ignorerer enheter uten navn
 
-                device_address = address.upper()
-                if is_paired(adapter_address, address):
-                    found_devices[address] = name + " (Paret) "
-                else:
-                    found_devices[address] = name 
+                if is_paired(adapter_address, device_address):
+                    full_name = name + " (Paret)"
 
-                print(f" {found_devices[address]}")
+                else:
+                    full_name = name
+
+                found_devices[address] = full_name
+                print(f"🔹 {full_name} ({address})")
 
     # Returnerer liste med funnede enheter
     def get_devices():
