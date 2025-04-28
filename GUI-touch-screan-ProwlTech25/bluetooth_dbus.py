@@ -83,6 +83,7 @@ else:
                 if not name:
                     continue    # Ignorerer enheter uten navn
 
+                device_address = address.upper()
                 if is_paired(adapter_address, device_address):
                     full_name = name + " (Paret)"
 
