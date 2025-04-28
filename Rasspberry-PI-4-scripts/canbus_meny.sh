@@ -78,6 +78,8 @@ while true; do
     echo "===================================="
     echo "$(get_can_status)"
     echo "===================================="
+    echo ""
+    echo ""
     echo "=== (can0) CAN-bus Kontrollmeny ==="
     echo "1. Prøv å starte CAN-bus på nytt"
     echo ""

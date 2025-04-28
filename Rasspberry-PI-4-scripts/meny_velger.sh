@@ -3,12 +3,6 @@
 # (PROWLTECH25 - CA).
 # Dette er menyen for å velge de forskjellige menyen for can0, motorkontroller og kontroller operasjoner.
 
-# Hvis ikke skriptet kjører i en terminal, åpne et nytt terminalvindu og kjør dette skriptet der
-if [ -z "$DISPLAY" ] || ! tty -s; then
-    gnome-terminal -- bash -c "$0; exec bash"
-    exit
-fi
-
 # Setter opp CAN-grensesnitt og bitrate.
 #================================================================
 CAN_INTERFACE="can0"
@@ -49,40 +43,6 @@ get_can_status() {
     fi
 }
 
-# Funksjonen bruker Python-skript for å hente status på motorkontrolleren (via CAN)
-get_motor_status() {
-    python3 /home/prowltech/prowltech-script/vesc_cmd.py --can_id $VESC_ID --get_status >/dev/null 2>&1
-    case $? in
-        0)
-            echo "(MOTORSTATUS: PÅ)";;
-        3)
-            echo "(MOTORSTATUS: AV)";;
-        1)
-            echo "(MOTORSTATUS: IKKE TILKOBLET)";;
-        2)
-            echo "(MOTORSTATUS: CAN FEIL)";;
-        4)
-            echo "(MOTORSTATUS: UKJENT SVAR)";;
-        *)
-            echo "(MOTORSTATUS: FEIL)";;
-    esac
-}
-
-# Funksjonen sjekker om VESC (motorstyring komponenten) er koblet til.
-check_vesc_status() {
-    python3 /home/prowltech/prowltech-script/vesc_cmd.py --can_id $VESC_ID --check_status >/dev/null 2>&1
-    case $? in
-        0)
-            echo "(VESC status: TILKOBLET)";;
-        1)
-            echo "(VESC status: IKKE TILKOBLET)";;
-        2)
-            echo "(VESC status: FEIL I CAN-GRENSESNITT)";;
-        *)
-            echo "(VESC status: UKJENT)";;
-    esac
-}
-
 # === HOVEDMENYEN ===
 while true; do
     clear
@@ -91,9 +51,6 @@ while true; do
     # Viser statuslinje for can0, VESC og motor.
     echo "===================================="
     echo "$(get_can_status)"
-    echo""
-    echo "$(check_vesc_status)"
-    echo "$(get_motor_status)"
     echo "===================================="
     echo ""
     echo ""
@@ -101,9 +58,7 @@ while true; do
     echo "===Velg Kontrollmeny ==="
     echo "1. CAN-bus kontrollmeny"
     echo ""
-    echo "2. Motorkontrollere kontrollmeny"
-    echo ""
-    echo "3. Kontroller meny"
+    echo "2. Xbox Kontroller meny"
     echo ""
     echo "x. Avslutt"
     echo "===================================="
@@ -112,7 +67,7 @@ while true; do
     echo
 
     case $valg in
-        # Alternativ 1: Åpner CAN-bus kontrollmeny
+        # Alternativ 1: Åpner CAN-bus kontrollmeny.
         1)
             clear
             echo "Åpner opp: "
@@ -127,23 +82,8 @@ while true; do
                 loading_animation
             fi
             ;;
-        # Alternativ 2: Åpner Motorkontrollere-meny
+        # Alternativ 2: Åpner kontroller-meny
         2)
-            clear
-            echo "Åpner opp: "
-            echo "Motorkontrollere kontrollmeny"
-            sleep 0.2
-            loading_animation
-            if [[ -x $motorkontroller_kontrollmeny ]]; then
-                $motorkontroller_kontrollmeny
-            else
-                echo "Feil: Fant ikke $motorkontroller_kontrollmeny"
-                sleep 0.4
-                loading_animation
-            fi
-            ;;
-        # Alternativ 3: Åpner kontroller-meny
-        3)
             clear
             echo "Åpner opp: "
             echo "kontroller meny"
