@@ -40,8 +40,13 @@ if platform.system() != "Linux":
 else:
     from pydbus import SystemBus
     import subprocess
+    import os
 
     found_devices = {}
+
+    def is_paired(adapter_address, device_address):
+        path = f"/var/lib/bluetooth/{adapter_address}/{device_address}"
+        return os.path.exists(path)
 
     # Skanner etter enheter via Bluez D-Bus
     def scan_devices():
@@ -52,6 +57,7 @@ else:
         bus = SystemBus()
         mngr = bus.get("org.bluez", "/")
         adapter = bus.get("org.bluez", "/org/bluez/hci0")
+        adapter_address = adapter.Address
 
         # Start Bluetooth-skanning via BlueZ
         print("Starter søket...")
@@ -76,8 +82,13 @@ else:
                 name = dev.get("Name")
                 if not name:
                     continue    # Ignorerer enheter uten navn
-                found_devices[address] = name
-                print(f"🔹 {name} ({address})")
+
+                if is_paired(adapter_address, address):
+                    found_devices[address] = name + " (Paret) "
+                else:
+                    found_devices[address] = name 
+
+                print(f" {found_devices[address]}")
 
     # Returnerer liste med funnede enheter
     def get_devices():
