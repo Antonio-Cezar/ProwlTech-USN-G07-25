@@ -122,6 +122,22 @@ else:
 
         try:
             device = bus.get("org.bluez", device_path)
+
+            # Først: Pair
+            try:
+                device.Pair()
+                print(f"Paired med {name}")
+            except Exception as e:
+                print(f"Pairing feilet: {e}")
+
+            # Trust etter Pair
+            try:
+                device.Trust()
+                print(f"Enheten {name} ble Trusted")
+            except Exception as e:
+                print(f"Trust feilet: {e}")
+
+            # Connect
             device.Connect()
             print(f"Koblet til {name} ({address})")
             return True
