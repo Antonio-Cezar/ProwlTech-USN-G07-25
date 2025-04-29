@@ -359,7 +359,7 @@ class ProwlTechApp(ctk.CTk):
         # Knapp for å oppdatere søket etter tilgjengelige kontrollere
         self.update_button = ctk.CTkButton(
             self.popup.top,
-            text="Søk",
+            text="Oppdater",
             width=120,
             height=40,
             image=update_icon,
@@ -372,6 +372,13 @@ class ProwlTechApp(ctk.CTk):
             command=self.start_update
         )
         self.update_button.place(relx=0.05, rely=0.5, anchor="w")
+
+         # Progressbar
+        self.start_progressbar()
+
+        # Starter skanning automatisk når popup åpnes
+        threading.Thread(target=self.scan_and_show).start() # Kjører skanning i egen tråd slik at GUI-et ikke fryser
+
 
         
 
@@ -436,11 +443,7 @@ class ProwlTechApp(ctk.CTk):
         self.update_button.configure(text="Søker...", state="disabled")     # Teksten på knappen endrer seg og knappen blir deaktivert under søk
 
         # Progressbar
-        self.progress = ctk.CTkProgressBar(self.popup.bottom, progress_color=frame_color)   # Oppretter progressbar
-        self.progress.pack(pady=10, padx=20, fill="x")
-        self.progress.configure(mode="indeterminate")   # Skal ikke vise tid, bare animasjon
-        self.progress.set(0)
-        self.progress.start()   # Starter animasjon
+        self.start_progressbar()
 
         threading.Thread(target=self.scan_and_show).start() # Kjører skanning i egen tråd slik at GUI-et ikke fryser
 
@@ -607,6 +610,14 @@ class ProwlTechApp(ctk.CTk):
         self.after(500, self.update_sensor_display)
 
 #--------------------ANDRE FUNKSJONER-------------------------  
+    # Progressbar
+    def start_progressbar(self):
+        self.progress = ctk.CTkProgressBar(self.popup.bottom, progress_color=frame_color)   # Oppretter progressbar
+        self.progress.pack(pady=10, padx=20, fill="x")
+        self.progress.configure(mode="indeterminate")   # Skal ikke vise tid, bare animasjon
+        self.progress.set(0)
+        self.progress.start()   # Starter animasjon
+
     # Funksjon: Avslutte programmet (ESC)
     def exit_fullscreen(self, event=None):
         self.destroy()
