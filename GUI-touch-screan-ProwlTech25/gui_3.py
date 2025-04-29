@@ -414,7 +414,7 @@ class ProwlTechApp(ctk.CTk):
             if self.controller_label.winfo_ismapped():
                 self.controller_label.pack_forget()
                 self.info_label.pack(padx=10, pady=20)
-                self.show_controller.configure(text="Kontrollerfunksjoner")
+                self.show_controller.configure(text="Kontroller")
             else:
                 self.info_label.pack_forget()
                 self.controller_label.pack(padx=10, pady=0)
@@ -423,7 +423,7 @@ class ProwlTechApp(ctk.CTk):
         # Knapp for å åpne kontroller-layout
         self.show_controller = ctk.CTkButton(
             self.popup.top,
-            text="Kontrollerfunksjoner",
+            text="Kontroller",
             width=120,
             height=40,
             font=("Century Gothic", 16),
