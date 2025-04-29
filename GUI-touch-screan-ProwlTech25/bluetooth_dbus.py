@@ -137,22 +137,16 @@ else:
             return False
 
         bus = SystemBus()
-        mngr = bus.get("org.bluez", "/")
         device_path = f"/org/bluez/hci0/dev_{address.replace(':', '_')}"
-        #print(f"[INFO] Frakobler fra path: {device_path}")
+        device = bus.get("org.bluez", device_path)
+        adapter = bus.get("org.bluez", "/org/bluez/hci0")
 
         try:
-            device = bus.get("org.bluez", device_path)
-
-            # Sjekker om enhet er tilkoblet før avkobling forsøkes
-            connected = device.Connected
-            print(f"[DEBUG] Enheten er {'tilkoblet' if connected else 'ikke tilkoblet'} før Disconnect()")
-
-            if connected:
-                device.Disconnect()
+            if device.Connected:
+                device.Disconnect()     # Kobler fra
                 print(f"Koblet fra {name} ({address})")
                 
-            mngr.RemoveDevice(device_path)
+            adapter.RemoveDevice(device_path)   # Fjerner enheten fra listen over kjente paringer
             print(f"Fjernet {name} fra kjent-liste")
             return True
             
