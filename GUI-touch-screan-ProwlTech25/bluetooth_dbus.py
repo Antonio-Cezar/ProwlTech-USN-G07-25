@@ -116,43 +116,48 @@ else:
         if not address:
             print(f"Fant ikke enhet med navn {name}")
             return False
-        
-        bus = SystemBus()
-        device_path = f"/org/bluez/hci0/dev_{address.replace(':', '_')}"
 
         try:
+            bus = SystemBus()
+            device_path = f"/org/bluez/hci0/dev_{address.replace(':', '_')}"
             device = bus.get("org.bluez", device_path)
-
-            # Først: Pair
-            try:
-                device.Pair()
-                print(f"Paired med {name}")
-            except Exception as e:
-                print(f"Pairing feilet: {e}")
-
-            # Trust etter Pair
-            try:
-                device.Trust()
-                print(f"Enheten {name} ble Trusted")
-            except Exception as e:
-                print(f"Trust feilet: {e}")
-
-            # Connect
-            device.Connect()
-            print(f"Forsøkte tilkobling til {name}")
-
-            return device.Connected
-
-            #if not device.Connected:
-             #   print(f"{name} er ble ikke tilkoblet")
-              #  return False
-
-            #print(f"{name} er nå tilkoblet!")
-            #return True
-        
         except Exception as e:
-            print(f"Feil ved tilkobling til {name}: {e}")
+            print(f"Kunne ikke hente device-objekt: {e}")
             return False
+
+        # Pair
+        try:
+            device.Pair()
+            print(f"Pairing vellykket med {name}")
+        except Exception as e:
+            print(f"Pairing feilet (kanskje allerede paret?): {e}")
+
+        # Trust
+        try:
+            device.Trust()
+            print(f"Trustet {name}")
+        except Exception as e:
+            print(f"Trust feilet: {e}")
+
+        # Connect
+        try:
+            device.Connect()
+            print(f"Kjørte Connect() for {name}")
+        except Exception as e:
+            print(f"Connect feilet: {e}")
+            return False
+
+        # Verifiser faktisk tilkobling
+        try:
+            if not device.Connected:
+                print(f"Enheten er ikke tilkoblet etter Connect()")
+                return False
+            print(f" {name} er nå tilkoblet!")
+            return True
+        except Exception as e:
+            print(f"Kunne ikke verifisere tilkoblingsstatus: {e}")
+            return False
+
         
     # Kobler fra enhet basert på navn    
     def disconnect_from_device(name):
