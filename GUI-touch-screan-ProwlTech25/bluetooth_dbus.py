@@ -117,46 +117,43 @@ else:
             print(f"Fant ikke enhet med navn {name}")
             return False
 
+        bus = SystemBus()
+        device_path = f"/org/bluez/hci0/dev_{address.replace(':', '_')}"
+
         try:
-            bus = SystemBus()
-            device_path = f"/org/bluez/hci0/dev_{address.replace(':', '_')}"
             device = bus.get("org.bluez", device_path)
-        except Exception as e:
-            print(f"Kunne ikke hente device-objekt: {e}")
-            return False
 
-        # Pair
-        try:
-            device.Pair()
-            print(f"Pairing vellykket med {name}")
-        except Exception as e:
-            print(f"Pairing feilet (kanskje allerede paret?): {e}")
+            try:
+                device.Pair()
+                print(f"Paret med {name}")
+            except Exception as e:
+                print(f"Pairing feilet eller allerede paret: {e}")
 
-        # Trust
-        try:
-            device.Trust()
-            print(f"Trustet {name}")
-        except Exception as e:
-            print(f"Trust feilet: {e}")
+            # Trust (hvis støttet)
+            try:
+                if hasattr(device, "Trust"):
+                    device.Trust()
+                    print(f"Trustet {name}")
+                else:
+                    print(f"Trust ikke støttet")
+            except Exception as e:
+                print(f"Trust feilet: {e}")
 
-        # Connect
-        try:
+            time.sleep(2)  # Vent på at kontrolleren blir klar
+
             device.Connect()
-            print(f"Kjørte Connect() for {name}")
+            print(f"Tilkobling forsøkt med {name}")
+
+            if not device.Connected:
+                print(f"Ikke faktisk tilkoblet etter Connect")
+                return False
+
+            return True
+
         except Exception as e:
-            print(f"Connect feilet: {e}")
+            print(f"Tilkoblingsfeil: {e}")
             return False
 
-        # Verifiser faktisk tilkobling
-        try:
-            if not device.Connected:
-                print(f"Enheten er ikke tilkoblet etter Connect()")
-                return False
-            print(f" {name} er nå tilkoblet!")
-            return True
-        except Exception as e:
-            print(f"Kunne ikke verifisere tilkoblingsstatus: {e}")
-            return False
 
         
     # Kobler fra enhet basert på navn    
