@@ -167,6 +167,5 @@ else:
             if "org.bluez.Device1" in interfaces:
                 dev = interfaces["org.bluez.Device1"]  # Bruk ordboken direkte
                 address = dev.get("Address")
-                if address:
-                    devices[address] = dev
+                devices[address] = dev
         return devices
