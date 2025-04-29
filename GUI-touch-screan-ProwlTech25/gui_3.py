@@ -543,6 +543,8 @@ class ProwlTechApp(ctk.CTk):
                 status_label.configure(text="", text_color="white")
                 self.connection_status.configure(text="Ingen kontroller tilkoblet", text_color="white")
                 print("Koblet fra")
+                self.popup.destroy()    # Lukker vindu
+                self.log_error(f"{name} ble koblet fra.")
 
             else:
                 print("Klarte ikke koble fra")
@@ -558,6 +560,8 @@ class ProwlTechApp(ctk.CTk):
                 status_label.configure(text="Tilkoblet", text_color="green")
                 self.connection_status.configure(text=f"Kontroller: Tilkoblet \n\n {name}", text_color="white")
                 print("Tilkobling fullført")
+                self.popup.destroy()    # Lukker vindu
+                self.log_error(f"{name} ble koblet til.")
 
             else:
                 self.connection_status.configure(text=f"Ingen kontroller tilkoblet", text_color="red")
@@ -645,6 +649,9 @@ class ProwlTechApp(ctk.CTk):
         self.connected_device = None
         self.connection_status.configure(text=f"Ingen kontroller tilkoblet", text_color="white")
         print("Ingen enheter er tilkoblet")
+
+        # Sjekker automatisk hvert 3. sekund
+        self.after(3000, self.check_connected)
 
     # Funksjon: Åpne kontrollpanel
     def open_control_panel(self):
