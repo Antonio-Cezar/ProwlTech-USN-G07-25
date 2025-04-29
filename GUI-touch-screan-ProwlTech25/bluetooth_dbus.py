@@ -141,12 +141,14 @@ else:
             device.Connect()
             print(f"Forsøkte tilkobling til {name}")
 
-            if not device.Connected:
-                print(f"{name} er ble ikke tilkoblet")
-                return False
+            return device.Connected
 
-            print(f"{name} er nå tilkoblet!")
-            return True
+            #if not device.Connected:
+             #   print(f"{name} er ble ikke tilkoblet")
+              #  return False
+
+            #print(f"{name} er nå tilkoblet!")
+            #return True
         
         except Exception as e:
             print(f"Feil ved tilkobling til {name}: {e}")
