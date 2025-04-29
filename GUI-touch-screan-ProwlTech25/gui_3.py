@@ -623,7 +623,7 @@ class ProwlTechApp(ctk.CTk):
     # Sjekker om det er noe kontroller tilkoblet
     def check_connected(self):
         devices = bluetooth_dbus.get_raw_devices()
-        for address, dev in devices.items():
+        for dev in devices.items():
             name = dev.get("Name")
             connected = dev.get("Connected", False)
             if connected and name:

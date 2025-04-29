@@ -87,16 +87,16 @@ else:
                 if not name:
                     continue    # Ignorerer enheter uten navn
 
-                paired = dev.get("Paired", False)
-                connected = dev.get("Connected", False)
-                label = name
-                if paired:
-                    label += " (Paret)"
-                if connected:
-                    label += " (Tilkoblet)"
+                #paired = dev.get("Paired", False)
+                #connected = dev.get("Connected", False)
+                #label = name
+                #if paired:
+                 #   label += " (Paret)"
+                #if connected:
+                 #   label += " (Tilkoblet)"
 
-                found_devices[address] = label
-                print(f" {label} ({address})")
+                found_devices[address] = name
+                print(f" {name} ({address})")
 
               
     # Returnerer liste med funnede enheter
