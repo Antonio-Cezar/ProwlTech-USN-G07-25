@@ -137,8 +137,9 @@ else:
             return False
 
         bus = SystemBus()
+        mngr = bus.get("org.bluez", "/")
         device_path = f"/org/bluez/hci0/dev_{address.replace(':', '_')}"
-        print(f"[INFO] Frakobler fra path: {device_path}")
+        #print(f"[INFO] Frakobler fra path: {device_path}")
 
         try:
             device = bus.get("org.bluez", device_path)
@@ -150,7 +151,10 @@ else:
             if connected:
                 device.Disconnect()
                 print(f"Koblet fra {name} ({address})")
-                return True
+                
+            mngr.RemoveDevice(device_path)
+            print(f"Fjernet {name} fra kjent-liste")
+            return True
             
         except Exception as e:
             print(f"Feil ved frakobling av {name}: {e}")

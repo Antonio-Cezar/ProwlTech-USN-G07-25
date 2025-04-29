@@ -543,7 +543,7 @@ class ProwlTechApp(ctk.CTk):
                 status_label.configure(text="", text_color="white")
                 self.connection_status.configure(text="Ingen kontroller tilkoblet", text_color="white")
                 print("Koblet fra")
-                self.popup.destroy()    # Lukker vindu
+                self.popup.close()    # Lukker vindu
                 self.log_error(f"{name} ble koblet fra.")
 
             else:
@@ -560,7 +560,7 @@ class ProwlTechApp(ctk.CTk):
                 status_label.configure(text="Tilkoblet", text_color="green")
                 self.connection_status.configure(text=f"Kontroller: Tilkoblet \n\n {name}", text_color="white")
                 print("Tilkobling fullført")
-                self.popup.destroy()    # Lukker vindu
+                self.popup.close()    # Lukker vindu
                 self.log_error(f"{name} ble koblet til.")
 
             else:
