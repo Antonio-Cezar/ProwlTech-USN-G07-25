@@ -82,7 +82,7 @@ else:
             if "org.bluez.Device1" in interfaces:
                 dev = interfaces["org.bluez.Device1"]
                 address = dev.get("Address", "ukjent")
-                name = dev.get("Name") or "Ukjent enhet"
+                name = dev.get("Name")
 
                 if not name:
                     continue    # Ignorerer enheter uten navn
