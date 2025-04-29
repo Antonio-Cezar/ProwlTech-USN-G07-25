@@ -17,6 +17,11 @@
 #define VESC_CMD_SET_RPM   5       // Kommando‑ID for COMM_SET_RPM
 #define VESC_CMD_GET_VALUES 4
 
+#define VESC_STX_SHORT     0x02
+#define VESC_ETX           0x03
+#define VESC_CMD_FORWARD_CAN 33
+#define VESC_CMD_SET_RPM     5
+
 #include <zephyr/drivers/pwm.h>
 const struct device *speaker_dev;
 
@@ -195,4 +200,68 @@ void speaker_init(void) {
     } else {
         printf("Speaker ready: %s\n", speaker_dev->name);
     }
+}
+
+void send_forwarded_set_rpm(uint8_t can_id, int rpm) {
+    if (!uart_dev) {
+        printf("ERROR: UART not initialized\n");
+        return;
+    }
+
+    // Lag innerste RPM-payload
+    uint8_t rpm_payload[1 + sizeof(int32_t)];
+    rpm_payload[0] = VESC_CMD_SET_RPM;
+    int32_t rpm_be = __builtin_bswap32(rpm);
+    memcpy(&rpm_payload[1], &rpm_be, sizeof(int32_t));
+
+    // Lag ytre CAN-forward-payload
+    uint8_t can_payload[1 + 1 + sizeof(rpm_payload)];
+    can_payload[0] = VESC_CMD_FORWARD_CAN;
+    can_payload[1] = can_id;  // Mottaker-VESC
+    memcpy(&can_payload[2], rpm_payload, sizeof(rpm_payload));
+
+    // Beregn CRC
+    uint16_t crc = compute_crc16(can_payload, sizeof(can_payload));
+
+    // Lag hele rammen
+    uint8_t frame[2 + sizeof(can_payload) + 2 + 1];
+    size_t idx = 0;
+    frame[idx++] = VESC_STX_SHORT;
+    frame[idx++] = (uint8_t)sizeof(can_payload);
+    memcpy(&frame[idx], can_payload, sizeof(can_payload));
+    idx += sizeof(can_payload);
+    frame[idx++] = (uint8_t)(crc >> 8);
+    frame[idx++] = (uint8_t)(crc & 0xFF);
+    frame[idx++] = VESC_ETX;
+
+    for (size_t i = 0; i < idx; i++) {
+        uart_poll_out(uart_dev, frame[i]);
+        k_busy_wait(100);  // 100 µs pause
+    }
+
+    printf("Sendte %d RPM til VESC med CAN ID %d\n", rpm, can_id);
+}
+
+void run_can_rpm_test_sequence(void) {
+    for (uint8_t can_id = 0; can_id <= 3; can_id++) {
+        printf("Starter test for VESC ID %d\n", can_id);
+
+        if (can_id == 0) {
+            send_set_rpm(5000);  // UART direkte
+        } else {
+            send_forwarded_set_rpm(can_id, 5000);  // via CAN
+        }
+
+        k_msleep(2000);  // kjør i 2 sek
+
+        if (can_id == 0) {
+            send_set_rpm(0);
+        } else {
+            send_forwarded_set_rpm(can_id, 0);
+        }
+
+        k_msleep(1000);  // pause
+    }
+
+    printf("Testsekvens fullført\n");
 }

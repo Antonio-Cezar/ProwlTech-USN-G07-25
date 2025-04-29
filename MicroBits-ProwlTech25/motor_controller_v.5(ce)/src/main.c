@@ -42,10 +42,12 @@
         printf(".\n");
         printf("Prøver å sender rpm\n");
 
-        for (int i = 0; i < 100; i++) {
-            send_set_rpm(5000);
-            k_msleep(50);
-        }
+        //for (int i = 0; i < 100; i++) {
+            //send_set_rpm(5000);
+            //k_msleep(50);
+        //}
+
+        run_can_rpm_test_sequence();
 
         printf(".\n");
         printf("Velykket sendt\n");
