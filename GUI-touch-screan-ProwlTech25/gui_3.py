@@ -520,7 +520,9 @@ class ProwlTechApp(ctk.CTk):
             )
             no_devices_label.pack(pady=10)
 
-        self.update_button.configure(text="Søk", state="normal")   # Gjør det mulig å trykke på søke-knappen igjen
+            self.log_error(f"Ingen enheter funnet.")
+
+        self.update_button.configure(text="Oppdater", state="normal")   # Gjør det mulig å trykke på søke-knappen igjen
 
     def toggle_connection(self, name):
 
@@ -548,6 +550,7 @@ class ProwlTechApp(ctk.CTk):
 
             else:
                 print("Klarte ikke koble fra")
+                self.log_error(f"Klarte ikke koble fra {name}")
 
         # Hvis enheten ikke er koblet til. Funksjon til å koble til enhet
         else:
