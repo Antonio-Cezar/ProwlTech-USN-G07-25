@@ -652,9 +652,8 @@ class ProwlTechApp(ctk.CTk):
         for dev in devices.values():
             name = dev.get("Name")
             connected = dev.get("Connected", False)
-            paired = dev.get("Paired", False)
 
-            if connected and paired and name:
+            if connected and name:
                 self.connected_device = name
                 self.connection_status.configure(text=f"Kontroller: Tilkoblet \n\n {name}", text_color="white")
                 print(f"Tilkoblet enhet oppdaget: {name}")

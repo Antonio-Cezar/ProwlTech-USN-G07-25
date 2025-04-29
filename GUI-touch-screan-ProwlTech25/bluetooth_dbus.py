@@ -122,36 +122,11 @@ else:
 
         try:
             device = bus.get("org.bluez", device_path)
-
-            try:
-                device.Pair()
-                print(f"Paret med {name}")
-            except Exception as e:
-                print(f"Pairing feilet eller allerede paret: {e}")
-
-            # Trust (hvis støttet)
-            try:
-                if hasattr(device, "Trust"):
-                    device.Trust()
-                    print(f"Trustet {name}")
-                else:
-                    print(f"Trust ikke støttet")
-            except Exception as e:
-                print(f"Trust feilet: {e}")
-
-            time.sleep(2)  # Vent på at kontrolleren blir klar
-
             device.Connect()
-            print(f"Tilkobling forsøkt med {name}")
-
-            if not device.Connected:
-                print(f"Ikke faktisk tilkoblet etter Connect")
-                return False
-
+            print(f"Tilkoblet {name}")
             return True
-
         except Exception as e:
-            print(f"Tilkoblingsfeil: {e}")
+            print(f"Feil ved tilkobling til {name}: {e}")
             return False
 
 
