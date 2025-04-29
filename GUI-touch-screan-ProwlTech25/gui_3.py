@@ -642,13 +642,14 @@ class ProwlTechApp(ctk.CTk):
     def check_connected(self):
         devices = bluetooth_dbus.get_raw_devices()
         for dev in devices.values():
-            name = dev.get("Name")
-            connected = dev.get("Connected", False)
+            name = dev.Name
+            connected = dev.Connected
             if connected and name:
                 self.connected_device = name
                 self.connection_status.configure(text=f"Kontroller: Tilkoblet \n\n {name}", text_color="white")
                 print(f"Tilkoblet enhet oppdaget: {name}")
                 return
+            
         self.connected_device = None
         self.connection_status.configure(text=f"Ingen kontroller tilkoblet", text_color="white")
         print("Ingen enheter er tilkoblet")

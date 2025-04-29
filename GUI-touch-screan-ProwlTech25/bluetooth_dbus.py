@@ -179,7 +179,10 @@ else:
         devices = {}
         for path, interfaces in managed_objects.items():
             if "org.bluez.Device1" in interfaces:
-                dev = interfaces["org.bluez.Device1"]
-                address = dev.get("Address", "ukjent")
-                devices[address] = dev
+                try:
+                    dev = bus.get("org.bluez", path)
+                    address = dev.Address
+                    devices[address] = dev
+                except Exception as e:
+                    print(f"Kunne ikke hente enhet {path}: {e}")
         return devices
