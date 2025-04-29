@@ -188,10 +188,8 @@ else:
         devices = {}
         for path, interfaces in managed_objects.items():
             if "org.bluez.Device1" in interfaces:
-                try:
-                    dev = bus.get("org.bluez", path)
-                    address = dev.Address
+                dev = interfaces["org.bluez.Device1"]  # Bruk ordboken direkte
+                address = dev.get("Address")
+                if address:
                     devices[address] = dev
-                except Exception as e:
-                    print(f"Kunne ikke hente enhet {path}: {e}")
         return devices
