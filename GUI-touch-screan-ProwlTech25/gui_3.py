@@ -5,6 +5,7 @@ import bluetooth_dbus   # Bluetoothhåndtering
 import subprocess   # Kjøring av eksterne script
 import sys
 import os
+import time
 
 # Sti til mappe med eksterne script
 script_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "Rasspberry-PI-4-scripts"))
@@ -582,27 +583,34 @@ class ProwlTechApp(ctk.CTk):
 
             # Så lenge programmet kjører blir data hentet fra CAN-bus
             while self.running:
-                val = receive_sensor_data() # Funksjonen som leser CAN-melding
+                try:
+                    val = receive_sensor_data() # Funksjonen som leser CAN-melding
 
-                # Sjekker om CAN-bus er inaktiv
-                if val == "CAN_INACTIVE":
-                    self.sensor_value = "--"
-                    if not can_error_logged:
-                        self.log_error("CAN-bus er ikke aktiv. Sjekk at can0 er oppe. ")    # Logger feilmelding
-                        can_error_logged = True
-                    continue
+                    # Sjekker om CAN-bus er inaktiv
+                    if val == "CAN_INACTIVE":
+                        self.sensor_value = "--"
+                        if not can_error_logged:
+                            self.log_error("CAN-bus er ikke aktiv. Sjekk at can0 er oppe. ")    # Logger feilmelding
+                            can_error_logged = True
+                        continue
 
-                # Sjekker om data er mottatt
-                if val is not None:
-                    self.sensor_value = val # Lagrer mottatt sensordata
-                    no_data_logged = False  # Tilbakestill hvis data er ok
+                    # Sjekker om data er mottatt
+                    if val is not None:
+                        self.sensor_value = val # Lagrer mottatt sensordata
+                        no_data_logged = False  # Tilbakestill hvis data er ok
+                        can_error_logged = False
 
-                # Hvis CAN-bus er aktiv men får ikke inn data
-                else:
+                    # Hvis CAN-bus er aktiv men får ikke inn data
+                    else:
+                        self.sensor_value = "__"
+                        if not no_data_logged:
+                            self.log_error("Ingen data mottatt fra sensor (CAN).")  # Logger feilmelding
+                            no_data_logged = True
+
+                except Exception as e:
                     self.sensor_value = "__"
-                    if not no_data_logged:
-                        self.log_error("Ingen data mottatt fra sensor (CAN).")  # Logger feilmelding
-                        no_data_logged = True
+                    self.log_error(f"Feil under lesing av sensordata: {e}")
+                    time.sleep(1)
 
     # Viser sensorstatus i GUI
     def update_sensor_display(self):
@@ -644,7 +652,9 @@ class ProwlTechApp(ctk.CTk):
         for dev in devices.values():
             name = dev.Name
             connected = dev.Connected
-            if connected and name:
+            paired = dev.Paired
+
+            if connected and paired and name:
                 self.connected_device = name
                 self.connection_status.configure(text=f"Kontroller: Tilkoblet \n\n {name}", text_color="white")
                 print(f"Tilkoblet enhet oppdaget: {name}")
