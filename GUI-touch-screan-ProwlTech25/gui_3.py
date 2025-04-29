@@ -273,7 +273,7 @@ class ProwlTechApp(ctk.CTk):
             self.connection_frame,
             width=35,
             height=35,
-            text="Koble til kontroller",
+            text="Koble til/fra kontroller",
             image=bluetooth_icon,
             compound="right",                          
             font=("Century Gothic", 14),
