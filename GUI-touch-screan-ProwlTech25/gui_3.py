@@ -620,6 +620,21 @@ class ProwlTechApp(ctk.CTk):
         print("Knappen ble trykket")
         CanMenuWindow(self)
 
+    # Sjekker om det er noe kontroller tilkoblet
+    def check_connected(self):
+        devices = bluetooth_dbus.get_raw_devices()
+        for address, dev in devices.items():
+            name = dev.get("Name")
+            connected = dev.get("Connected", False)
+            if connected and name:
+                self.connected_device = name
+                self.connection_status.configure(text=f"Kontroller: Tilkoblet \n\n {name}", text_color="white")
+                print(f"Tilkoblet enhet oppdaget: {name}")
+                return
+        self.connected_device = None
+        self.connection_status.configure(text=f"Ingen kontroller tilkoblet", text_color="white")
+        print("Ingen enheter er tilkoblet")
+
     # Funksjon: Åpne kontrollpanel
     def open_control_panel(self):
         self.front_frame.destroy()
@@ -631,6 +646,8 @@ class ProwlTechApp(ctk.CTk):
         self.sensor_value = "__"
         threading.Thread(target=self.get_sensor_data, daemon=True).start()
         self.update_sensor_display()
+
+        self.check_connected() 
 
         self.log_error("Test: Kontrollpanelet ble åpnet.")
 

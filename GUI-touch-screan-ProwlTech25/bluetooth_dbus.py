@@ -88,7 +88,12 @@ else:
                     continue    # Ignorerer enheter uten navn
 
                 paired = dev.get("Paired", False)
-                label = name + " (Paret)" if paired else name
+                connected = dev.get("Connected", False)
+                label = name
+                if paired:
+                    label += " (Paret)"
+                if connected:
+                    label += " (Tilkoblet)"
 
                 found_devices[address] = label
                 print(f" {label} ({address})")
@@ -152,4 +157,15 @@ else:
             return False
 
 
-    
+    def get_raw_devices():
+        bus = SystemBus()
+        mngr = bus.get("org.bluez", "/")
+        managed_objects = mngr.GetManagedObjects()
+
+        devices = {}
+        for path, interfaces in managed_objects.items():
+            if "org.bluez.Device1" in interfaces:
+                dev = interfaces["org.bluez.Device1"]
+                address = dev.get("Address", "ukjent")
+                devices[address] = dev
+        return devices
