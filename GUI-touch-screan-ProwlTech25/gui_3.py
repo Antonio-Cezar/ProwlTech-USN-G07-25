@@ -650,9 +650,9 @@ class ProwlTechApp(ctk.CTk):
     def check_connected(self):
         devices = bluetooth_dbus.get_raw_devices()
         for dev in devices.values():
-            name = dev.Name
-            connected = dev.Connected
-            paired = dev.Paired
+            name = dev.get("Name")
+            connected = dev.get("Connected", False)
+            paired = dev.get("Paired", False)
 
             if connected and paired and name:
                 self.connected_device = name
