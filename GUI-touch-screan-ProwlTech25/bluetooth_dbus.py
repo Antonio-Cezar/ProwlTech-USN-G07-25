@@ -76,29 +76,24 @@ else:
         print("Skanning avsluttet.\n")
 
         # Henter enheter funnet via D-Bus object manager
-        print("Enheter funnet via D-Bus:")
         managed_objects = mngr.GetManagedObjects()
 
         for path, interfaces in managed_objects.items():
             if "org.bluez.Device1" in interfaces:
                 dev = interfaces["org.bluez.Device1"]
                 address = dev.get("Address", "ukjent")
-                name = dev.get("Name")
+                name = dev.get("Name") or "Ukjent enhet"
+
                 if not name:
                     continue    # Ignorerer enheter uten navn
 
-                device_address = address.upper()
-                adapter_address = adapter.Address.upper()   # Henter MAC-adressen til Bluetooth-adapteren
+                paired = dev.get("Paired", False)
+                label = name + " (Paret)" if paired else name
 
-                if is_paired(adapter_address, device_address):
-                    full_name = name + " (Paret)"
+                found_devices[address] = label
+                print(f" {label} ({address})")
 
-                else:
-                    full_name = name
-
-                found_devices[address] = full_name
-                print(f"🔹 {full_name} ({address})")
-
+              
     # Returnerer liste med funnede enheter
     def get_devices():
         return found_devices
