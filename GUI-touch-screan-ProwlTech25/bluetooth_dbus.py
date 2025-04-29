@@ -87,8 +87,8 @@ else:
                 if not name:
                     continue    # Ignorerer enheter uten navn
 
-                #paired = dev.get("Paired", False)
-                #connected = dev.get("Connected", False)
+                paired = dev.get("Paired", False)
+                connected = dev.get("Connected", False)
                 #label = name
                 #if paired:
                  #   label += " (Paret)"
