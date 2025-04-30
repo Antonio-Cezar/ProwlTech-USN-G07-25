@@ -34,6 +34,9 @@ if platform.system() != "Linux":
     def disconnect_from_device(name):
         print(f"Mock: Koblet fra {name}")
         return True
+    
+    def get_raw_devices():
+        return {}
 
     
 #------------------------------------Ekte versjon på Linux-------------------------------------------
