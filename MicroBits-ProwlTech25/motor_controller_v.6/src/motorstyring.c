@@ -90,12 +90,19 @@ int kontroller_motorene(
         (int32_t)(mv.rear_left   * MAX_RPM),
         (int32_t)(mv.rear_right  * MAX_RPM),
     };
-
-    const int32_t MIN_RPM = 900;
-
-    for (int i = 0; i < NUM_MOTORS; i++) {
-        if (rpms[i] != 0 && abs(rpms[i]) < MIN_RPM) {
-            rpms[i] = (rpms[i] > 0) ? MIN_RPM : -MIN_RPM;
+    
+    // Hvis fart = 0, nullstill alt (uansett smoothing)
+    if (ønsket_fart == 0.0f) {
+        for (int i = 0; i < NUM_MOTORS; i++) {
+            rpms[i] = 0;
+        }
+    } else {
+        // Ellers bruk minimum RPM hvis nødvendig
+        const int32_t MIN_RPM = 1000;
+        for (int i = 0; i < NUM_MOTORS; i++) {
+            if (rpms[i] != 0 && abs(rpms[i]) < MIN_RPM) {
+                rpms[i] = (rpms[i] > 0) ? MIN_RPM : -MIN_RPM;
+            }
         }
     }
 
