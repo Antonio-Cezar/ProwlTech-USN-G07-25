@@ -15,23 +15,17 @@ struct MotorVerdier kalkulerMotorVerdier(
     float rotasjon,
     float sving_js
 ) {
-    // Slå sammen hovedrotasjon og joystick‐sving
     float rot_tot = rotasjon + sving_js;
 
-    // Finn sideveis (x) og fremover (y) komposanter
-    float x = fart * sinf(vinkel);  // vinkel=0 → x=0
-    float y = fart * cosf(vinkel);  // vinkel=0 → y=fart
-
-    // Juster rotasjon basert på fart
+    float x = fart * sinf(vinkel);
+    float y = fart * cosf(vinkel);
     float just_rot = rot_tot * fart;
 
-    // Beregn bidrag for hvert hjul (mecanum‐matrise)
-    float fl = y + x + just_rot;  // front left
-    float fr = y - x - just_rot;  // front right
-    float rl = y - x + just_rot;  // rear left
-    float rr = y + x - just_rot;  // rear right
+    float fl = y + x + just_rot;
+    float fr = y - x - just_rot;
+    float rl = y - x + just_rot;
+    float rr = y + x - just_rot;
 
-    // Normaliser hvis noen absolutt‐verdier overskrider 1.0
     float maxv = fmaxf(fmaxf(fabsf(fl), fabsf(fr)),
                        fmaxf(fabsf(rl), fabsf(rr)));
     if (maxv > 1.0f) {
@@ -41,7 +35,6 @@ struct MotorVerdier kalkulerMotorVerdier(
         rr /= maxv;
     }
 
-    // Returner strukturen med alle fire bidrag
     return (struct MotorVerdier){ fl, fr, rl, rr };
 }
 
@@ -49,21 +42,20 @@ struct MotorVerdier kalkulerMotorVerdier(
 static float gj_fart     = 0.0f;
 static float gj_vinkel   = 0.0f;
 static float gj_rotasjon = 0.0f;
-static const float delta = 0.05f;  // endring per steg
+static float gj_sving_js = 0.0f;   // ← lagt til for smoothing av sving_js
+static const float delta = 0.2f;   // ← økt for raskere respons
 
-// Høyere nivå: kall denne med rå input, så sendes RPM via UART→CAN→VESC
 int kontroller_motorene(
     float ønsket_fart,
     float ønsket_vinkel,
     float ønsket_rotasjon,
     float ønsket_sving_js
 ) {
-    // Debug‐print av input
     printf("kontrollerer: fart=%.2f vinkel=%.2f rot=%.2f sving_js=%.2f\n",
            ønsket_fart, ønsket_vinkel,
            ønsket_rotasjon, ønsket_sving_js);
 
-    // --- SMOOTHING med delta ---
+    // SMOOTHING for alle fire verdier
     if (gj_fart < ønsket_fart)
         gj_fart += delta;
     else if (gj_fart > ønsket_fart)
@@ -79,37 +71,46 @@ int kontroller_motorene(
     else if (gj_rotasjon > ønsket_rotasjon)
         gj_rotasjon -= delta;
 
-    // Kalkuler motorbidrag basert på de glatte verdiene
+    if (gj_sving_js < ønsket_sving_js)
+        gj_sving_js += delta;
+    else if (gj_sving_js > ønsket_sving_js)
+        gj_sving_js -= delta;
+
+    // Kalkuler motorbidrag basert på glatte verdier
     struct MotorVerdier mv = kalkulerMotorVerdier(
         gj_fart,
         gj_vinkel,
         gj_rotasjon,
-        ønsket_sving_js  // Denne glattes ikke her, men du kan utvide smoothing om ønsket
+        gj_sving_js
     );
 
-    // Skaler til RPM
     int32_t rpms[NUM_MOTORS] = {
         (int32_t)(mv.front_left  * MAX_RPM),
         (int32_t)(mv.front_right * MAX_RPM),
         (int32_t)(mv.rear_left   * MAX_RPM),
         (int32_t)(mv.rear_right  * MAX_RPM),
     };
+
+    const int32_t MIN_RPM = 900;
+
+    for (int i = 0; i < NUM_MOTORS; i++) {
+        if (rpms[i] != 0 && abs(rpms[i]) < MIN_RPM) {
+            rpms[i] = (rpms[i] > 0) ? MIN_RPM : -MIN_RPM;
+        }
+    }
+
     printf("sender rpms: %ld, %ld, %ld, %ld\n",
            (long)rpms[0], (long)rpms[1],
            (long)rpms[2], (long)rpms[3]);
 
-    // Send RPM til riktig motor via riktig metode
-    // ID 0 er master (direkte UART), ID 1-3 er slaver (CAN-forward)
     uint8_t ids[NUM_MOTORS] = {0, 1, 2, 3};
     for (int i = 0; i < NUM_MOTORS; i++) {
         if (ids[i] == 0) {
-            // Master VESC (foran venstre) – UART direkte
-            send_set_rpm(rpms[i]);
+            send_set_rpm(rpms[i]); // Master via UART
         } else {
-            // Slave VESC – via CAN-forward
-            send_forwarded_rpm(ids[i], rpms[i]);
+            send_forwarded_rpm(ids[i], rpms[i]); // Slaver via CAN-forward
         }
-        k_msleep(1);  // liten pause mellom meldinger
+        k_msleep(1);
     }
 
     return 0;

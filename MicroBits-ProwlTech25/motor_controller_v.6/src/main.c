@@ -31,10 +31,7 @@ void main(void) {
 
     /* 4) Evig loop: send til hver ESC i rekkefølge */
     while (1) {
-        while (1) {
-            process_can_data();
-            k_msleep(10);
-        }
-        
+        process_can_data();
+        k_busy_wait(500);        
     }
 }
