@@ -60,6 +60,16 @@ class CanMenuWindow(ctk.CTkToplevel):
         self.button_frame = ctk.CTkFrame(self, fg_color=background_color)
         self.button_frame.pack(expand=True)
 
+        # Statusfelt
+        self.can_status_label = ctk.CTkLabel(
+            self.button_frame,
+            text="Henter status...",
+            font=("Century Gothic", 16),
+            text_color="white"
+        )
+        self.can_status_label.pack(padx=20, pady=10)
+        self.update_can_status()
+
         # Åpne CAN-bus meny
         self.can_button = ctk.CTkButton(
             self.button_frame,
