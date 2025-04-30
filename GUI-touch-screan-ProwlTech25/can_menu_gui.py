@@ -174,6 +174,18 @@ class CanMenuWindow(ctk.CTkToplevel):
         )
         self.status_button.pack(padx=40, pady=10, fill="x")
 
+        # CAN-dump
+        self.candump_button = ctk.CTkButton(
+            self.popup.bottom,
+            text="Vis CAN-dump (trafikk)",
+            font=("Century Gothic", 16),
+            fg_color=button_color,
+            hover_color=button_hover_color,
+            corner_radius=20,
+            command=self.start_candump
+        )
+        self.candump_button.pack(padx=40, pady=10, fill="x")
+
     '''
     def open_motor_meny(self):
         print("Åpner motorkontroller meny...")
@@ -287,5 +299,12 @@ class CanMenuWindow(ctk.CTkToplevel):
         output = subprocess.getoutput("ip -details link show can0")
         self.can_status_label.configure(text=f"Detaljert status:\n{output}")
 
+    def start_candump(self):
+        try:
+            subprocess.Popen([
+                "lxterminal", "-e", "bash -c 'candump can0; exec bash'"
+            ])
+        except FileNotFoundError:
+            print("Fant ikke lxterminal eller candump.")
 
 
