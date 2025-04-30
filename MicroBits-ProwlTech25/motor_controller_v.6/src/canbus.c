@@ -18,6 +18,12 @@ const struct device *const get_can_dev(void) {
     return DEVICE_DT_GET(DT_CHOSEN(zephyr_canbus));
 }
 
+static int64_t last_can_rx_time = 0;
+
+int64_t get_last_can_rx_time(void) {
+    return last_can_rx_time;
+}
+
 // Starter CAN‐hardware og legger til filter/callback
 void canBegin(const struct device *can_dev) {
     if (!can_dev) {
@@ -69,6 +75,7 @@ void can_rx_callback(const struct device *dev,
             .sving_js = s_i  / 100.0f,
         };
 
+        last_can_rx_time = k_uptime_get();  // ← registrer tid
         // Legg meldingen i kø, håndteres i hovedløkken
         k_msgq_put(&can_msgq, &data, K_NO_WAIT);
     }

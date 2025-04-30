@@ -6,9 +6,12 @@
 #include <zephyr/kernel.h>  // k_msleep()
 
 #define NUM_MOTORS 4
-#define MAX_RPM    5000    // Maks RPM‐skala for normaliserte duty‐verdier
+#define MAX_RPM    20000    // Maks RPM‐skala for normaliserte duty‐verdier
 
-// Beregner hjul‐bidrag basert på ønsket bevegelse + sving‐joystick
+// ============================================================================
+// Beregner hjul-bidrag basert på ønsket bevegelse + rotasjon + sving_js
+// rotasjon er ±1 for venstre/høyre rotasjon, skalert med fart
+// ============================================================================
 struct MotorVerdier kalkulerMotorVerdier(
     float fart,
     float vinkel,
@@ -19,13 +22,27 @@ struct MotorVerdier kalkulerMotorVerdier(
 
     float x = fart * sinf(vinkel);
     float y = fart * cosf(vinkel);
-    float just_rot = rot_tot * fart;
+    float rot = rot_tot * fmaxf(fart, 0.1f);  // ← riktig linje
 
-    float fl = y + x + just_rot;
-    float fr = y - x - just_rot;
-    float rl = y - x + just_rot;
-    float rr = y + x - just_rot;
+    // Fremdrift (bevegelse)
+    float fwd_fl = y + x;
+    float fwd_fr = y - x;
+    float fwd_rl = y - x;
+    float fwd_rr = y + x;
 
+    // Rotasjon (separat)
+    float rot_fl = -rot;
+    float rot_fr = +rot;
+    float rot_rl = -rot;
+    float rot_rr = +rot;
+
+    // Kombiner
+    float fl = fwd_fl + rot_fl;
+    float fr = fwd_fr + rot_fr;
+    float rl = fwd_rl + rot_rl;
+    float rr = fwd_rr + rot_rr;
+
+    // Normaliser om nødvendig
     float maxv = fmaxf(fmaxf(fabsf(fl), fabsf(fr)),
                        fmaxf(fabsf(rl), fabsf(rr)));
     if (maxv > 1.0f) {
@@ -38,13 +55,20 @@ struct MotorVerdier kalkulerMotorVerdier(
     return (struct MotorVerdier){ fl, fr, rl, rr };
 }
 
-// Globale glatte‐variabler for jevn akselerasjon/stopp
+
+
+// ============================================================================
+// Globale glatte‐variabler for jevn akselerasjon/stopp (internt minne)
+// ============================================================================
 static float gj_fart     = 0.0f;
 static float gj_vinkel   = 0.0f;
 static float gj_rotasjon = 0.0f;
-static float gj_sving_js = 0.0f;   // ← lagt til for smoothing av sving_js
-static const float delta = 0.2f;   // ← økt for raskere respons
+static float gj_sving_js = 0.0f;
+static const float delta = 0.2f;  // hvor raskt verdier justeres
 
+// ============================================================================
+// Hovedfunksjon: tar inn joystick-data og sender RPM til alle hjul
+// ============================================================================
 int kontroller_motorene(
     float ønsket_fart,
     float ønsket_vinkel,
@@ -57,9 +81,9 @@ int kontroller_motorene(
 
     // SMOOTHING for alle fire verdier
     if (gj_fart < ønsket_fart)
-        gj_fart += delta;
+        gj_fart = fminf(gj_fart + delta, ønsket_fart);
     else if (gj_fart > ønsket_fart)
-        gj_fart -= delta;
+        gj_fart = fmaxf(gj_fart - delta, ønsket_fart);
 
     if (gj_vinkel < ønsket_vinkel)
         gj_vinkel += delta;
@@ -76,7 +100,7 @@ int kontroller_motorene(
     else if (gj_sving_js > ønsket_sving_js)
         gj_sving_js -= delta;
 
-    // Kalkuler motorbidrag basert på glatte verdier
+    // Kalkuler motorverdier med smoothede parametre
     struct MotorVerdier mv = kalkulerMotorVerdier(
         gj_fart,
         gj_vinkel,
@@ -84,21 +108,23 @@ int kontroller_motorene(
         gj_sving_js
     );
 
+    // Skaler til RPM
     int32_t rpms[NUM_MOTORS] = {
         (int32_t)(mv.front_left  * MAX_RPM),
         (int32_t)(mv.front_right * MAX_RPM),
         (int32_t)(mv.rear_left   * MAX_RPM),
         (int32_t)(mv.rear_right  * MAX_RPM),
     };
-    
-    // Hvis fart = 0, nullstill alt (uansett smoothing)
+
+    // Hvis fart = 0, nullstill alt umiddelbart (også smoothing)
     if (ønsket_fart == 0.0f) {
         for (int i = 0; i < NUM_MOTORS; i++) {
             rpms[i] = 0;
         }
+        gj_fart = gj_vinkel = gj_rotasjon = gj_sving_js = 0.0f;
     } else {
-        // Ellers bruk minimum RPM hvis nødvendig
-        const int32_t MIN_RPM = 1000;
+        // Sett minimum RPM hvis nødvendig
+        const int32_t MIN_RPM = 900;
         for (int i = 0; i < NUM_MOTORS; i++) {
             if (rpms[i] != 0 && abs(rpms[i]) < MIN_RPM) {
                 rpms[i] = (rpms[i] > 0) ? MIN_RPM : -MIN_RPM;
@@ -110,12 +136,13 @@ int kontroller_motorene(
            (long)rpms[0], (long)rpms[1],
            (long)rpms[2], (long)rpms[3]);
 
+    // Send til master/slave ESC-er
     uint8_t ids[NUM_MOTORS] = {0, 1, 2, 3};
     for (int i = 0; i < NUM_MOTORS; i++) {
         if (ids[i] == 0) {
-            send_set_rpm(rpms[i]); // Master via UART
+            send_set_rpm(rpms[i]);  // master via UART
         } else {
-            send_forwarded_rpm(ids[i], rpms[i]); // Slaver via CAN-forward
+            send_forwarded_rpm(ids[i], rpms[i]);  // slaver via CAN
         }
         k_msleep(1);
     }

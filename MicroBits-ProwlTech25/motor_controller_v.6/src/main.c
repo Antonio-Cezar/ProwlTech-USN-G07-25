@@ -6,13 +6,12 @@
 
 #include "vesc_uart.h"
 #include "canbus.h"
+#include "motorstyring.h"  // <- nødvendig for kontroller_motorene()
 
 void main(void) {
-    /* 1) Init UART (til master‐ESC) */
     uart_init();
     k_msleep(100);
 
-    /* 2) Init CAN på master */
     const struct device *const can_dev = get_can_dev();
     if (!can_dev) {
         printf("Error: fant ikke CAN-enhet\n");
@@ -23,15 +22,25 @@ void main(void) {
 
     printf("UART+CAN klar. Starter loop for master+slaver...\n\n");
 
-    /* 3) Liste over ESC‐ID-er og ønskede RPM */
-    // 0 = master, 1–3 = slave-ESC-er
-    const uint8_t  ids[]  = {0, 1, 2, 3};
-    const int32_t  rpms[] = {4000, 4000, 4000, 4000};
-    const size_t   n     = sizeof(ids) / sizeof(ids[0]);
+    const int TIMEOUT_MS = 200;
+    static int null_sent = 0;
 
-    /* 4) Evig loop: send til hver ESC i rekkefølge */
     while (1) {
-        process_can_data();
-        k_busy_wait(500);        
+        process_can_data();  // håndterer ny CAN-data
+
+        int64_t nå = k_uptime_get();
+        int64_t sist = get_last_can_rx_time();
+
+        if ((nå - sist > TIMEOUT_MS) && !null_sent) {
+            printf("Timeout – sender null RPM!\n");
+            kontroller_motorene(0.0f, 0.0f, 0.0f, 0.0f);
+            null_sent = 1;
+        }
+
+        if (nå - sist <= TIMEOUT_MS) {
+            null_sent = 0;
+        }
+
+        k_busy_wait(200);  // du kan evt. gjøre dette raskere (f.eks. 200 µs)
     }
 }

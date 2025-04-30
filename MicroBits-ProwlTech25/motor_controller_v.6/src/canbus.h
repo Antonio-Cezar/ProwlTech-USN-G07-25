@@ -56,6 +56,8 @@ void process_can_data(void);
 // Sender en test‐streng over CAN (valgfritt)
 void send_string(const struct device *can_dev, const char *str);
 
+int64_t get_last_can_rx_time(void);  // ← ny funksjon
+
 // Hjelpefunksjon: konverterer CAN‐state‐enum til tekst
 const char* can_state_to_str(enum can_state state);
 
