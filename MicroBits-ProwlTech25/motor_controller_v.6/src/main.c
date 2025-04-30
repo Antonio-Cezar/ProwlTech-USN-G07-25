@@ -31,29 +31,10 @@ void main(void) {
 
     /* 4) Evig loop: send til hver ESC i rekkefølge */
     while (1) {
-        for (size_t i = 0; i < n; i++) {
-            uint8_t  id  = ids[i];
-            int32_t  rpm = rpms[i];
-
-            printf("Tester ID %u med %ld RPM\n", id, (long)rpm);
-
-            if (id == 0) {
-                // Master: direkte UART‐kommando
-                send_set_rpm(rpm);
-            } else {
-                // Slave: CAN-forwarding
-                send_forwarded_rpm(id, rpm);
-            }
-
-            k_msleep(500);
-
-            // Stopp akkurat denne ESC-en før neste
-            if (id == 0) {
-                send_set_rpm(0);
-            } else {
-                send_forwarded_rpm(id, 0);
-            }
-            k_msleep(200);
+        while (1) {
+            process_can_data();
+            k_msleep(10);
         }
+        
     }
 }

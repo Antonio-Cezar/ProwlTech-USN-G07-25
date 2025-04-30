@@ -35,8 +35,10 @@ struct MotorVerdier kalkulerMotorVerdier(
     float maxv = fmaxf(fmaxf(fabsf(fl), fabsf(fr)),
                        fmaxf(fabsf(rl), fabsf(rr)));
     if (maxv > 1.0f) {
-        fl /= maxv; fr /= maxv;
-        rl /= maxv; rr /= maxv;
+        fl /= maxv;
+        fr /= maxv;
+        rl /= maxv;
+        rr /= maxv;
     }
 
     // Returner strukturen med alle fire bidrag
@@ -61,17 +63,31 @@ int kontroller_motorene(
            ønsket_fart, ønsket_vinkel,
            ønsket_rotasjon, ønsket_sving_js);
 
-    // TODO: Legg til validering av input og smoothing med gj_* + delta
+    // --- SMOOTHING med delta ---
+    if (gj_fart < ønsket_fart)
+        gj_fart += delta;
+    else if (gj_fart > ønsket_fart)
+        gj_fart -= delta;
 
-    // Kalkuler ferdige normaliserte hjul‐verdier
+    if (gj_vinkel < ønsket_vinkel)
+        gj_vinkel += delta;
+    else if (gj_vinkel > ønsket_vinkel)
+        gj_vinkel -= delta;
+
+    if (gj_rotasjon < ønsket_rotasjon)
+        gj_rotasjon += delta;
+    else if (gj_rotasjon > ønsket_rotasjon)
+        gj_rotasjon -= delta;
+
+    // Kalkuler motorbidrag basert på de glatte verdiene
     struct MotorVerdier mv = kalkulerMotorVerdier(
         gj_fart,
         gj_vinkel,
         gj_rotasjon,
-        ønsket_sving_js
+        ønsket_sving_js  // Denne glattes ikke her, men du kan utvide smoothing om ønsket
     );
 
-    // Skaler til heltall‐RPM og send til hver VESC‐node
+    // Skaler til RPM
     int32_t rpms[NUM_MOTORS] = {
         (int32_t)(mv.front_left  * MAX_RPM),
         (int32_t)(mv.front_right * MAX_RPM),
@@ -82,12 +98,18 @@ int kontroller_motorene(
            (long)rpms[0], (long)rpms[1],
            (long)rpms[2], (long)rpms[3]);
 
-    // Antatte CAN‐ID-er for hjulene
+    // Send RPM til riktig motor via riktig metode
+    // ID 0 er master (direkte UART), ID 1-3 er slaver (CAN-forward)
     uint8_t ids[NUM_MOTORS] = {0, 1, 2, 3};
     for (int i = 0; i < NUM_MOTORS; i++) {
-        // Wrapper‐kall som pakker RPM‐kommando for riktig node
-        send_forwarded_rpm(ids[i], rpms[i]);
-        k_msleep(1);  // kort pause mellom pakker
+        if (ids[i] == 0) {
+            // Master VESC (foran venstre) – UART direkte
+            send_set_rpm(rpms[i]);
+        } else {
+            // Slave VESC – via CAN-forward
+            send_forwarded_rpm(ids[i], rpms[i]);
+        }
+        k_msleep(1);  // liten pause mellom meldinger
     }
 
     return 0;
