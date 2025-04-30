@@ -381,9 +381,6 @@ class ProwlTechApp(ctk.CTk):
         # Starter skanning automatisk når popup åpnes
         threading.Thread(target=self.scan_and_show).start() # Kjører skanning i egen tråd slik at GUI-et ikke fryser
 
-
-        
-
     # Åpner info-popup
     def open_info_window(self):
         self.popup = PopupWindow(self, title="Informasjon")
@@ -437,7 +434,6 @@ class ProwlTechApp(ctk.CTk):
         )
         self.show_controller.place(relx=0.05, rely=0.5, anchor="w")
         
-
 
 #--------------------KOBLE TIL KONTROLLER-------------------------  
     # Starter søkeprosess 
