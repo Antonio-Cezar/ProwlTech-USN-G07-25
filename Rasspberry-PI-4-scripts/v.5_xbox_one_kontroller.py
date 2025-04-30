@@ -93,7 +93,6 @@ def vis_data(fart, vinkel, rotasjon, sving_js, data):
 #================================================================
 # Funksjon for å beregne fart og vinkel.
 def beregn_fart_og_vinkel(x, y):
-    #Beregner fart og vinkel basert på joystickens posisjon
     # Død-sone – ignorer små bevegelser
     if abs(x) < 0.1:
         x = 0.0
@@ -103,28 +102,27 @@ def beregn_fart_og_vinkel(x, y):
     fart = math.sqrt(x ** 2 + y ** 2)
     fart = min(fart, 1.0)
 
-    if fart < 0.1:
-        fart = 0.0
+    # Ikke kutt ut lav fart her – vi vil ha 0.01, 0.05, 0.09 osv.
+    # if fart < 0.1:
+    #     fart = 0.0
 
-    # Justert vinkel:
-    vinkel = math.atan2(-x, -y)  # bytter x og y + inverterer x for å snu retningen
-
+    vinkel = math.atan2(-x, -y)
     if vinkel < 0:
         vinkel += 2 * math.pi
 
     return fart, vinkel
 
 
-# Bestem fart basert på valgt profil
+
 def skaler_fart(fart, profil):
-    #Tilpasser fart etter valgt hastighetsmodus
     if profil == 1:
-        return fart * 0.3
+        return fart * 0.1  # 0.0–0.1
     elif profil == 2:
-        return (fart * 0.3) + (0.3 if fart > 0 else 0.0)
+        return (fart * 0.5) + (0.1 if fart > 0 else 0.0)  # 0.1–0.6
     elif profil == 3:
-        return (fart * 0.6) + (0.4 if fart > 0 else 0.0)
+        return (fart * 0.7) + (0.3 if fart > 0 else 0.0)  # 0.3–1.0
     return 0.0
+
 
 
 # Funksjon for vibrasjon av kontroller
@@ -275,22 +273,20 @@ while True:
 
         forrige_x = x  # Oppdater knappestatus
 
-
-
         # === Endre hastighetsmoduser ===
         if y:
             Hastighetsmodus = 1
-            print("Hastighetsmodus 1 valgt (0.0-0.3)")
+            print("Hastighetsmodus 1 valgt (0.0-0.1)")
             vibrer_kont_funk(joystick, 1)
 
         elif b:
             Hastighetsmodus = 2
-            print("Hastighetsmodus 2 valgt (0.3-0.6)")
+            print("Hastighetsmodus 2 valgt (0.1-0.6)")
             vibrer_kont_funk(joystick, 2)
 
         elif a:
             Hastighetsmodus = 3
-            print("Hastighetsmodus 3 valgt (0.4-1.0)")
+            print("Hastighetsmodus 3 valgt (0.3-1.0)")
             vibrer_kont_funk(joystick, 3)
 
         # Velg rotasjonsfart som faktor
@@ -323,11 +319,12 @@ while True:
 
         # === Skaler fart i henhold til valgt Hastighetsmodus ===
         if Hastighetsmodus == 1:
-            fart = fart * 0.3
+            fart = fart * 0.1  # 0.0–0.1
         elif Hastighetsmodus == 2:
-            fart = (fart * 0.3) + (0.3 if fart > 0 else 0.0)
+            fart = (fart * 0.5) + (0.1 if fart > 0 else 0.0)  # 0.1–0.6
         elif Hastighetsmodus == 3:
-            fart = (fart * 0.6) + (0.4 if fart > 0 else 0.0)
+            fart = (fart * 0.7) + (0.3 if fart > 0 else 0.0)  # 0.3–1.0
+
         
         # Rund av og send
         fart_r = round(fart, 2)
@@ -336,13 +333,13 @@ while True:
         if rotasjon != 0.0:
             # Bruk maks fart for valgt modus, uavhengig av joystick-input
             if Hastighetsmodus == 1:
-                fart_r = 0.3
+                fart_r = 0.1
             elif Hastighetsmodus == 2:
-                fart_r = 0.6
+                fart_r = 0.4
             elif Hastighetsmodus == 3:
-                fart_r = 1.0
+                fart_r = 0.5
             else:
-                fart_r = 0.3  # fallback
+                fart_r = 0.1  # fallback
 
             vinkel_r = 0.0  # fast retning for rotasjon
             send_data(bus, fart_r, vinkel_r, rotasjon=rotasjon, sving_js=sving_js)
@@ -368,11 +365,12 @@ while True:
                 sist_sendte_vinkel = vinkel
 
             elif aktiv_joystick:
-                # Stoppbevegelse kun én gang
-                send_data(bus, 0.0, 0.0, rotasjon=0.0, sving_js=0.0)
-                aktiv_joystick = False
-                sist_sendte_fart = 0.0
-                sist_sendte_vinkel = 0.0
+                if abs(venstre_x) < 0.1 and abs(venstre_y) < 0.1 and abs(sving_js) < 0.1 and rotasjon == 0.0:
+                    send_data(bus, 0.0, 0.0, rotasjon=0.0, sving_js=0.0)
+                    aktiv_joystick = False
+                    sist_sendte_fart = 0.0
+                    sist_sendte_vinkel = 0.0
+
 
         # Håndterer sving funksjonaliteten
         # Håndterer sving-funksjonalitet uten å endre vinkel
