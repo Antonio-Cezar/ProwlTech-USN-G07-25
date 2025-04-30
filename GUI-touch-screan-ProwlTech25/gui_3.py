@@ -6,6 +6,7 @@ import subprocess   # Kjøring av eksterne script
 import sys
 import os
 import time
+import serial
 
 # Sti til mappe med eksterne script
 script_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "Rasspberry-PI-4-scripts"))
@@ -624,6 +625,33 @@ class ProwlTechApp(ctk.CTk):
         self.sensor_value_label.configure(text=text)
         self.after(500, self.update_sensor_display)
 
+#--------------------BATTERIDATA-------------------------  
+
+    def get_battery_data(self):
+        # Åpner UART-porten
+        try:
+            with serial.Serial('/dev/serial0', baudrate=9600, timeout=1) as ser:
+                # Så lenge programmet kjører
+                while self.running:
+                    frame = ser.read(16)    # Leser 16 byte fra shunten
+
+                    # Hvis det ikke ble lest nøyaktig 16 byte, så hoppes det over denne runden 
+                    if len(frame) != 16:  
+                        continue
+                    
+
+                    checksum = sum(frame[0:15]) & 0xFF  # Beregner sjekksum: sum av byte 0-14, behold kun laveste byte
+                    # Sammenligner beregnet sjekksum med den siste byten i rammen (byte 15)
+                    if checksum != frame[15]:
+                        continue    # Hopper over runden om sjekksummen ikke stemmer
+
+                    percent = frame[9]  # Henter batteriprosent fra byte 9 i rammen
+                    self.after(0, lambda: self.battery_status.configure(text=f"{percent} %"))   # Oppdaterer GUI-boksen i egen tråd slik at den ikke fryser
+                    time.sleep(1)
+
+        except Exception as e:
+            self.log_error(f"Feil ved lesing av batteriprosent: {e}")
+
 #--------------------ANDRE FUNKSJONER-------------------------  
     # Progressbar
     def start_progressbar(self):
@@ -677,6 +705,8 @@ class ProwlTechApp(ctk.CTk):
         self.sensor_value = "__"
         threading.Thread(target=self.get_sensor_data, daemon=True).start()
         self.update_sensor_display()
+
+        threading.Thread(target=self.get_battery_data, daemon=True).start()
 
         self.check_connected() 
 

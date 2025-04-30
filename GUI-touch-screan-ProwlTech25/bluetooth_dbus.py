@@ -40,18 +40,21 @@ if platform.system() != "Linux":
 
     
 #------------------------------------Ekte versjon på Linux-------------------------------------------
+#   Skanner etter tilgjengelige enheter via Bluetooth, filtrerer bort enheter uten navn. Koble til og koble fra enheter. Henter all informasjon og returnerer til GUI-kode.
 else:
     from pydbus import SystemBus
     import subprocess
     import os
 
-    found_devices = {}
+    found_devices = {}  # Liste for enheter funnet under skanning
 
+    # Sjekker om enheten er paret med adapteren
     def is_paired(adapter_address, device_address):
         path = f"/var/lib/bluetooth/{adapter_address}/{device_address}/info"
         if not os.path.exists(path):
             return False
 
+        # Leser info-filen og sjekker etter Paried=True
         with open(path, "r") as file:
             content = file.read()
             return "Paired=true" in content
@@ -90,14 +93,11 @@ else:
                 if not name:
                     continue    # Ignorerer enheter uten navn
 
+                # Henter status om paret og tilkoblet
                 paired = dev.get("Paired", False)
                 connected = dev.get("Connected", False)
-                #label = name
-                #if paired:
-                 #   label += " (Paret)"
-                #if connected:
-                 #   label += " (Tilkoblet)"
 
+                # Legger til enheter i listen
                 found_devices[address] = name
                 print(f" {name} ({address})")
 
@@ -134,7 +134,7 @@ else:
 
 
         
-    # Kobler fra enhet basert på navn    
+    # Kobler fra enhet og fjerner fra pairing-liste
     def disconnect_from_device(name):
         address = get_device(name)
         if not address:
@@ -159,7 +159,7 @@ else:
             print(f"Feil ved frakobling av {name}: {e}")
             return False
 
-
+    # Funksjon for å returnere alle enheter som aktivt er tilkoblet
     def get_raw_devices():
         bus = SystemBus()
         mngr = bus.get("org.bluez", "/")
@@ -168,7 +168,7 @@ else:
         devices = {}
         for path, interfaces in managed_objects.items():
             if "org.bluez.Device1" in interfaces:
-                dev = interfaces["org.bluez.Device1"]  # Bruk ordboken direkte
+                dev = interfaces["org.bluez.Device1"]  # Bruk data direkte
                 address = dev.get("Address")
-                devices[address] = dev
+                devices[address] = dev  # Lagrer device-info for senere
         return devices
