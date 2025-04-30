@@ -3,7 +3,7 @@ import time
 
 def read_battery_percentage():
     try:
-        with serial.Serial('/dev/ttyS0', baudrate=9600, timeout=1) as ser:
+        with serial.Serial('/dev/ttys0', baudrate=9600, timeout=1) as ser:
             print("Lytter på batteridata fra TF03K...\n")
 
             while True:
