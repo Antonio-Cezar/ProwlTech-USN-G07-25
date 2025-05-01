@@ -1,55 +1,74 @@
 #!/usr/bin/env python3
-import serial, struct, time, argparse, sys, glob
+import serial
+import struct
+import time
 
-DEFAULT_PORTS = ['/dev/serial0', '/dev/ttyAMA0', '/dev/ttyS0']
+# ---- KONFIGURASJON ----
+PORT = '/dev/ttys0'   # Eller '/dev/ttyAMA0' om du ikke bruker serial0-pekeren
 BAUDRATE = 9600
-TIMEOUT = 1  # sekunder
+TIMEOUT = 1             # sekunder
 
-def find_port():
-    for p in DEFAULT_PORTS:
-        if glob.glob(p):
-            return p
-    return None
-
-def parse_args():
-    p = argparse.ArgumentParser(description="Les data fra batterishunt over TTL-serial")
-    p.add_argument('-p', '--port', help="Serial port (default: prøver serial0, ttyAMA0, ttyS0)")
-    return p.parse_args()
-
+# ---- HJELPEFUNKSJONER ----
 def parse_frame(frame: bytes):
-    if len(frame) != 16 or frame[0] != 0xA5:
+    """
+    Tar en 16-byte frame og returnerer en dict med utpakkede verdier,
+    eller None ved format/checksum-feil.
+    """
+    if len(frame) != 16:
         return None
+    if frame[0] != 0xA5:
+        return None
+    # Sjekk checksum: 8-bit sum av byte 0..14 skal være byte 15
     if (sum(frame[0:15]) & 0xFF) != frame[15]:
         return None
 
-    soc = frame[1]
-    voltage = ((frame[2]<<8)|frame[3]) / 100.0
-    capacity = struct.unpack('>I', frame[4:8])[0]
-    current = struct.unpack('>i', frame[8:12])[0]
-    t = (frame[12]<<16)|(frame[13]<<8)|frame[14]
-    hrs, rem = divmod(t, 3600)
-    mins, secs = divmod(rem, 60)
+    soc = frame[1]  # i %
+    voltage_raw = (frame[2] << 8) | frame[3]
+    voltage = voltage_raw / 100.0  # i volt
+
+    # 32-bit unsigned kapasitet i mAh
+    capacity_raw = struct.unpack('>I', frame[4:8])[0]
+
+    # 32-bit signed strøm i mA (to’s complement)
+    current_raw = struct.unpack('>i', frame[8:12])[0]
+
+    # 24-bit gjenværende tid i sekunder
+    time_raw = (frame[12] << 16) | (frame[13] << 8) | frame[14]
+    hrs = time_raw // 3600
+    mins = (time_raw % 3600) // 60
+    secs = time_raw % 60
 
     return {
         'SOC (%)': soc,
         'Voltage (V)': voltage,
-        'Capacity (mAh)': capacity,
-        'Current (mA)': current,
+        'Capacity (mAh)': capacity_raw,
+        'Current (mA)': current_raw,
         'Remaining Time': f"{hrs:02d}:{mins:02d}:{secs:02d}"
     }
 
 def read_loop(ser):
+    """
+    Leser kontinuerlig fra serielt grensesnitt, synkroniserer
+    på 0xA5, pakker ut hele frame og printer resultat.
+    """
     buf = bytearray()
     while True:
+        # Les én byte
         b = ser.read(1)
         if not b:
             continue
+
+        # Hvis vi ikke har header ennå, let etter 0xA5
         if not buf and b[0] != 0xA5:
             continue
+
         buf += b
+
+        # Når vi har 16 byte, prøv å parse
         if len(buf) == 16:
             data = parse_frame(buf)
             if data:
+                # Skriv ut i terminalen
                 print(f"[{time.strftime('%Y-%m-%d %H:%M:%S')}] "
                       f"SOC={data['SOC (%)']}% | "
                       f"V={data['Voltage (V)']:.2f}V | "
@@ -58,20 +77,16 @@ def read_loop(ser):
                       f"RemTime={data['Remaining Time']}")
             else:
                 print("Ugyldig frame eller checksum-feil")
-            buf.clear()
+
+            # Nullstill buffer og vent på ny header
+            buf = bytearray()
 
 if __name__ == '__main__':
-    args = parse_args()
-    port = args.port or find_port()
-    if not port:
-        print("Fant ingen serial-port. Forsøk å aktivere i raspi-config eller spesifiser -p")
-        sys.exit(1)
-
     try:
-        ser = serial.Serial(port, BAUDRATE, timeout=TIMEOUT)
-        print(f"Åpnet {port} @ {BAUDRATE} bps")
+        ser = serial.Serial(PORT, BAUDRATE, timeout=TIMEOUT)
+        print(f"Åpnet {PORT} @ {BAUDRATE} bps")
         read_loop(ser)
     except serial.SerialException as e:
         print("Kunne ikke åpne seriel port:", e)
     except KeyboardInterrupt:
-        print("\nAvslutter.")
+        print("\nAvslutter lesing.")
