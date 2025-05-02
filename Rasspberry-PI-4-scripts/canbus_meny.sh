@@ -35,14 +35,22 @@ show_status() {
     echo "===================================="
     echo "=== CAN-status ==="
     echo "===================================="
-    ip -details link show $CAN_INTERFACE | grep -A 5 "$CAN_INTERFACE" #(-A 5) -> Dette filtrerer ut deler av teksten som vises.
+
+    # Vis detaljer om CAN-nettverksgrensesnittet (bitrate, status, drivere)
+    #(-A 5) -> Dette filtrerer ut deler av teksten som vises. (CAN_INTERFACE + 5 linjer etterpå)
+    ip -details link show $CAN_INTERFACE | grep -A 5 "$CAN_INTERFACE" 
     echo "===================================="
     echo ""
 }
 
 # Funksjonen som viser CAN status aktiv og innaktiv på toppen av menyen.
 get_can_status() {
-    local state=$(ip link show $CAN_INTERFACE | grep -o "state [A-Z]*" | awk '{print $2}') #-o betyr "bare vis det som matcher mønsteret", Det ser etter SATE UP/DOWN og da tar denlinja og viser.
+
+    #-o betyr "vis det er lik mønsteret", Den ser etter SATE UP/DOWN og da tar denlinja og viser.
+    # `awk '{print $2}'`(andre kolonne = "UP" eller "DOWN")
+    local state=$(ip link show $CAN_INTERFACE | grep -o "state [A-Z]*" | awk '{print $2}') 
+
+    # Sjekk om grensesnittet er aktivt
     if [[ $state == "UP" ]]; then
         echo "(can0 status: AKTIV)"
     else
