@@ -6,6 +6,7 @@ import math
 import os
 
 
+
 # (PROWLTECH25 - CA)
 #================================================================
 # KONFIGURASJON
@@ -18,6 +19,7 @@ EXTENDED_ID = True         # Zephyr bruker 29-bit ID, så vi setter extended ID
 # CAN-meldings-IDer (brukes for å identifisere meldinger på bussen)
 MSG_ID_motor = 0x0000001   # Melding til motorstyring
 MSG_ID_COM = 0x0000020     # Melding for kommandoer (eks. tone)
+
 
 
 #================================================================
@@ -34,22 +36,27 @@ def send_data(bus, fart, vinkel, rotasjon=0.0, sving_js=0.0):
     # sving_js: verdi fra sving-joystick, brukes til finjustering av sving
     try:
         # Skalere flyttall til heltall (matchende format med Zephyr-C-struktur)
-        vinkel_i = int(vinkel * 100)  # OBS: må bruke samme faktor som Zephyr → /100
+        vinkel_i = int(vinkel * 100)  # Bruke samme faktor som Zephyr → /100
         fart_i = int(fart * 100)
         rotasjon_i = int(rotasjon * 100)
         sving_js_i = int(sving_js * 100)
 
-        data = struct.pack('<hhhh', fart_i, vinkel_i, rotasjon_i, sving_js_i)# # 8 byte → matcher C-struktur (4 x int16)
+        data = struct.pack('<hhhh', fart_i, vinkel_i, rotasjon_i, sving_js_i)# 8 byte → sammensvarer C-struktur (4 x int16). h = Short integer size 2.
 
+        # Oppretter en CAN-melding med riktig ID, data og ID-type
         melding = can.Message(
             arbitration_id=MSG_ID_motor,
             data=data,
             is_extended_id=EXTENDED_ID
         )
+        # Sender meldingen på CAN-bussen
         bus.send(melding)
+
+        # Viser de opprinnelige verdiene og pakkede data for feilsøking/logging
         vis_data(fart, vinkel, rotasjon, sving_js, data)
 
     except Exception as e:
+        # Hvis noe går galt i try-blokken, så vil feilmelding og verdiene som ble forsøkt sendt vises i konsol
         print("FEIL VED SENDING!!!")
         print(f"→ Fart={fart}, Vinkel={vinkel}, Rotasjon={rotasjon}, Sving={sving_js}")
         print(f"Feilmelding: {e}")
@@ -58,19 +65,25 @@ def send_tone(bus, aktiv=True):
     #Sender tone-kommando til microbit (start/stop lyd)
     try:
         # 1 byte: tone på/av
-        data = struct.pack('<B', 1 if aktiv else 0)
+        data = struct.pack('<B', 1 if aktiv else 0) # B = unsigned char size 1.
+
+        # Oppretter en CAN-melding med riktig ID, data og ID-type
         melding = can.Message(
-            arbitration_id=MSG_ID_COM,  # Ny ID for tone-melding
+            arbitration_id=MSG_ID_COM,  # ID for tone-melding
             data=data,
             is_extended_id=True
         )
+        # Sender meldingen på CAN-bussen
         bus.send(melding)
+
+        # Viser de opprinnelige verdiene og pakkede data for feilsøking/logging
         print(f"{'Starter' if aktiv else 'Stopper'} tone på microbit")
     except Exception as e:
+        # Hvis noe går galt i try-blokken, så vil feilmelding og verdiene som ble forsøkt sendt vises i konsol
         print("FEIL ved sending av tone-kommando:", e)
 
 def vis_data(fart, vinkel, rotasjon, sving_js, data):
-    """Viser verdier sendt til CAN, nyttig for debug"""
+    #Viser verdier sendt til CAN, nyttig for debug
     os.system('clear')
     print("========================================")
     print("SENDT DATA TIL CAN-BUS")
@@ -98,48 +111,58 @@ def beregn_fart_og_vinkel(x, y):
         x = 0.0
     if abs(y) < 0.1:
         y = 0.0
-
+    # Beregn fart som hypotenusen til vektoren (x, y)
     fart = math.sqrt(x ** 2 + y ** 2)
+
+    # Begrens farten til maks 1.0
+    # Denne kutter verdier over 1.0 så vis "min(1.3, 1.0) = 1.0""
     fart = min(fart, 1.0)
 
-    # Ikke kutt ut lav fart her – vi vil ha 0.01, 0.05, 0.09 osv.
-    # if fart < 0.1:
-    #     fart = 0.0
-
+    # Beregn vinkel i radianer – atan2 gir retning med korrekt kvadrant (her inverteres x og y)
+    # anran2 er arc tanget 2 brukes til å finne vinkelen til et punkt (x, y) i forhold til origo (0,0)
     vinkel = math.atan2(-x, -y)
+
+    # Gjør vinkelen positiv ved å legge til 2π hvis den er negativ (holder den i 0–2π området)
     if vinkel < 0:
         vinkel += 2 * math.pi
-
     return fart, vinkel
 
-
-
 def skaler_fart(fart, profil):
+     # Hastighet 1: Lav hastighet
     if profil == 1:
         return fart * 0.1  # 0.0–0.1
+    
+    # Hastighet 2: Moderat hastighet – litt raskere
     elif profil == 2:
         return (fart * 0.5) + (0.1 if fart > 0 else 0.0)  # 0.1–0.6
+    
+    # Hastighet 3: Høy hastighet – raskeste
     elif profil == 3:
         return (fart * 0.7) + (0.3 if fart > 0 else 0.0)  # 0.3–1.0
     return 0.0
-
-
 
 # Funksjon for vibrasjon av kontroller
 def vibrer_kont_funk(joystick, antall, varighet=50, mellomrom=0.1):
      #Vibrerer kontrolleren for tilbakemelding ved modusbytte
     for _ in range(antall):
         try:
+            # Start vibrasjon
             joystick.rumble(1.0, 1.0, varighet)
+
+            # Vent litt før stopp
             time.sleep(mellomrom)
+
+            # Stopper vibrasjonen
             joystick.rumble(0.0, 0.0, 0)  # Stopp
+
+            # Pause før neste vibrasjon. Dette er for å kunne følle på forskjellen av antal vibrasjoner som skal lik hastighetsmodus 1, 2 eller 3.
             time.sleep(mellomrom)
         except Exception:
-            print("Rumble ikke støttet av kontrolleren.")
             break
 
-
 def radianer_til_grader(rad):
+    # Konverterer radianer til grader og sørger for at resultatet alltid er mellom 0 og 360
+    # Blitt brukt for debugging.
     return (math.degrees(rad) + 360) % 360
 
 
@@ -151,10 +174,13 @@ def radianer_til_grader(rad):
 def start_bus():
     try:
         print("Starter CAN kommunikajson...")
+
+        # Opprett CAN-bus med spesifisert kanal og bitrate
         bus = can.interface.Bus(channel=CHANNEL, bustype='socketcan', bitrate=BITRATE)
         print("CAN er på")
         return bus
     except Exception as e:
+        # Hvis noe er galt
         print("FEIL: CAN er IKKE på", e)
         return None
 
@@ -164,20 +190,25 @@ def start_joystick():
     pygame.joystick.init()
 
     while True:
+        # Hent antall tilkoblede joysticks
         antall = pygame.joystick.get_count()
 
         if antall > 0:
+            # Hvis det finnes en eller flere joysticks
             for i in range(antall):
-                js = pygame.joystick.Joystick(i)
-                js.init()
-                print(f"Joystick {i}: {js.get_name()}")
+                js = pygame.joystick.Joystick(i) # Velg joystick nr. i
+                js.init() # Initialiser den
+                print(f"Joystick {i}: {js.get_name()}") # Skriv ut navnet
             joystick = pygame.joystick.Joystick(0)
             joystick.init()
-            print(f"Bruker joystick 0: {joystick.get_name()}")
+            print(f"Kontroller {i}: {js.get_name()}")
             return joystick
         else:
+            # Ingen joystick funnet – vent og prøv igjen
             print("Ingen kontroller funnet. Venter på tilkobling...")
             time.sleep(1)
+
+             # Re-initier for å sjekke på nytt
             pygame.joystick.quit()
             pygame.joystick.init()
 
