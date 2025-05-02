@@ -7,10 +7,9 @@
 #================================================================
 CAN_INTERFACE="can0"
 BITRATE=125000
-$VESC_ID=10
 #================================================================
 
-xbox_one=python v.5_xbox_one_kon_debug.py
+xbox_one="python3 v.5_xbox_one_kon_debug.py"
 
 # meny
 while true; do

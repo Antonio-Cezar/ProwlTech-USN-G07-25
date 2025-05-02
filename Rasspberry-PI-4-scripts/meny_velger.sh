@@ -7,7 +7,6 @@
 #================================================================
 CAN_INTERFACE="can0"
 BITRATE=125000
-$VESC_ID=10
 #================================================================
 
 # Sti til undermenyer.
@@ -58,7 +57,9 @@ while true; do
             echo "Åpner opp: "
             echo "CAN-bus kontrollmeny"
             sleep 0.2
-            if [[ -x $canbus_kontrollmeny ]]; then # Kjører hvis det finnes og er kjørbart (-x)
+
+            # Kjører hvis det finnes og er kjørbart (-x)
+            if [[ -x $canbus_kontrollmeny ]]; then
                 $canbus_kontrollmeny
             else
                 echo "Feil: Fant ikke $canbus_kontrollmeny"
