@@ -84,9 +84,9 @@ nano ~/.config/autostart/kontroller_autostart.desktop
 
 # Kopier dette inn 
 [Desktop Entry]
-Type=Application
+Type=Application                                                              # Programstarter
 Name=Start Kontroller Script
-Exec=python3 /home/prowltech/prowltech_script/v.5_xbox_one_kontroller.py
-Terminal=true
-X-GNOME-Autostart-enabled=true
+Exec=python3 /home/prowltech/prowltech_script/v.5_xbox_one_kon_debug.py       # Kommandoen som skal kjøres ved oppstart
+Terminal=true                                                                 # Kjører i et synlig terminalvindu (for testing)
+X-GNOME-Autostart-enabled=true                                                # Sørger for at den aktiveres i oppstart 
 ========================================================

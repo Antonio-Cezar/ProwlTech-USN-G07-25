@@ -7,26 +7,7 @@
 #================================================================
 CAN_INTERFACE="can0"
 BITRATE=125000
-VESC_ID=10
 #================================================================
-
-# Funksjonen viser en enkel "laste-animasjon" med roterende tegn.
-loading_animation() {
-    spinner="/|\\-"
-    duration=0.6
-    interval=0.1
-    end_time=$(echo "$duration / $interval" | bc)
-
-    echo -n "Laster "
-
-    for ((i=0; i<$end_time; i++)); do
-        index=$((i % 4))
-        printf "\b${spinner:$index:1}"
-        sleep $interval
-    done
-
-    printf "\b Ferdig!\n"
-}
 
 # Funksjonen pauser og venter til bruker trykker x etter at en annen funkjson har blitt kalt på for å vise operasjonen så lenge bruker ønsker 
 pause_for_return() {
@@ -72,8 +53,6 @@ get_can_status() {
 # === HOVEDMENY ===
 while true; do
     clear
-    loading_animation
-    clear
     # Viser statuslinje for can0.
     echo "===================================="
     echo "$(get_can_status)"
@@ -102,7 +81,6 @@ while true; do
             clear
             start_canbus
             show_status
-            loading_animation
             pause_for_return
             ;;
         # Alternativ 2: Skru av can0 manuelt
@@ -112,7 +90,6 @@ while true; do
             sudo ip link set $CAN_INTERFACE down
             show_status
             sleep 0.2
-            loading_animation
             ;;
         # Alternativ 3: Skru på can0 manuelt
         3)
@@ -122,20 +99,19 @@ while true; do
             sudo ip link set $CAN_INTERFACE up
             show_status
             sleep 0.2
-            loading_animation
             ;;
         # Alternativ 4: Vis CAN-status
         4)
             clear
             show_status
-            loading_animation
+            sleep 0.2
             pause_for_return
             ;;
         # Alternativ 5: Kjør `candump` og vis CAN-trafikk
         5)
             clear
             echo "Starter CAN-dump... Trykk x for å avslutte."
-            loading_animation
+            sleep 0.2
             candump $CAN_INTERFACE &
             CANDUMP_PID=$!
 
@@ -152,7 +128,7 @@ while true; do
          # Alternativ x: Avslutt programmet
         x)
             echo "Avslutter."
-            loading_animation
+            sleep 0.2
             clear
             exit 0
             ;;
@@ -160,7 +136,7 @@ while true; do
         *)
             clear
             echo "Ugyldig valg. Prøv igjen."
-            loading_animation
+            sleep 0.2
             pause_for_return
             ;;
     esac
