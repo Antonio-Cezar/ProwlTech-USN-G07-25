@@ -3,10 +3,10 @@ from PIL import Image   # Bildehåndtering
 import threading    # Prosesshåndtering
 import bluetooth_dbus   # Bluetoothhåndtering
 import subprocess   # Kjøring av eksterne script
-import sys
-import os
-import time
-import serial
+import sys  # Endre søkestien for moduler
+import os   # Finne filstier
+import time # Håndtere tid
+import serial   # Kommunikasjon over seriell port 
 
 # Sti til mappe med eksterne script
 script_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "Rasspberry-PI-4-scripts"))
@@ -18,8 +18,6 @@ from popup_window import PopupWindow    # Bruker egen klasse for popup-vinduer
 
 # Importerer bilder og ikoner
 from assets import  prowltech_logo, usn_logo, usn_logo_sort, info_icon, bluetooth_icon, bolt_icon, can_icon, cross_icon, loading_icon, menu_icon, sensor_icon, signal_icon, temp_icon, update_icon, warning_icon, start_icon, controller_pic
-
-
 
 # Setter mørkt tema for hele GUI-et
 ctk.set_appearance_mode("dark")
@@ -40,7 +38,7 @@ popup_background_color = "#200F2D"
 popup_top_color = "#3A2557"
 popup_button_color = "#6C3DAF"
 
-# Definerer spesifikke størrelser 
+# Definerer størrelser i designet
 border_size = 10
 corner = 30
 container_text_size = 14
@@ -56,10 +54,10 @@ class ProwlTechApp(ctk.CTk):
         self.bind("<Escape>", self.exit_fullscreen)     # ESC lukker programmet
         #self.config(cursor="none")                      # Skjuler musepeker når GUI er i gang
 
-        self.bluetooth_devices = []                      # Liste for bluetooth-enheter
+        #self.bluetooth_devices = []                      # Liste for bluetooth-enheter funnet under skanning
         self.device_menu = None 
-        self.connected_device = None
-        self.device_widgets = {}  
+        self.connected_device = None                     # Holder informasjon om tilkoblet enhet
+        self.device_widgets = {}                         # Lagrer widgets knyttet til hver enhet
 
         # Konfigurerer rutenett for strukturen
 
@@ -456,15 +454,18 @@ class ProwlTechApp(ctk.CTk):
         self.progress.stop()    # Stopper progressbar
         self.progress.destroy()     # Sletter progressbar
 
+        # Lager side brukeren kan scrolle på
+        self.device_list = ctk.CTkScrollableFrame(self.popup.bottom, fg_color="transparent")
+        self.device_list.pack(expand=True, fill="both", padx=20, pady=10)
 
         # Fjerner gamle synlige enheter om det er noen slik at det ikke overlapper
-        for widget in self.popup.bottom.winfo_children():
+        for widget in self.device_list.winfo_children():
                     widget.destroy()
 
         # Lager rader for hver enhet om det er funnet noen
         if devices:
             for name in devices.values():
-                row = ctk.CTkFrame(self.popup.bottom, fg_color="#50256D", height=50, width=400, corner_radius=30)
+                row = ctk.CTkFrame(self.device_list, fg_color="#50256D", height=50, width=400, corner_radius=30)
                 row.pack(fill="x", pady=5, padx=20)
                 row.pack_propagate(False)
 
