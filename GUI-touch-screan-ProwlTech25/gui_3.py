@@ -656,20 +656,26 @@ class ProwlTechApp(ctk.CTk):
 #--------------------BATTERIDATA-------------------------  
 
     def get_battery_data(self):
+        print("DEBUG: get_battery_data thread startet") 
         # Åpner UART-porten
         try:
             with serial.Serial('/dev/serial0', baudrate=9600, timeout=1) as ser:
                 # Så lenge programmet kjører
                 while self.running:
                     frame = ser.read(16)    # Leser 16 byte fra shunten
+                    print("RAW:", frame.hex())
 
                     # Hvis det ikke ble lest nøyaktig 16 byte, så hoppes det over denne runden 
                     if len(frame) != 16:  
                         continue
 
                     data = parse_frame(frame)
+                    print("PARSE:", data)
                     if not data:
                         continue
+
+                    pct = data['soc']
+                    print(f"  -> SOC: {pct}%")
                     
                     self.after(0, lambda pct=data['soc']:
                                self.battery_status.configure(text=f"{pct} %"))
