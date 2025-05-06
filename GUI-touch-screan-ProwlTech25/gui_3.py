@@ -694,6 +694,10 @@ class ProwlTechApp(ctk.CTk):
     def on_closing(self):
         self.running = False
         self.destroy()
+
+        # Avslutter underprosessen som henter data fra kontroller
+        if hasattr(self, 'ctrl_thread') and self.ctrl_thread.proc:
+            self.ctrl_thread.proc.terminate()
        
     def run_can_script(self):
         #subprocess.Popen(["bash", "../Rasspberry-PI-4-scripts/meny_velger.sh"])
