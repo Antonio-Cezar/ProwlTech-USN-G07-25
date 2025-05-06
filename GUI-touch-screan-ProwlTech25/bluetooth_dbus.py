@@ -6,6 +6,8 @@ import time
 if platform.system() != "Linux":
     print("Kjører i Windows")
 
+    mock_connected_device = None
+
     # Oppretter falsk data
     found_devices = {"00:11:22:33:44:55": "TestController A", "66:77:88:99:AA:BB": "TestController B"}
 
@@ -28,15 +30,26 @@ if platform.system() != "Linux":
     # Simulerer tilkobling
     def connect_to_device(name):
         print(f"Mock: Koblet til {name}")
+        global mock_connected_device
+        mock_connected_device = name
         return True
     
     # Simulerer frakobling
     def disconnect_from_device(name):
+        global mock_connected_device
         print(f"Mock: Koblet fra {name}")
+        if mock_connected_device == name:
+            mock_connected_device = None
         return True
     
     def get_raw_devices():
-        return {}
+        devices = {}
+        for addr, name in found_devices.items():
+            devices[addr] = {
+                "Name": name,
+                "Connected": name == mock_connected_device
+            }
+        return devices
 
     
 #------------------------------------Ekte versjon på Linux-------------------------------------------
@@ -131,7 +144,6 @@ else:
         except Exception as e:
             print(f"Feil ved tilkobling til {name}: {e}")
             return False
-
 
         
     # Kobler fra enhet og fjerner fra pairing-liste

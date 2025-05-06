@@ -12,9 +12,10 @@ import serial   # Kommunikasjon over seriell port
 script_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "Rasspberry-PI-4-scripts"))
 sys.path.append(script_dir)
 
-from get_can_data import receive_sensor_data    # Funksjon til å hente ut sensordata via CAN-bus
+#from get_can_data import receive_sensor_data    # Funksjon til å hente ut sensordata via CAN-bus
 from can_menu_gui import CanMenuWindow  # Bruker egen klasse for CAN-menyen
 from popup_window import PopupWindow    # Bruker egen klasse for popup-vinduer
+from controller import ControllerThread
 
 # Importerer bilder og ikoner
 from assets import  prowltech_logo, usn_logo, usn_logo_sort, info_icon, bluetooth_icon, bolt_icon, can_icon, cross_icon, loading_icon, menu_icon, sensor_icon, signal_icon, temp_icon, update_icon, warning_icon, start_icon, controller_pic
@@ -273,7 +274,7 @@ class ProwlTechApp(ctk.CTk):
             self.connection_frame,
             width=35,
             height=35,
-            text="Koble til/fra kontroller",
+            text="Sjekker...",
             image=bluetooth_icon,
             compound="right",                          
             font=("Century Gothic", 14),
@@ -281,11 +282,11 @@ class ProwlTechApp(ctk.CTk):
             hover_color=button_hover_color,
             text_color="white",
             corner_radius=button_corner,
-            command=self.open_connection_window
+            command=self.handle_connect_button
         )
         self.connect_button.pack(pady=(5, 20))
 
-
+        
         # Sensormåling:----------------------------------------------
         self.sensor_container = ctk.CTkFrame(self.bot_frame, fg_color=background_color)
         self.sensor_container.grid(row=0, column=2, padx=(20, 10), pady=10, sticky="nsew")
@@ -308,6 +309,7 @@ class ProwlTechApp(ctk.CTk):
         self.sensor_frame.pack(side="top", expand=True, padx=5, pady=(0, 20))
         self.sensor_frame.pack_propagate(False)
 
+        '''
         # Sensormåling - Innhold
         self.sensor_value_label = ctk.CTkLabel(
             self.sensor_frame,
@@ -316,6 +318,16 @@ class ProwlTechApp(ctk.CTk):
             text_color="white"
         )
         self.sensor_value_label.pack(expand=True)
+        '''
+
+        self.mode_value_label = ctk.CTkLabel(
+            self.sensor_frame,
+            text="Fartsmodus: -",
+            font=("Century Gothic", 18),
+            text_color="white"
+        )
+        self.mode_value_label.pack(expand=True)
+      
 
         # Feilmeldinger:----------------------------------------------
         self.error_container = ctk.CTkFrame(self.bot_frame, fg_color=background_color)
@@ -434,6 +446,23 @@ class ProwlTechApp(ctk.CTk):
         
 
 #--------------------KOBLE TIL KONTROLLER-------------------------  
+    def handle_connect_button(self):
+        if self.connected_device:
+            self.disconnect_controller()
+        else:
+            self.open_connection_window()
+    
+    # Sjekker om konrtoller er tilkoblet før popup åpnes
+    def disconnect_controller(self):
+        if self.connected_device:
+            success = bluetooth_dbus.disconnect_from_device(self.connected_device)
+            if success:
+                self.connected_device = None
+                self.connection_status.configure(text="Ingen kontroller tilkoblet")
+                self.log_error("Kontroller ble frakoblet")
+            else:
+                self.log_error(f"Klarte ikke koble fra {self.connected_device}")
+    
     # Starter søkeprosess 
     def start_update(self):
         self.update_button.configure(text="Søker...", state="disabled")     # Teksten på knappen endrer seg og knappen blir deaktivert under søk
@@ -573,7 +602,7 @@ class ProwlTechApp(ctk.CTk):
         #self.start_update()
 
 #--------------------SENSORDATA-------------------------  
-
+    '''
     # Leser CAN-data kontinuerlig i bakgrunnen
     def get_sensor_data(self):
             no_data_logged = False  # Unngå spam av samme feilmelding
@@ -621,7 +650,7 @@ class ProwlTechApp(ctk.CTk):
 
         self.sensor_value_label.configure(text=text)
         self.after(500, self.update_sensor_display)
-
+    '''
 #--------------------BATTERIDATA-------------------------  
 
     def get_battery_data(self):
@@ -674,6 +703,8 @@ class ProwlTechApp(ctk.CTk):
     # Sjekker om det er noe kontroller tilkoblet
     def check_connected(self):
         devices = bluetooth_dbus.get_raw_devices()
+        found_connected = False
+
         for dev in devices.values():
             name = dev.get("Name")
             connected = dev.get("Connected", False)
@@ -681,12 +712,16 @@ class ProwlTechApp(ctk.CTk):
             if connected and name:
                 self.connected_device = name
                 self.connection_status.configure(text=f"Kontroller: Tilkoblet \n\n {name}", text_color="white")
+                self.connect_button.configure(text="Koble fra kontroller")
                 print(f"Tilkoblet enhet oppdaget: {name}")
-                return
-            
-        self.connected_device = None
-        self.connection_status.configure(text=f"Ingen kontroller tilkoblet", text_color="white")
-        print("Ingen enheter er tilkoblet")
+                found_connected = True
+                break
+
+        if not found_connected:
+            self.connected_device = None
+            self.connection_status.configure(text=f"Ingen kontroller tilkoblet", text_color="white")
+            self.connect_button.configure(text="Koble til kontroller")
+            print("Ingen enheter er tilkoblet")
 
         # Sjekker automatisk hvert 3. sekund
         self.after(3000, self.check_connected)
@@ -699,16 +734,23 @@ class ProwlTechApp(ctk.CTk):
         self.bot_section()
 
         self.running = True
-        self.sensor_value = "__"
-        threading.Thread(target=self.get_sensor_data, daemon=True).start()
-        self.update_sensor_display()
+        #self.sensor_value = "__"
+        #threading.Thread(target=self.get_sensor_data, daemon=True).start()
+        #self.update_sensor_display()
 
         threading.Thread(target=self.get_battery_data, daemon=True).start()
 
         self.check_connected() 
 
+        self.ctrl_thread = ControllerThread()
+        self.ctrl_thread.add_mode_listener(self.on_mode_change)
+        self.ctrl_thread.start()
+
         self.log_error("Test: Kontrollpanelet ble åpnet.")
 
+    def on_mode_change(self, mode: int):
+        beskr = {1:"(0.0-0.3)", 2:"(0.3-0.6)", 3:"(0.4-1.0)"}.get(mode, "")
+        self.after(0, lambda: self.mode_value_label.configure(text=f"Modus: {mode} {beskr}"))
 
     # Logger feilmeldinger
     def log_error(self, message: str):
