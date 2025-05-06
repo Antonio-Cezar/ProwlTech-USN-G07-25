@@ -659,7 +659,7 @@ class ProwlTechApp(ctk.CTk):
         print("DEBUG: get_battery_data thread startet") 
         # Åpner UART-porten
         try:
-            with serial.Serial('/dev/serial0', baudrate=9600, timeout=1) as ser:
+            with serial.Serial('/dev/ttyAMA1', baudrate=9600, timeout=1) as ser:
                 print(f"DEBUG: Åpnet port {ser.port} @ {ser.baudrate} baud")
                 # Så lenge programmet kjører
                 while self.running:

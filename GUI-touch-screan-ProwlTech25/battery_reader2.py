@@ -4,7 +4,7 @@ import struct
 import time
 
 # ---- KONFIGURASJON ----
-PORT = '/dev/ttys0'   # Eller '/dev/ttyAMA0' om du ikke bruker serial0-pekeren
+PORT = '/dev/ttyAMA1'   # Eller '/dev/ttyAMA0' om du ikke bruker serial0-pekeren
 BAUDRATE = 9600
 TIMEOUT = 1             # sekunder
 
