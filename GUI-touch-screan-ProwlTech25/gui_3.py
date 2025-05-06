@@ -660,26 +660,29 @@ class ProwlTechApp(ctk.CTk):
         # Åpner UART-porten
         try:
             with serial.Serial('/dev/serial0', baudrate=9600, timeout=1) as ser:
+                print(f"DEBUG: Åpnet port {ser.port} @ {ser.baudrate} baud")
                 # Så lenge programmet kjører
                 while self.running:
-                    frame = ser.read(16)    # Leser 16 byte fra shunten
-                    print("RAW:", frame.hex())
+                    frame = ser.read(16)
+                    print(f"DEBUG: Leste {len(frame)} byte")
+                    if frame:
+                        print("DEBUG: Raw hex:", frame.hex())
 
-                    # Hvis det ikke ble lest nøyaktig 16 byte, så hoppes det over denne runden 
-                    if len(frame) != 16:  
+                    if len(frame) != 16:
+                        time.sleep(0.5)
                         continue
 
                     data = parse_frame(frame)
-                    print("PARSE:", data)
+                    print("DEBUG: Parsed data:", data)
                     if not data:
+                        print("  -> parse_frame returnerte None")
                         continue
 
                     pct = data['soc']
-                    print(f"  -> SOC: {pct}%")
+                    print(f"  -> SOC: {pct}%  <-- skal vises i GUI")
+                    self.after(0, lambda p=pct: self.battery_status.configure(text=f"{p} %"))
+                    time.sleep(1)
                     
-                    self.after(0, lambda pct=data['soc']:
-                               self.battery_status.configure(text=f"{pct} %"))
-                
 
                     #checksum = sum(frame[0:15]) & 0xFF  # Beregner sjekksum: sum av byte 0-14, behold kun laveste byte
 
