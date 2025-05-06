@@ -7,6 +7,7 @@ import sys  # Endre søkestien for moduler
 import os   # Finne filstier
 import time # Håndtere tid
 import serial   # Kommunikasjon over seriell port 
+import struct
 
 # Sti til mappe med eksterne script
 script_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "Rasspberry-PI-4-scripts"))
@@ -16,6 +17,7 @@ sys.path.append(script_dir)
 from can_menu_gui import CanMenuWindow  # Bruker egen klasse for CAN-menyen
 from popup_window import PopupWindow    # Bruker egen klasse for popup-vinduer
 from controller import ControllerThread
+from battery_reader2 import parse_frame
 
 # Importerer bilder og ikoner
 from assets import  prowltech_logo, usn_logo, usn_logo_sort, info_icon, bluetooth_icon, bolt_icon, can_icon, cross_icon, loading_icon, menu_icon, sensor_icon, signal_icon, temp_icon, update_icon, warning_icon, start_icon, controller_pic
@@ -664,15 +666,23 @@ class ProwlTechApp(ctk.CTk):
                     # Hvis det ikke ble lest nøyaktig 16 byte, så hoppes det over denne runden 
                     if len(frame) != 16:  
                         continue
+
+                    data = parse_frame(frame)
+                    if not data:
+                        continue
                     
+                    self.after(0, lambda pct=data['soc']:
+                               self.battery_status.configure(text=f"{pct} %"))
+                
 
-                    checksum = sum(frame[0:15]) & 0xFF  # Beregner sjekksum: sum av byte 0-14, behold kun laveste byte
+                    #checksum = sum(frame[0:15]) & 0xFF  # Beregner sjekksum: sum av byte 0-14, behold kun laveste byte
+
                     # Sammenligner beregnet sjekksum med den siste byten i rammen (byte 15)
-                    if checksum != frame[15]:
-                        continue    # Hopper over runden om sjekksummen ikke stemmer
+                    #if checksum != frame[15]:
+                     #   continue    # Hopper over runden om sjekksummen ikke stemmer
 
-                    percent = frame[9]  # Henter batteriprosent fra byte 9 i rammen
-                    self.after(0, lambda: self.battery_status.configure(text=f"{percent} %"))   # Oppdaterer GUI-boksen i egen tråd slik at den ikke fryser
+                    #percent = frame[9]  # Henter batteriprosent fra byte 9 i rammen
+                    #self.after(0, lambda: self.battery_status.configure(text=f"{percent} %"))   # Oppdaterer GUI-boksen i egen tråd slik at den ikke fryser
                     time.sleep(1)
 
         except Exception as e:
