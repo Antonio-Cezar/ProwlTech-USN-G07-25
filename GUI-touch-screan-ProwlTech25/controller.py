@@ -11,17 +11,18 @@ SCRIPT = Path(__file__).parent.parent / "Rasspberry-PI-4-scripts" / "v.5_xbox_on
 #from can_wrapper import initialize_bus, initialize_joystick, rumble_ganger
 
 class ControllerThread(threading.Thread):
-    MODE_RE = re.compile(r"Hastighetsmodus\s*(\d)\s*valgt")
+    MODE_RE = re.compile(r"Hastighetsmodus\s*(\d)\s*valgt", re.IGNORECASE)
 
     def __init__(self):
         super().__init__(daemon=True)
         self._listeners = []
 
         self.proc = subprocess.Popen(
-            [sys.executable, str(SCRIPT)],
+            [sys.executable, "-u", str(SCRIPT)],
             cwd=str(SCRIPT.parent),
             stdout=subprocess.PIPE,
             stderr=subprocess.STDOUT,
+            bufsize=1,
             text=True,
         )
 
@@ -47,6 +48,7 @@ class ControllerThread(threading.Thread):
             m = self.MODE_RE.search(line)
             if m:
                 mode = int(m.group(1))
+                print(f"Fant modus: {mode}")
                 self._notify(mode)
 
 

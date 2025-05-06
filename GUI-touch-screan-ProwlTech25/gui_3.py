@@ -752,7 +752,8 @@ class ProwlTechApp(ctk.CTk):
 
         self.log_error("Test: Kontrollpanelet ble åpnet.")
 
-    def on_mode_change(self, mode: int):
+    def on_mode_change(self, mode):
+        print(f"[GUI DEBUG] on_mode_change got: {mode}")
         beskr = {1:"(0.0-0.3)", 2:"(0.3-0.6)", 3:"(0.4-1.0)"}.get(mode, "")
         self.after(0, lambda: self.mode_value_label.configure(text=f"Modus: {mode} {beskr}"))
 
