@@ -297,7 +297,7 @@ class ProwlTechApp(ctk.CTk):
         # Sensormåling - Tittel
         self.sensor_label = ctk.CTkLabel(
             self.sensor_container, 
-            text="SENSORSTATUS  ",
+            text="FARTSMODUS  ",
             font=("Century Gothic", container_text_size),
             image=sensor_icon,
             compound="right",
@@ -325,7 +325,7 @@ class ProwlTechApp(ctk.CTk):
         self.mode_value_label = ctk.CTkLabel(
             self.sensor_frame,
             text="Fartsmodus: -",
-            font=("Century Gothic", 18),
+            font=("Century Gothic", 20),
             text_color="white"
         )
         self.mode_value_label.pack(expand=True)
