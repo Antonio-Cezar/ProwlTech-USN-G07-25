@@ -656,46 +656,43 @@ class ProwlTechApp(ctk.CTk):
 #--------------------BATTERIDATA-------------------------  
 
     def get_battery_data(self):
-        print("DEBUG: get_battery_data thread startet") 
-        # Åpner UART-porten
+        import struct  # sørg for at dette er importert øverst
+        print("🔋 UART-tråd startet: Lytter på /dev/ttyAMA1 @ 9600")
         try:
             with serial.Serial('/dev/ttyAMA1', baudrate=9600, timeout=1) as ser:
-                print(f"DEBUG: Åpnet port {ser.port} @ {ser.baudrate} baud")
-                # Så lenge programmet kjører
                 while self.running:
                     frame = ser.read(16)
-                    print(f"DEBUG: Leste {len(frame)} byte")
-                    if frame:
-                        print("DEBUG: Raw hex:", frame.hex())
-
                     if len(frame) != 16:
-                        time.sleep(0.5)
                         continue
 
-                    data = parse_frame(frame)
-                    print("DEBUG: Parsed data:", data)
-                    if not data:
-                        print("  -> parse_frame returnerte None")
+                    # Parse frame
+                    if frame[0] != 0xA5 or (sum(frame[0:15]) & 0xFF) != frame[15]:
                         continue
 
-                    pct = data['soc']
-                    print(f"  -> SOC: {pct}%  <-- skal vises i GUI")
-                    self.after(0, lambda p=pct: self.battery_status.configure(text=f"{p} %"))
-                    time.sleep(1)
-                    
+                    soc = frame[1]
+                    voltage = ((frame[2] << 8) | frame[3]) / 100.0
+                    capacity = struct.unpack('>I', frame[4:8])[0]
+                    current = struct.unpack('>i', frame[8:12])[0]
+                    t = (frame[12] << 16) | (frame[13] << 8) | frame[14]
+                    hrs, rem = divmod(t, 3600)
+                    mins, secs = divmod(rem, 60)
+                    remaining = f"{hrs:02d}:{mins:02d}:{secs:02d}"
 
-                    #checksum = sum(frame[0:15]) & 0xFF  # Beregner sjekksum: sum av byte 0-14, behold kun laveste byte
+                    # Oppdater GUI med batteriprosent
+                    self.after(0, lambda pct=soc:
+                            self.battery_status.configure(text=f"{pct} %"))
 
-                    # Sammenligner beregnet sjekksum med den siste byten i rammen (byte 15)
-                    #if checksum != frame[15]:
-                     #   continue    # Hopper over runden om sjekksummen ikke stemmer
+                    # Du kan legge til flere labels her hvis ønskelig:
+                    # f.eks. self.voltage_label.configure(text=f"{voltage:.2f} V")
 
-                    #percent = frame[9]  # Henter batteriprosent fra byte 9 i rammen
-                    #self.after(0, lambda: self.battery_status.configure(text=f"{percent} %"))   # Oppdaterer GUI-boksen i egen tråd slik at den ikke fryser
+                    print(f"Batteri: {soc}% | {voltage:.2f}V | {current}mA | Rem: {remaining}")
+
                     time.sleep(1)
 
         except Exception as e:
-            self.log_error(f"Feil ved lesing av batteriprosent: {e}")
+            self.log_error(f"Feil ved UART: {e}")
+            print("Feil ved UART:", e)
+
 
 #--------------------ANDRE FUNKSJONER-------------------------  
     # Progressbar
