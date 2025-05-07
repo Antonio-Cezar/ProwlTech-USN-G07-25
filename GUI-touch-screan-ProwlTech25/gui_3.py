@@ -7,7 +7,7 @@ import sys  # Endre søkestien for moduler
 import os   # Finne filstier
 import time # Håndtere tid
 import serial   # Kommunikasjon over seriell port 
-import struct
+import struct   # Kunne packe/unpacke binær data
 
 # Sti til mappe med eksterne script
 script_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "Rasspberry-PI-4-scripts"))
@@ -654,39 +654,40 @@ class ProwlTechApp(ctk.CTk):
         self.after(500, self.update_sensor_display)
     '''
 #--------------------BATTERIDATA-------------------------  
-
+    # Leser av shunt for å hente batteridata
     def get_battery_data(self):
-        import struct  # sørg for at dette er importert øverst
+
+        # Viser at tråden starter 
         print("UART-tråd startet: Lytter på /dev/ttyS0 @ 9600")
         try:
+            # Åpner seriallport ttyS0 med 9600 bps
             with serial.Serial('/dev/ttyS0', baudrate=9600, timeout=1) as ser:
+                # Så lenge programmet kjører
                 while self.running:
                     frame = ser.read(16)
-                    if len(frame) != 16:
+                    if len(frame) != 16:    # Leser nøyaktig 16 byte, hvis færre, hopp over 
                         continue
 
-                    # Parse frame
-                    if frame[0] != 0xA5 or (sum(frame[0:15]) & 0xFF) != frame[15]:
-                        continue
+                    # Sjekker at rammen er gyldig 
+                    if frame[0] != 0xA5 or (sum(frame[0:15]) & 0xFF) != frame[15]:  # sum av byte skal stemme med checksum
+                        continue    # Hopp over om ikke gyldig
 
+                    # Parsing
                     soc = frame[1]
-                    voltage = ((frame[2] << 8) | frame[3]) / 100.0
-                    capacity = struct.unpack('>I', frame[4:8])[0]
-                    current = struct.unpack('>i', frame[8:12])[0]
-                    t = (frame[12] << 16) | (frame[13] << 8) | frame[14]
-                    hrs, rem = divmod(t, 3600)
-                    mins, secs = divmod(rem, 60)
+                    voltage = ((frame[2] << 8) | frame[3]) / 100.0  # Spenning: byte 2 og 3 (16-bit tall), del på 100 for volt
+                    capacity = struct.unpack('>I', frame[4:8])[0]   # Kapasitet (mAh) (32-bit tall)
+                    current = struct.unpack('>i', frame[8:12])[0]   # Strøm (mA) (32-bit tall)
+                    t = (frame[12] << 16) | (frame[13] << 8) | frame[14]    # Resterende tid i sekunder (leser 3 byte)
+                    hrs, rem = divmod(t, 3600)  # Timer og restsekunder
+                    mins, secs = divmod(rem, 60)    # Minutter og restsekunder
                     remaining = f"{hrs:02d}:{mins:02d}:{secs:02d}"
 
                     # Oppdater GUI med batteriprosent
                     self.after(0, lambda pct=soc:
                             self.battery_status.configure(text=f"{pct} %"))
 
-                    # Du kan legge til flere labels her hvis ønskelig:
-                    # f.eks. self.voltage_label.configure(text=f"{voltage:.2f} V")
-
                     #print(f"Batteri: {soc}% | {voltage:.2f}V | {current}mA | Rem: {remaining}")
-                    print(f"Batteri: {soc}%")
+                    print(f"Batteri: {soc}% | Rem: {remaining}")
 
                     time.sleep(1)
 
