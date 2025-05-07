@@ -684,10 +684,9 @@ class ProwlTechApp(ctk.CTk):
 
                     # Oppdater GUI med batteriprosent
                     self.after(0, lambda pct=soc:
-                            self.battery_status.configure(text=f"{pct} %"))
+                            self.battery_status.configure(text=f"{pct} % \n\n "))
 
-                    #print(f"Batteri: {soc}% | {voltage:.2f}V | {current}mA | Rem: {remaining}")
-                    print(f"Batteri: {soc}% | Rem: {remaining}")
+                    print(f"Batteri: {soc}% | {voltage:.2f}V | {current}mA | Rem: {remaining}")
 
                     time.sleep(1)
 
