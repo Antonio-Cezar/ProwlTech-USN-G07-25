@@ -76,9 +76,6 @@ void can_rx_callback(const struct device *dev, struct can_frame *frame, void *us
         received_byte = frame->data[0];
         //(FENRIS24) printk("Received byte from ID 0x%X: %02X\n", frame->id, received_byte);
     } 
-    //(PROWLTECH25) Sjekker fis frame fra BUS har den samme ID og frame data som blir sendt
-    else if (frame->id == RECEIVE_ID_PI) {
-        handle_pi_controller_data(frame); 
     else {
         printk("Unexpected data format or ID\n");
     }

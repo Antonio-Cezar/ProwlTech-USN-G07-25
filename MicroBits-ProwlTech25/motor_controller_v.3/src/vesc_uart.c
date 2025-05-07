@@ -196,3 +196,8 @@ void speaker_init(void) {
         printf("Speaker ready: %s\n", speaker_dev->name);
     }
 }
+
+// Legg til i vesc_uart.c
+const struct device *get_uart_dev(void) {
+    return uart_dev;
+}
