@@ -3,7 +3,7 @@ import serial
 import time
 import sys
 
-def åpne_port(port='/dev/serial0', baudrate=9600, timeout=1):
+def åpne_port(port='/dev/ttyS0', baudrate=9600, timeout=1):
     """
     Prøver å åpne serial-porten. Kaster serial.SerialException hvis det feiler.
     """
