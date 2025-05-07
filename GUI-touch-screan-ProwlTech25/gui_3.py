@@ -657,9 +657,9 @@ class ProwlTechApp(ctk.CTk):
 
     def get_battery_data(self):
         import struct  # sørg for at dette er importert øverst
-        print("🔋 UART-tråd startet: Lytter på /dev/ttyAMA1 @ 9600")
+        print("UART-tråd startet: Lytter på /dev/ttyS0 @ 9600")
         try:
-            with serial.Serial('/dev/ttyAMA1', baudrate=9600, timeout=1) as ser:
+            with serial.Serial('/dev/ttyS0', baudrate=9600, timeout=1) as ser:
                 while self.running:
                     frame = ser.read(16)
                     if len(frame) != 16:
@@ -685,7 +685,8 @@ class ProwlTechApp(ctk.CTk):
                     # Du kan legge til flere labels her hvis ønskelig:
                     # f.eks. self.voltage_label.configure(text=f"{voltage:.2f} V")
 
-                    print(f"Batteri: {soc}% | {voltage:.2f}V | {current}mA | Rem: {remaining}")
+                    #print(f"Batteri: {soc}% | {voltage:.2f}V | {current}mA | Rem: {remaining}")
+                    print(f"Batteri: {soc}%")
 
                     time.sleep(1)
 
