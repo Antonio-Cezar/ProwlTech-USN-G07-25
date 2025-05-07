@@ -231,7 +231,7 @@ class ProwlTechApp(ctk.CTk):
         self.battery_status = ctk.CTkLabel(
             self.battery_frame,
             text="- %",
-            font=("Century Gothic", 18),
+            font=("Century Gothic", 20),
             text_color="white",
             anchor="center",
             justify="left"
@@ -684,7 +684,7 @@ class ProwlTechApp(ctk.CTk):
 
                     # Oppdater GUI med batteriprosent
                     self.after(0, lambda pct=soc:
-                            self.battery_status.configure(text=f"{pct} % \n\n "))
+                            self.battery_status.configure(text=f"{pct} %"))
 
                     print(f"Batteri: {soc}% | {voltage:.2f}V | {current}mA | Rem: {remaining}")
 
