@@ -1,16 +1,13 @@
 #!/bin/bash
-
 # (PROWLTECH25 - CA).
 # Dette er menyen for å velge de forskjellige opperasjonene for can0 (CAN-Bus kommunikasjon).
-
 # Setter opp CAN-grensesnitt og bitrate.
 #================================================================
 CAN_INTERFACE="can0"
 BITRATE=125000
 #================================================================
-
 # Funksjonen pauser og venter til bruker trykker x etter at en annen funkjson har blitt kalt på for å vise operasjonen så lenge bruker ønsker 
-pause_for_return() {
+pause_for_return(){
     echo ""
     echo "Trykk x for å gå tilbake til menyen..."
     while true; do
@@ -20,48 +17,39 @@ pause_for_return() {
         fi
     done
 }
-
-# Funksjon for å starter opp CAN-bussen med spesifisert bitrate når den blir valgt i menyen.
-start_canbus() {
+# Funksjon for å starte opp CAN-bussen med spesifisert bitrate når den blir valgt i menyen.
+start_canbus(){
     echo "Starter $CAN_INTERFACE med bitrate $BITRATE ..."
-    sudo ip link set $CAN_INTERFACE down
-    sudo ip link set $CAN_INTERFACE type can bitrate $BITRATE
-    sudo ip link set $CAN_INTERFACE up
+    sudo ip link set "$CAN_INTERFACE" down
+    sudo ip link set "$CAN_INTERFACE" type can bitrate "$BITRATE"
+    sudo ip link set "$CAN_INTERFACE" up
     sleep 1
 }
 # Funksjonen viser CAN status når den blir valgt i menyen.
-show_status() {
+show_status(){
     echo ""
     echo "===================================="
     echo "=== CAN-status ==="
     echo "===================================="
-
-    # Vis detaljer om CAN-nettverksgrensesnittet (bitrate, status, drivere)
-    #(-A 5) -> Dette filtrerer ut deler av teksten som vises. (CAN_INTERFACE + 5 linjer etterpå)
-    ip -details link show $CAN_INTERFACE | grep -A 5 "$CAN_INTERFACE" 
+    ip -details link show "$CAN_INTERFACE" | grep -A 5 "$CAN_INTERFACE" 
     echo "===================================="
     echo ""
 }
-
 # Funksjonen som viser CAN status aktiv og innaktiv på toppen av menyen.
-get_can_status() {
-
-    #-o betyr "vis det er lik mønsteret", Den ser etter SATE UP/DOWN og da tar denlinja og viser.
+get_can_status(){
+    #-o betyr "vis det er lik mønsteret", Den ser etter STATE UP/DOWN og da tar den linja og viser.
     # `awk '{print $2}'`(andre kolonne = "UP" eller "DOWN")
-    local state=$(ip link show $CAN_INTERFACE | grep -o "state [A-Z]*" | awk '{print $2}') 
+    local state=$(ip link show "$CAN_INTERFACE" | grep -o "state [A-Z]*" | awk '{print $2}') 
 
-    # Sjekk om grensesnittet er aktivt
     if [[ $state == "UP" ]]; then
         echo "(can0 status: AKTIV)"
     else
         echo "(can0 status: INAKTIV)"
     fi
 }
-
 # === HOVEDMENY ===
 while true; do
     clear
-    # Viser statuslinje for can0.
     echo "===================================="
     echo "$(get_can_status)"
     echo "===================================="
@@ -82,65 +70,56 @@ while true; do
     echo -n "Velg operasjon: "
     read -n 1 valg
     echo
-
     case $valg in
-        # Alternativ 1: Start CAN-bus på nytt
-        1) 
+        1)
             clear
             start_canbus
             show_status
             pause_for_return
             ;;
-        # Alternativ 2: Skru av can0 manuelt
         2)
             clear
             echo "Manuelt: Skru AV $CAN_INTERFACE ..."
-            sudo ip link set $CAN_INTERFACE down
+            sudo ip link set "$CAN_INTERFACE" down
             show_status
             sleep 0.2
             ;;
-        # Alternativ 3: Skru på can0 manuelt
         3)
             clear
             echo "Manuelt: Skru PÅ $CAN_INTERFACE ..."
-            sudo ip link set $CAN_INTERFACE type can bitrate $BITRATE
-            sudo ip link set $CAN_INTERFACE up
+            sudo ip link set "$CAN_INTERFACE" type can bitrate "$BITRATE"
+            sudo ip link set "$CAN_INTERFACE" up
             show_status
             sleep 0.2
             ;;
-        # Alternativ 4: Vis CAN-status
         4)
             clear
             show_status
             sleep 0.2
             pause_for_return
             ;;
-        # Alternativ 5: Kjør `candump` og vis CAN-trafikk
         5)
             clear
             echo "Starter CAN-dump... Trykk x for å avslutte."
             sleep 0.2
-            candump $CAN_INTERFACE &
+            candump "$CAN_INTERFACE" &
             CANDUMP_PID=$!
-
             while true; do
                 read -n 1 -s input
                 if [[ $input == "x" || $input == "X" ]]; then
                     echo "Avslutter candump..."
-                    kill $CANDUMP_PID
-                    wait $CANDUMP_PID 2>/dev/null
+                    kill "$CANDUMP_PID"
+                    wait "$CANDUMP_PID" 2>/dev/null
                     break
                 fi
             done
             ;;
-         # Alternativ x: Avslutt programmet
         x)
             echo "Avslutter."
             sleep 0.2
             clear
             exit 0
             ;;
-        # Default: Ugyldig valg
         *)
             clear
             echo "Ugyldig valg. Prøv igjen."

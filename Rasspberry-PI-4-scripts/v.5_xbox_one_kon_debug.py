@@ -229,7 +229,7 @@ sist_sendte_fart = None # Husk forrige vinkel for å sjekke endring
 sist_sendte_vinkel = None  # Husk forrige vinkel for å sjekke endring
 aktiv_joystick = False
 Hastighetsmodus = 1
-forrige_x = 0
+forrige_a = 0
 tone_aktiv = False
 
 # Loop som registrerer verdier og sender verdier til pakke funsjonene (send_data)
@@ -264,6 +264,7 @@ while True:
         a = joystick.get_button(0)  # A-knapp
         b = joystick.get_button(1)  # B-knapp
         y = joystick.get_button(4)  # Y-knapp
+        x = joystick.get_button(3)  # x-knapp
 
         # === Input kanpper for rotasjon LB og RB ===
         rb = joystick.get_button(7)  # Høyre bumper
@@ -293,16 +294,14 @@ while True:
         # Håndter rotasjon (RB og LB)
         # Bestem rotasjon basert på bumpere
 
-        x = joystick.get_button(3)
-
         # Send tone på når knappen trykkes ned, og tone av når den slippes
-        if x != forrige_x:
-            if x == 1:
+        if x != forrige_a:
+            if a == 1:
                 send_tone(bus, aktiv=True)
             else:
                 send_tone(bus, aktiv=False)
 
-        forrige_x = x  # Oppdater knappestatus
+        forrige_a = a  # Oppdater knappestatus
 
         # === Endre hastighetsmoduser ===
         if y:
@@ -315,7 +314,7 @@ while True:
             print("Hastighetsmodus 2 valgt (0.1-0.6)")
             vibrer_kont_funk(joystick, 2)
 
-        elif a:
+        elif x:
             Hastighetsmodus = 3
             print("Hastighetsmodus 3 valgt (0.3-1.0)")
             vibrer_kont_funk(joystick, 3)
