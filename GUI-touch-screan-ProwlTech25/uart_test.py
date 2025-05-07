@@ -3,13 +3,13 @@ import serial
 import struct
 import time
 
-SERIAL_PORT = '/dev/ttyS0'     # TTL-UART på GPIO-pins (GPIO14/15)
+SERIAL_PORT = '/dev/ttyAMA1'  # PL011-UART på GPIO14/15
 BAUDRATE    = 9600
-TIMEOUT     = 1                # sekunder
+TIMEOUT     = 1               # sekunder
 
 def parse_frame(frame: bytes):
     """
-    Tar en 16-byte frame som:
+    Tar en 16-byte frame:
       [0]    = 0xA5 (header)
       [1]    = SOC (%)
       [2-3]  = Voltage * 100 (big-endian)
@@ -22,16 +22,15 @@ def parse_frame(frame: bytes):
     if len(frame) != 16 or frame[0] != 0xA5:
         return None
 
-    # Sjekk checksum
     if (sum(frame[0:15]) & 0xFF) != frame[15]:
         return None
 
     soc = frame[1]
     voltage_raw = (frame[2] << 8) | frame[3]
-    voltage = voltage_raw / 100.0  # Volt
+    voltage = voltage_raw / 100.0
 
-    capacity = struct.unpack('>I', frame[4:8])[0]  # mAh
-    current  = struct.unpack('>i', frame[8:12])[0] # mA
+    capacity = struct.unpack('>I', frame[4:8])[0]
+    current  = struct.unpack('>i', frame[8:12])[0]
 
     t = (frame[12] << 16) | (frame[13] << 8) | frame[14]
     hrs, rem = divmod(t, 3600)
@@ -51,7 +50,7 @@ def main():
         ser = serial.Serial(SERIAL_PORT, BAUDRATE, timeout=TIMEOUT)
         print(f"Åpnet {SERIAL_PORT} @ {BAUDRATE} bps")
     except serial.SerialException as e:
-        print("Kunne ikke åpne seriel port:", e)
+        print("Kunne ikke åpne seriell port:", e)
         return
 
     buf = bytearray()
@@ -61,24 +60,27 @@ def main():
             if not b:
                 continue
 
+            # Debug: vis hver mottatt byte
+            print("DEBUG: Received byte:", b.hex())
+
             # Synkroniser på header-byte 0xA5
             if not buf and b[0] != 0xA5:
                 continue
 
             buf += b
+            print(f"DEBUG: Buffer length = {len(buf)}")
 
             if len(buf) == 16:
+                print("DEBUG: Full frame:", buf.hex())
                 data = parse_frame(buf)
                 if data:
                     print(f"[{time.strftime('%Y-%m-%d %H:%M:%S')}] "
                           f"SOC = {data['soc']}%  |  "
                           f"V = {data['voltage']:.2f}V  |  "
-                          f"I = {data['current']}mA  |  "
+                          f"I = {data['current']} mA  |  "
                           f"Time = {data['remaining']}")
                 else:
-                    print("Ugyldig frame eller checksum-feil")
-
-                # Nullstill buffer og let etter ny header
+                    print("DEBUG: Frame invalid or checksum failed")
                 buf.clear()
 
     except KeyboardInterrupt:
