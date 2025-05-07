@@ -1,0 +1,11 @@
+{
+    "files.associations": {
+        "kernel.h": "c",
+        "gpio.h": "c",
+        "can.h": "c",
+        "stdbool.h": "c",
+        "spi.h": "c",
+        "canbus.h": "c"
+    },
+    "nrf-connect.applications": []
+}
