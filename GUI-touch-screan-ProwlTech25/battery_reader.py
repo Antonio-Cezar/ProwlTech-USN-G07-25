@@ -12,12 +12,10 @@ def read_battery_percentage():
                 if len(frame) != 16:
                     continue
 
-                checksum = sum(frame[0:15]) & 0xFF
-                if checksum != frame[15]:
-                    print("Sjekksumfeil, hopper over.")
-                    continue
+                if frame[0] != 0xA5 or (sum(frame[0:15]) & 0xFF) != frame[15]:  # sum av byte skal stemme med checksum
+                        continue 
 
-                percent = frame[9]
+                percent = frame[1]
                 print(f"Batteriprosent: {percent}%")
                 time.sleep(1)
 
