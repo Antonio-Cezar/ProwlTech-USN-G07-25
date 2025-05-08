@@ -1,3 +1,12 @@
+"""
+popup_window.py
+
+Definerer en gjenbrukbar klasse for popup-vinduer i GUI-et.
+
+Den inneholder en toppseksjon, bunnseksjon, tittel og en knapp for å lukke vinduet.
+
+"""
+
 import customtkinter as ctk
 from assets import cross_icon
 
