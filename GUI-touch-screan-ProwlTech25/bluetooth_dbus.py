@@ -20,7 +20,7 @@ if platform.system() != "Linux":
     mock_connected_device = None    # Lagrer mock-enhet som er tilkoblet
 
     # Simulerer funnede enheter (navn og MAC-adresse)
-    found_devices = {"00:11:22:33:44:55": "TestController A", "66:77:88:99:AA:BB": "TestController B"}
+    found_devices = {"00:11:22:33:44:55": "Xbox Wireless Controller"}
 
     # Simulerer skanning med ventetid
     def scan_devices():
