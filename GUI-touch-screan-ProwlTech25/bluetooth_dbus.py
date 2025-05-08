@@ -139,17 +139,18 @@ else:
 
     # Kobler til enhet basert på navn
     def connect_to_device(name):
-        address = get_device(name)
+        address = get_device(name)  # Slår opp MAC-adresse basert på navn
+        # Hvis ikke enheten finnes, returnerer False
         if not address:
             print(f"Fant ikke enhet med navn {name}")
             return False
 
-        bus = SystemBus()
-        device_path = f"/org/bluez/hci0/dev_{address.replace(':', '_')}"
+        bus = SystemBus()   # Kobler til D-Bus via pydbus (gir tilgang til Bluez-tjenesten)
+        device_path = f"/org/bluez/hci0/dev_{address.replace(':', '_')}"    # Lager D-Bus-sti basert på MAC-adressen
 
         try:
-            device = bus.get("org.bluez", device_path)
-            device.Connect()
+            device = bus.get("org.bluez", device_path)  # Prøver å hente enhet fra D-Bus med org.bluez
+            device.Connect()    # Starter Bluetooth-tilkoblingen
             print(f"Tilkoblet {name}")
             return True
         except Exception as e:
@@ -159,16 +160,19 @@ else:
         
     # Kobler fra enhet og fjerner fra pairing-liste
     def disconnect_from_device(name):
-        address = get_device(name)
+        address = get_device(name)  # Slår opp MAC-adresse basert på navn
+        # Hvis ikke enheten finnes, returnerer False
         if not address:
             print(f"Fant ikke enhet med navn {name}")
             return False
 
-        bus = SystemBus()
-        device_path = f"/org/bluez/hci0/dev_{address.replace(':', '_')}"
-        device = bus.get("org.bluez", device_path)
-        adapter = bus.get("org.bluez", "/org/bluez/hci0")
+        bus = SystemBus()   # Kobler til D-Bus via pydbus (gir tilgang til Bluez-tjenesten)
+        device_path = f"/org/bluez/hci0/dev_{address.replace(':', '_')}"    # Lager D-Bus-sti basert på MAC-adressen
 
+        device = bus.get("org.bluez", device_path)  # Henter enheten
+        adapter = bus.get("org.bluez", "/org/bluez/hci0")   # Henter adapteren (for å kunne fjerne paringen)
+
+        # Hvis enheten er tilkoblet, så frakobles den
         try:
             if device.Connected:
                 device.Disconnect()     # Kobler fra
@@ -184,14 +188,15 @@ else:
 
     # Funksjon for å returnere alle enheter som aktivt er tilkoblet
     def get_raw_devices():
-        bus = SystemBus()
-        mngr = bus.get("org.bluez", "/")
-        managed_objects = mngr.GetManagedObjects()
+        bus = SystemBus()   # Kobler til D-Bus via pydbus (gir tilgang til Bluez-tjenesten)
+        mngr = bus.get("org.bluez", "/")    # Henter Object Manager (oversikt over alle tilknyttede enheter)
+        managed_objects = mngr.GetManagedObjects()  # Returnerer alle kjente Bluetooth-objekter (både adaptere og enheter)
 
         devices = {}
+        # path: stien til enheten // interfaces: inholdet knyttet til objektet
         for path, interfaces in managed_objects.items():
-            if "org.bluez.Device1" in interfaces:
-                dev = interfaces["org.bluez.Device1"]  # Bruk data direkte
-                address = dev.get("Address")
-                devices[address] = dev  # Lagrer device-info for senere
+            if "org.bluez.Device1" in interfaces:   # Filtrerer ut faktiske Bluetooth-enheter
+                dev = interfaces["org.bluez.Device1"]  # Henter detaljene for enheten (navn, tilkobling, MAC-adresse osv.)
+                address = dev.get("Address")    # MAC-adressen til enheten 
+                devices[address] = dev  # Lagrer hele objektet med detaljer 
         return devices
