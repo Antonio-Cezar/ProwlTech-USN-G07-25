@@ -1,6 +1,7 @@
 import customtkinter as ctk
 from assets import cross_icon
 
+# Definerer farger for enkel endring
 popup_background_color = "#200F2D"
 popup_top_color = "#3A2557"
 popup_button_color = "#6C3DAF"
@@ -34,7 +35,7 @@ class PopupWindow:
         self.bottom.grid_rowconfigure(0, weight=1)
         self.bottom.grid_columnconfigure(0, weight=1)
 
-
+        # Titteltekst
         self.label = ctk.CTkLabel(
             self.top, 
             text=title, 
@@ -43,6 +44,7 @@ class PopupWindow:
             )
         self.label.place(relx=0.5, rely=0.5, anchor=ctk.CENTER)
 
+        # Knapp for å lukke popup
         self.close_button = ctk.CTkButton(
             self.top,
             text="Lukk",
@@ -59,9 +61,7 @@ class PopupWindow:
         )
         self.close_button.place(relx=0.95, rely=0.5, anchor="e")
 
-    def add_widget(self, widget, **pack_kwargs):
-        widget.pack(**pack_kwargs)
-
+    # Funksjon for å lukke popup
     def close(self):
         self.panel.destroy()
         if self.on_close:

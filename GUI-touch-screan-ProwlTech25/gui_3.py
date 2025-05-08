@@ -17,7 +17,6 @@ sys.path.append(script_dir)
 from can_menu_gui import CanMenuWindow  # Bruker egen klasse for CAN-menyen
 from popup_window import PopupWindow    # Bruker egen klasse for popup-vinduer
 from controller import ControllerThread
-from battery_reader2 import parse_frame
 
 # Importerer bilder og ikoner
 from assets import  prowltech_logo, usn_logo, usn_logo_sort, info_icon, bluetooth_icon, bolt_icon, can_icon, cross_icon, loading_icon, menu_icon, sensor_icon, signal_icon, temp_icon, update_icon, warning_icon, start_icon, controller_pic
@@ -25,7 +24,7 @@ from assets import  prowltech_logo, usn_logo, usn_logo_sort, info_icon, bluetoot
 # Setter mørkt tema for hele GUI-et
 ctk.set_appearance_mode("dark")
 
-# Definerer farger brukt i designet for konsistens og enkel endring
+# Definerer farger for enkel endring
 text_color = "#FFFFFF"
 background_color = "#0D0D1F"
 top_panel_color = "#230F46"
