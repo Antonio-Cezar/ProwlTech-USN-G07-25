@@ -1,3 +1,13 @@
+"""
+assets.py
+
+Denne filen laster inn alle bilder og ikoner som blir brukt i GUI-et. 
+
+Bruk 'load_image(filnavn, størrelse)' for å hente og skalere bilder fra mappen 'Image'.
+
+"""
+
+
 from PIL import Image
 import customtkinter as ctk
 import os
@@ -8,9 +18,10 @@ BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 # Full sti til Image-mappen
 IMAGE_DIR = os.path.join(BASE_DIR, "Image")
 
-def load_image(filename, size):
-    image_path = os.path.join(IMAGE_DIR, filename)
-    return ctk.CTkImage(light_image=Image.open(image_path), size=size)
+# Funksjon for å laste inn og skalere bilder
+def load_image(filename, size): # Bildenavn, ønsket størrelse
+    image_path = os.path.join(IMAGE_DIR, filename)  # Lager filstien
+    return ctk.CTkImage(light_image=Image.open(image_path), size=size)  # Åpner bildet
 
 # Logoer
 prowltech_logo = load_image("prowltech_logo2.png", (550, 550))
