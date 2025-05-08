@@ -1,3 +1,11 @@
+"""
+
+gui_3.py
+
+Hovedfilen som starter ProwlTech kontrollpanel-GUI-et.
+
+"""
+
 import customtkinter as ctk
 from PIL import Image   # Bildehåndtering
 import threading    # Prosesshåndtering

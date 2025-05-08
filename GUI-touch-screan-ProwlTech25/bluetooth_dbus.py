@@ -1,3 +1,14 @@
+"""
+
+bluetooth_dbus.py
+
+Håndterer Bluetooth-enheter via D-Bus på Raspberry Pi.
+
+Brukes i GUI for å koble til/fra kontroller og hente tilkoblingsstatus.
+Inkluderer mock-versjon for bruk i Windows.
+
+"""
+
 import platform
 import time
 
@@ -6,9 +17,9 @@ import time
 if platform.system() != "Linux":
     print("Kjører i Windows")
 
-    mock_connected_device = None
+    mock_connected_device = None    # Lagrer mock-enhet som er tilkoblet
 
-    # Oppretter falsk data
+    # Simulerer funnede enheter (navn og MAC-adresse)
     found_devices = {"00:11:22:33:44:55": "TestController A", "66:77:88:99:AA:BB": "TestController B"}
 
     # Simulerer skanning med ventetid
@@ -16,11 +27,11 @@ if platform.system() != "Linux":
         print("Mock: Simulerer skanning...")
         time.sleep(2)   # Tid til å vise progressbaren 
 
-    # Returnerer de falske enhetene
+    # Returnerer mock-enhetene
     def get_devices():
         return found_devices
     
-    # Returnerer MAC-adressen basert på enhet-navn
+    # Returnerer MAC-adressen basert på enhetsnavn
     def get_device(name):
         for addr, dev_name in found_devices.items():
             if dev_name == name:
@@ -31,7 +42,7 @@ if platform.system() != "Linux":
     def connect_to_device(name):
         print(f"Mock: Koblet til {name}")
         global mock_connected_device
-        mock_connected_device = name
+        mock_connected_device = name    # Setter til valgt navn
         return True
     
     # Simulerer frakobling
@@ -42,6 +53,7 @@ if platform.system() != "Linux":
             mock_connected_device = None
         return True
     
+    # Returnerer alle mock-enheter med navn og om de er tilkoblet
     def get_raw_devices():
         devices = {}
         for addr, name in found_devices.items():
@@ -61,13 +73,13 @@ else:
 
     found_devices = {}  # Liste for enheter funnet under skanning
 
-    # Sjekker om enheten er paret med adapteren
+    # Sjekker om pairing-info finnes
     def is_paired(adapter_address, device_address):
         path = f"/var/lib/bluetooth/{adapter_address}/{device_address}/info"
         if not os.path.exists(path):
             return False
 
-        # Leser info-filen og sjekker etter Paried=True
+        # Leser innholdet i pairing-filen og ser etter "Paired=True"
         with open(path, "r") as file:
             content = file.read()
             return "Paired=true" in content
@@ -79,29 +91,28 @@ else:
 
         # Koble til D-Bus
         bus = SystemBus()
-        mngr = bus.get("org.bluez", "/")
-        adapter = bus.get("org.bluez", "/org/bluez/hci0")
+        mngr = bus.get("org.bluez", "/")    # Object manager
+        adapter = bus.get("org.bluez", "/org/bluez/hci0")   # Bluetooth-adapter
 
         # Start Bluetooth-skanning via BlueZ
         print("Starter søket...")
         try:
-            adapter.StartDiscovery()
+            adapter.StartDiscovery()            # Starter skanning
             print("Søker...")
-            time.sleep(10)  # Tid for å oppdage enheter
-            adapter.StopDiscovery()
+            time.sleep(10)                      # Tid for å oppdage enheter
+            adapter.StopDiscovery()             # Stopper skanning
         except Exception as e:
             print(f"Skanning feilet: {e}")
 
         print("Skanning avsluttet.\n")
 
-        # Henter enheter funnet via D-Bus object manager
-        managed_objects = mngr.GetManagedObjects()
+        managed_objects = mngr.GetManagedObjects()  # Henter enheter funnet via D-Bus object manager
 
-        for path, interfaces in managed_objects.items():
+        for path, interfaces in managed_objects.items():    # Går gjennom alle Bluetooth-objekter og filtrerer 
             if "org.bluez.Device1" in interfaces:
-                dev = interfaces["org.bluez.Device1"]
-                address = dev.get("Address", "ukjent")
-                name = dev.get("Name")
+                dev = interfaces["org.bluez.Device1"]   # Henter enhetsdata
+                address = dev.get("Address", "ukjent")  # Henter MAC-adresse
+                name = dev.get("Name")                  # Henter navn
 
                 if not name:
                     continue    # Ignorerer enheter uten navn
@@ -110,7 +121,7 @@ else:
                 paired = dev.get("Paired", False)
                 connected = dev.get("Connected", False)
 
-                # Legger til enheter i listen
+                # Legger til enheter i listen som sendes til GUI
                 found_devices[address] = name
                 print(f" {name} ({address})")
 
