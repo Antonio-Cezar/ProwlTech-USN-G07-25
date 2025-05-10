@@ -45,4 +45,5 @@ warning_icon = load_image("warning.png", (20, 20))
 loading_icon = load_image("loading.png", (20, 20))
 start_icon = load_image("start.png", (20, 20))
 menu_icon = load_image("menu.png", (20, 20))
+speed_icon = load_image("speed.png", (20, 20))
 

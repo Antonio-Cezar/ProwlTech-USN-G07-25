@@ -27,7 +27,7 @@ from popup_window import PopupWindow    # Bruker egen klasse for popup-vinduer
 from controller import ControllerThread
 
 # Importerer bilder og ikoner
-from assets import  prowltech_logo, usn_logo, usn_logo_sort, info_icon, bluetooth_icon, bolt_icon, can_icon, cross_icon, loading_icon, menu_icon, sensor_icon, signal_icon, temp_icon, update_icon, warning_icon, start_icon, controller_pic
+from assets import  prowltech_logo, usn_logo, usn_logo_sort, info_icon, bluetooth_icon, bolt_icon, can_icon, cross_icon, loading_icon, menu_icon, sensor_icon, signal_icon, temp_icon, update_icon, warning_icon, start_icon, controller_pic, speed_icon
 
 # Setter mørkt tema for hele GUI-et
 ctk.set_appearance_mode("dark")
@@ -36,7 +36,7 @@ ctk.set_appearance_mode("dark")
 text_color = "#FFFFFF"
 background_color = "#0D0D1F"
 top_panel_color = "#230F46"
-error_section = "#2C161F"
+sys_log_section = "#2C161F"
 frame_color = "#230F46"
 frame_border_color = "#503C74"
 
@@ -306,7 +306,7 @@ class ProwlTechApp(ctk.CTk):
             self.sensor_container, 
             text="FARTSMODUS  ",
             font=("Century Gothic", container_text_size),
-            image=sensor_icon,
+            image=speed_icon,
             compound="right",
             text_color=text_color,
             justify="left"
@@ -328,7 +328,7 @@ class ProwlTechApp(ctk.CTk):
         )
         self.sensor_value_label.pack(expand=True)
         '''
-
+        # Fartsmodus-info (midlertidig pga feil med kommunikasjon til sensorer)
         self.mode_value_label = ctk.CTkLabel(
             self.sensor_frame,
             text="Fartsmodus: -",
@@ -338,39 +338,39 @@ class ProwlTechApp(ctk.CTk):
         self.mode_value_label.pack(expand=True)
       
 
-        # Feilmeldinger:----------------------------------------------
-        self.error_container = ctk.CTkFrame(self.bot_frame, fg_color=background_color)
-        self.error_container.grid(row=1, column=0, columnspan=3, padx=10, pady=5, sticky="nsew")
+        # Systemlogg:----------------------------------------------
+        self.sys_log_container = ctk.CTkFrame(self.bot_frame, fg_color=background_color)
+        self.sys_log_container.grid(row=1, column=0, columnspan=3, padx=10, pady=5, sticky="nsew")
 
-        # Feilmeldinger - Tittel
-        self.error_label = ctk.CTkLabel(
-            self.error_container, 
-            text="FEILMELDINGER  ",
+        # Systemlogg - Tittel
+        self.sys_log_label = ctk.CTkLabel(
+            self.sys_log_container, 
+            text="SYSTEMLOGG  ",
             font=("Century Gothic", container_text_size),
             image=warning_icon,
             compound="right",
             text_color=text_color,
             justify="left"
         )
-        self.error_label.pack(side="top", anchor="w", padx=35, pady=0)
+        self.sys_log_label.pack(side="top", anchor="w", padx=35, pady=0)
         
 
-        # Feilmeldinger - Ramme
-        self.error_frame = ctk.CTkFrame(self.error_container, height=100, width=750, fg_color=error_section, corner_radius=30)
-        self.error_frame.pack(expand=True)
-        self.error_frame.pack_propagate(False)
+        # Systemlogg - Ramme
+        self.sys_log_frame = ctk.CTkFrame(self.sys_log_container, height=125, width=750, fg_color=sys_log_section, corner_radius=30)
+        self.sys_log_frame.pack(expand=True)
+        self.sys_log_frame.pack_propagate(False)
 
-        # Feilmeldinger - Tekstboks
-        self.error_textbox = ctk.CTkTextbox(
-            self.error_frame,
+        # Systemlogg - Tekstboks
+        self.sys_log_textbox = ctk.CTkTextbox(
+            self.sys_log_frame,
             font=("Century Gothic", 14),
             text_color="white",
-            fg_color=error_section,
+            fg_color=sys_log_section,
             wrap="word"
         )
-        self.error_textbox.pack(expand=True, fill="both", padx=20, pady=5)
-        self.error_textbox.insert("end", "Ingen feilmeldinger.\n")
-        self.error_textbox.configure(state="disabled")
+        self.sys_log_textbox.pack(expand=True, fill="both", padx=20, pady=5)
+        self.sys_log_textbox.insert("end", " ")
+        self.sys_log_textbox.configure(state="disabled")
 
 #--------------------POPUP-VINDUER------------------------- 
     # Åpner koble_til_kontroller-popup
@@ -468,9 +468,9 @@ class ProwlTechApp(ctk.CTk):
             if success:
                 self.connected_device = None
                 self.connection_status.configure(text="Ingen kontroller tilkoblet")
-                self.log_error("Kontroller ble frakoblet")
+                self.log_message("Kontroller ble frakoblet", level="success")
             else:
-                self.log_error(f"Klarte ikke koble fra {self.connected_device}")
+                self.log_message(f"Klarte ikke koble fra {self.connected_device}", level="error")
     
     # Starter søkeprosess 
     def start_update(self):
@@ -557,7 +557,7 @@ class ProwlTechApp(ctk.CTk):
             )
             no_devices_label.pack(pady=10)
 
-            self.log_error(f"Ingen enheter funnet.")
+            self.log_message(f"Ingen enheter funnet", level="info")
 
         self.update_button.configure(text="Oppdater", state="normal")   # Gjør det mulig å trykke på søke-knappen igjen
 
@@ -583,11 +583,11 @@ class ProwlTechApp(ctk.CTk):
                 self.connection_status.configure(text="Ingen kontroller tilkoblet", text_color="white")
                 print("Koblet fra")
                 self.popup.close()    # Lukker vindu
-                self.log_error(f"{name} ble koblet fra.")
+                self.log_message(f"{name} ble koblet fra", level="success")
 
             else:
                 print("Klarte ikke koble fra")
-                self.log_error(f"Klarte ikke koble fra {name}")
+                self.log_message(f"Klarte ikke koble fra {name}", level="error")
 
         # Hvis enheten ikke er koblet til. Funksjon til å koble til enhet
         else:
@@ -601,11 +601,11 @@ class ProwlTechApp(ctk.CTk):
                 self.connection_status.configure(text=f"Kontroller: Tilkoblet \n\n {name}", text_color="white")
                 print("Tilkobling fullført")
                 self.popup.close()    # Lukker vindu
-                self.log_error(f"{name} ble koblet til.")
+                self.log_message(f"{name} ble koblet til", level="success")
 
             else:
                 self.connection_status.configure(text=f"Ingen kontroller tilkoblet", text_color="red")
-                self.log_error(f"Klarte ikke koble til {name}")     # Logger feilmelding
+                self.log_message(f"Klarte ikke koble til {name}", level="error")     # Logger feilmelding
                 print("Tilkobling mislykkes")
 
         #self.start_update()
@@ -698,7 +698,7 @@ class ProwlTechApp(ctk.CTk):
                     time.sleep(1)
 
         except Exception as e:
-            self.log_error(f"Feil ved UART: {e}")
+            self.log_message(f"Feil ved UART: {e}", level="error")
             print("Feil ved UART:", e)
 
 
@@ -774,19 +774,31 @@ class ProwlTechApp(ctk.CTk):
         self.ctrl_thread.add_mode_listener(self.on_mode_change)
         self.ctrl_thread.start()
 
-        self.log_error("Test: Kontrollpanelet ble åpnet.")
+        self.log_message("Kontrollpanelet ble åpnet", level="info")
 
     def on_mode_change(self, mode):
         print(f"[GUI DEBUG] on_mode_change got: {mode}")
         beskr = {1:"(0.0-0.3)", 2:"(0.3-0.6)", 3:"(0.4-1.0)"}.get(mode, "")
         self.after(0, lambda: self.mode_value_label.configure(text=f"Modus: {mode} {beskr}"))
 
-    # Logger feilmeldinger
-    def log_error(self, message: str):
-        self.error_textbox.configure(state="normal")
-        self.error_textbox.insert("end", f"{message}\n")
-        self.error_textbox.see("end")   # Scroller til bunnen
-        self.error_textbox.configure(state="disabled")
+    # Logger systemmeldinger
+    def log_message(self, message: str, level="info"):
+    
+        color_map = {
+            "info": "white",
+            "success": "#00FFAA",
+            "warning": "#FFD700",
+            "error": "#FF4C4C"
+        }
+
+        color = color_map.get(level, "white")
+
+        self.sys_log_textbox.configure(state="normal")
+        self.sys_log_textbox.insert("end", f"{message}\n", level)
+        self.sys_log_textbox.tag_config(level, foreground=color)
+        self.sys_log_textbox.see("end")
+        self.sys_log_textbox.configure(state="disabled")
+
 
 # Starter GUI-applikasjon
 app = ProwlTechApp()
