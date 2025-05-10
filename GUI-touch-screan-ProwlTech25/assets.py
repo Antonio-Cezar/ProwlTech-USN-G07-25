@@ -29,7 +29,7 @@ usn_logo = load_image("USN_logo.png", (60, 70))
 usn_logo_sort = load_image("USN_logo_sort.png", (60, 70))
 
 # Bilder
-controller_pic = load_image("kontroller.png", (600, 250))
+controller_pic = load_image("kontroller.png", (600, 300))
 
 # Ikoner
 info_icon = load_image("info.png", (20, 20))
