@@ -1,44 +1,49 @@
-import 'package:flutter/material.dart';
-import 'package:http/http.dart' as http;
-import 'dart:convert';
-import 'dart:async';
+import 'package:flutter/material.dart';     // Flutter sitt UI-bibliotek
+import 'package:http/http.dart' as http;    // HTTP-klient for å hente data fra Flask-API
+import 'dart:convert';                      // JSON-dekoder for å tolke API-svar
+import 'dart:async';                        // For periodisk oppdatering
 
+// Hovedmetode som starter Flutter-appen
 void main() {
   runApp(const ProwlTechApp());
 }
 
-// Hovedappen
+// Hovedoppsettet til appen
 class ProwlTechApp extends StatelessWidget {
   const ProwlTechApp({super.key});
 
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: 'ProwlTech Kontrollpanel',
-      home: const Kontrollpanel(),
-      debugShowCheckedModeBanner: false,
+      title: 'ProwlTech Kontrollpanel',   // App-tittel
+      home: const Kontrollpanel(),        // Første skjerm-widget
+      debugShowCheckedModeBanner: false,  // Fjerner debug-banneret øverst
     );
   }
 }
 
 // Innholdet i appen
-class Kontrollpanel extends StatefulWidget {
+class Kontrollpanel extends StatefulWidget {    // StatefulWidget: skal hente og oppdatere data løpende
   const Kontrollpanel({super.key});
 
   @override
   State<Kontrollpanel> createState() => _KontrollpanelState();
 }
 
+// Tilstanden til kontrollpanel: lagrer API-data og bygger
 class _KontrollpanelState extends State<Kontrollpanel> {
-  bool kontrollerTilkoblet = false;
-  List<String> feilmeldinger = [];
+  bool kontrollerTilkoblet = false;   // Viser om kontrolleren er tilkoblet
+  List<String> feilmeldinger = [];    // Feilmeldinger fra API
 
+// Metode som henter status fra Flask-serveren
   Future<void> hentStatus() async {
     try {
+      // Sender GET-forespørsel
       final response = await http.get(
         Uri.parse('http://192.168.137.113:5000/status'),
       );
 
+      // Sjekker om OK
       if (response.statusCode == 200) {
         final data = jsonDecode(response.body);
         setState(() {
