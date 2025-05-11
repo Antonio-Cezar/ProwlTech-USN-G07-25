@@ -25,6 +25,7 @@ sys.path.append(script_dir)
 from can_menu_gui import CanMenuWindow  # Bruker egen klasse for CAN-menyen
 from popup_window import PopupWindow    # Bruker egen klasse for popup-vinduer
 from controller import ControllerThread
+from shunt_data import get_battery_percent
 
 # Importerer bilder og ikoner
 from assets import  prowltech_logo, usn_logo, usn_logo_sort, info_icon, bluetooth_icon, bolt_icon, can_icon, cross_icon, loading_icon, menu_icon, sensor_icon, signal_icon, temp_icon, update_icon, warning_icon, start_icon, controller_pic, speed_icon
@@ -147,6 +148,7 @@ class ProwlTechApp(ctk.CTk):
         )
         self.can_bus_button.place(relx=0.2, rely=0.9, anchor="center")
 
+        """
         # Avslutt-knapp
         self.exit_button = ctk.CTkButton(
             self.front_frame,
@@ -163,6 +165,7 @@ class ProwlTechApp(ctk.CTk):
             command=self.on_closing
         )
         self.exit_button.place(relx=0.1, rely=0.1, anchor="center")
+        """
 
     # Toppseksjon: logo, tittel og knapper
     def top_section(self):
@@ -661,6 +664,12 @@ class ProwlTechApp(ctk.CTk):
         self.after(500, self.update_sensor_display)
     '''
 #--------------------BATTERIDATA-------------------------  
+    def update_battery(self):
+        battery = get_battery_percent()
+        if battery is not None:
+            self.battery_status.configure(text=f"{battery}%")
+
+    """
     # Leser av shunt for å hente batteridata
     def get_battery_data(self):
 
@@ -700,7 +709,7 @@ class ProwlTechApp(ctk.CTk):
         except Exception as e:
             self.log_message(f"Feil ved UART: {e}", level="error")
             print("Feil ved UART:", e)
-
+    """
 
 #--------------------ANDRE FUNKSJONER-------------------------  
     # Progressbar
@@ -766,7 +775,7 @@ class ProwlTechApp(ctk.CTk):
         #threading.Thread(target=self.get_sensor_data, daemon=True).start()
         #self.update_sensor_display()
 
-        threading.Thread(target=self.get_battery_data, daemon=True).start()
+        threading.Thread(target=self.update_battery, daemon=True).start()
 
         self.check_connected() 
 
@@ -777,8 +786,8 @@ class ProwlTechApp(ctk.CTk):
         self.log_message("Kontrollpanelet ble åpnet", level="info")
 
     def on_mode_change(self, mode):
-        print(f"[GUI DEBUG] on_mode_change got: {mode}")
-        beskr = {1:"(0.0-0.3)", 2:"(0.3-0.6)", 3:"(0.4-1.0)"}.get(mode, "")
+        print(f"Fartsmodus: {mode}")
+        beskr = {1:"(Lav)", 2:"(Middela)", 3:"(Høy)"}.get(mode, "")
         self.after(0, lambda: self.mode_value_label.configure(text=f"Modus: {mode} {beskr}"))
 
     # Logger systemmeldinger
