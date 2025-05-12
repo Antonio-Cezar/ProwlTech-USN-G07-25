@@ -72,7 +72,7 @@ else:
 
     class ControllerThread(threading.Thread):
         # Regex (mønstersøk) for å fange opp linjer med Hastighetsmodus-informasjon
-        MODE_RE = re.compile(r"Hastighetsmodus\s*(\d)\s*valgt", re.IGNORECASE)  # \d: ett siffer // \s*: mellomrom // re.IGNORECASE: ignorerer forskjellen på store/små bokstaver
+        mode_re = re.compile(r"Hastighetsmodus\s*(\d)\s*valgt", re.IGNORECASE)  # \d: ett siffer // \s*: mellomrom // re.IGNORECASE: ignorerer forskjellen på store/små bokstaver
 
         def __init__(self):
             super().__init__(daemon=True)   # daemon slik at tråden stopper når hovedprogrammet avsluttes
@@ -103,7 +103,7 @@ else:
 
             # Leser linje for linje 
             for line in self.proc.stdout:
-                m = self.MODE_RE.search(line)   # Sjekker om linjen inneholder ønsket tekst (bruker regex-en fra tidligere)
+                m = self.mode_re.search(line)   # Sjekker om linjen inneholder ønsket tekst (bruker regex-en fra tidligere)
 
                 # Ved match
                 if m:
