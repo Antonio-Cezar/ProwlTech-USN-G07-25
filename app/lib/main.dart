@@ -40,7 +40,7 @@ class _KontrollpanelState extends State<Kontrollpanel> {
     try {
       // Sender GET-forespørsel
       final response = await http.get(
-        Uri.parse('http://192.168.137.113:5000/status'),
+        Uri.parse('http://192.168.137.6:5000/status'),
       );
 
       // Sjekker om OK
@@ -82,32 +82,37 @@ class _KontrollpanelState extends State<Kontrollpanel> {
 
             //------------------------------TITTELBOKS---------------------------------
             Container(
-              padding: const EdgeInsets.symmetric(vertical: 24),    // Luft inni boksen
+              padding: const EdgeInsets.fromLTRB(40, 16, 16, 16),    // Luft inni boksen
               decoration: BoxDecoration(
                 color: const Color(0xFF2E1458),                // Lilla bakgrunn
                 borderRadius: BorderRadius.circular(8),         // Runde hjørner
               ),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,   // Juster innhold til venstre
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                crossAxisAlignment: CrossAxisAlignment.center,
                 children: [
-                  const Text(
-                    'ProwlTech',                         // Hovedtittel
-                    style: TextStyle(
-                      fontSize: 40,                     // Tekststørrelse
-                      color: Colors.white,            // Tekstfarge
-                      fontWeight: FontWeight.bold,      // Fet skrift
-                    ),
+                  Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: const[
+                      Text(
+                        'ProwlTech',                         // Hovedtittel
+                        style: TextStyle(
+                          fontSize: 40,                     // Tekststørrelse
+                          color: Colors.white,            // Tekstfarge
+                          fontWeight: FontWeight.bold,      // Fet skrift
+                        ),
+                      ),
+                      SizedBox(height: 1),            // Litt luft 
+                      Text(
+                        'Kontrollpanel',                    // Undertittel
+                        style: TextStyle(
+                          fontSize: 36,                     // Tekststørrelse
+                          color: Colors.purpleAccent,    // Tekstfarge
+                          fontWeight: FontWeight.w500,
+                        ),
+                      ),
+                    ],
                   ),
-                  const SizedBox(height: 1),            // Litt luft 
-                  const Text(
-                    'Kontrollpanel',                    // Undertittel
-                    style: TextStyle(
-                      fontSize: 36,                     // Tekststørrelse
-                      color: Colors.purpleAccent,    // Tekstfarge
-                      fontWeight: FontWeight.w500,
-                    ),
-                  ),
-                  const SizedBox(height: 20),   // Luft mellom elementer
 
 //------------------------------INFO-KNAPP---------------------------------
                   OutlinedButton.icon(
@@ -301,7 +306,7 @@ class _KontrollpanelState extends State<Kontrollpanel> {
                   const SizedBox(height: 12),   // Luft under tittelen
                   Text(
                     feilmeldinger.isEmpty   // Hvis lista er tom
-                        ? 'Ingen feilmeldinger'
+                        ? 'Ingen meldinger'
                         : feilmeldinger.map((e) => '• $e').join('\n'),    // Ellers lag punktliste
                     style: const TextStyle(
                       color: Colors.white70,    // Tekstfarge
