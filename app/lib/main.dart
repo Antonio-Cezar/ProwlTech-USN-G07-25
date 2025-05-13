@@ -16,7 +16,7 @@ class ProwlTechApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MaterialApp(
       title: 'ProwlTech Kontrollpanel',   // App-tittel
-      home: const Kontrollpanel(),        // Første skjerm-widget
+      home: const Kontrollpanel(),        // Første skjerm som vises
       debugShowCheckedModeBanner: false,  // Fjerner debug-banneret øverst
     );
   }
@@ -30,7 +30,7 @@ class Kontrollpanel extends StatefulWidget {    // StatefulWidget: skal hente og
   State<Kontrollpanel> createState() => _KontrollpanelState();
 }
 
-// Tilstanden til kontrollpanel: lagrer API-data og bygger
+// Tilstanden til kontrollpanel: holder data og bygger UI
 class _KontrollpanelState extends State<Kontrollpanel> {
   bool kontrollerTilkoblet = false;   // Viser om kontrolleren er tilkoblet
   List<String> feilmeldinger = [];    // Feilmeldinger fra API
@@ -45,23 +45,25 @@ class _KontrollpanelState extends State<Kontrollpanel> {
 
       // Sjekker om OK
       if (response.statusCode == 200) {
-        final data = jsonDecode(response.body);
+        final data = jsonDecode(response.body);   // Dekoder JSON til et Dart-objekt
+        // Oppdaterer state med ny data
         setState(() {
           kontrollerTilkoblet = data['kontroller_tilkoblet'];
           feilmeldinger = List<String>.from(data['feilmeldinger']);
         });
       } else {
-        print('Feil ved henting: ${response.statusCode}');
+        print('Feil ved henting: ${response.statusCode}');  // Logger feilkode hvis ikke 200
       }
     } catch (e) {
-      print('Klarte ikke å hente status: $e');
+      print('Klarte ikke å hente status: $e');  // Logger unntak (timeout eller nettverksfeil)
     }
   }
 
   @override
   void initState() {
     super.initState();
-    hentStatus();
+    hentStatus();     // Henter status ved oppstart
+    // Henter status hvert 5. sekund
     Timer.periodic(const Duration(seconds: 5), (timer) {
       hentStatus();
     });
@@ -70,112 +72,118 @@ class _KontrollpanelState extends State<Kontrollpanel> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color(0xFF1A0033),
+      backgroundColor: const Color(0xFF1A0033),            // Bakgrunnsfarge for hele skjermen
       body: Padding(
-        padding: const EdgeInsets.all(16.0),
+        padding: const EdgeInsets.all(16.0),                 // 16px padding rundt alt
         child: Column(
-          crossAxisAlignment: CrossAxisAlignment.stretch,
+          crossAxisAlignment: CrossAxisAlignment.stretch,   // Juster innhold til venstre
           children: [
-            const SizedBox(height: 50),
+            const SizedBox(height: 50),                     // Tom plass øverst
 
-            // Tittelboks
+            //------------------------------TITTELBOKS---------------------------------
             Container(
-              padding: const EdgeInsets.symmetric(vertical: 24),
+              padding: const EdgeInsets.symmetric(vertical: 24),    // Luft inni boksen
               decoration: BoxDecoration(
-                color: const Color(0xFF2E1458),
-                borderRadius: BorderRadius.circular(8),
+                color: const Color(0xFF2E1458),                // Lilla bakgrunn
+                borderRadius: BorderRadius.circular(8),         // Runde hjørner
               ),
               child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
+                crossAxisAlignment: CrossAxisAlignment.start,   // Juster innhold til venstre
                 children: [
                   const Text(
-                    'ProwlTech',
+                    'ProwlTech',                         // Hovedtittel
                     style: TextStyle(
-                      fontSize: 40,
-                      color: Colors.white,
-                      fontWeight: FontWeight.bold,
+                      fontSize: 40,                     // Tekststørrelse
+                      color: Colors.white,            // Tekstfarge
+                      fontWeight: FontWeight.bold,      // Fet skrift
                     ),
                   ),
-                  const SizedBox(height: 1),
+                  const SizedBox(height: 1),            // Litt luft 
                   const Text(
-                    'Kontrollpanel',
+                    'Kontrollpanel',                    // Undertittel
                     style: TextStyle(
-                      fontSize: 36,
-                      color: Colors.purpleAccent,
+                      fontSize: 36,                     // Tekststørrelse
+                      color: Colors.purpleAccent,    // Tekstfarge
                       fontWeight: FontWeight.w500,
                     ),
                   ),
-                  const SizedBox(height: 20),
+                  const SizedBox(height: 20),   // Luft mellom elementer
 
+//------------------------------INFO-KNAPP---------------------------------
                   OutlinedButton.icon(
                     onPressed: () {
+                      // Viser et popup-vindu ved knappetrykk
                       showDialog(
-                        context: context,
+                        context: context,   // Viser popup i riktig del av appen
                         builder: (context) => AlertDialog(
-                          backgroundColor: const Color(0xFF2E1458),
+                          backgroundColor: const Color(0xFF2E1458),   // Bakgrunnsfarge
                           title: const Text(
-                            'Om bilen',
-                            style: TextStyle(color: Colors.white),
+                            'Om bilen',                                 // Tittel i popup
+                            style: TextStyle(color: Colors.white),    // Tekstfarge
                           ),
                           content: const Text(
-                            'Kort info om bilen',
-                            style: TextStyle(color: Colors.white70),
+                            'Kort info om bilen',                       // Infotekst i popup
+                            style: TextStyle(color: Colors.white70),    // Tekstfarge
                           ),
                           actions: [
+                            // Knapp nederst i popup for å lukke vinduet
                             TextButton(
-                              onPressed: () => Navigator.pop(context),
-                              child: const Text('OK'),
+                              onPressed: () => Navigator.pop(context),    // Lukk popup
+                              child: const Text('OK'),                    // Tekst på knapp
                             ),
                           ],
                         ),
                       );
                     },
+                    // Stil på knappen
                     style: OutlinedButton.styleFrom(
-                      side: const BorderSide(color: Colors.white70),
+                      side: const BorderSide(color: Colors.white70),    // Rammefarge på knappen
                       shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(12),
+                        borderRadius: BorderRadius.circular(12),    // Runde hjørner
                       ),
+                      // Luft inni knappen
                       padding: const EdgeInsets.symmetric(
                         horizontal: 12,
                         vertical: 8,
                       ),
                     ),
-                    icon: const Icon(Icons.info_outline, color: Colors.white),
+                    icon: const Icon(Icons.info_outline, color: Colors.white),    // Ikon på venstre side av teksten
                     label: const Text(
-                      'Info',
-                      style: TextStyle(color: Colors.white),
+                      'Info',                                     // Tekst på knappen
+                      style: TextStyle(color: Colors.white),    // Tekstfarge
                     ),
                   ),
                 ],
               ),
             ),
 
-            const SizedBox(height: 24),
+            const SizedBox(height: 24),   // Luft mellom elementer
 
-            // Kontrollerboks
+            //------------------------------KONTROLLERBOKS---------------------------------
             Container(
-              padding: const EdgeInsets.all(16),
+              padding: const EdgeInsets.all(16),                 // Luft inni boksen på alle kanter
               decoration: BoxDecoration(
-                color: const Color(0xFF4A3C6E),
-                borderRadius: BorderRadius.circular(12),
+                color: const Color(0xFF4A3C6E),               // Mørk lilla bakgrunn
+                borderRadius: BorderRadius.circular(12),        // Runde hjørner
               ),
               child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
+                crossAxisAlignment: CrossAxisAlignment.start,   // Juster innhold til venstre
                 children: [
                   const Text(
-                    'KONTROLLER',
+                    'KONTROLLER',   // Tittel
                     style: TextStyle(
-                      color: Colors.white,
-                      fontSize: 18,
-                      fontWeight: FontWeight.bold,
+                      color: Colors.white,                  // Tekstfarge
+                      fontSize: 18,                           // Tekststørrelse
+                      fontWeight: FontWeight.bold,            // Fet skrift
                     ),
                   ),
-                  const SizedBox(height: 8),
+                  const SizedBox(height: 8),                  // Luft mellom elementer
 
-                  // Tilkoblingsstatus
+                  // Rad med ikon og statustekst
                   Row(
                     children: [
                       Icon(
+                        // Viser grønt ikon hvis tilkoblet, ellers rødt kryss
                         kontrollerTilkoblet
                             ? Icons.check_circle
                             : Icons.cancel,
@@ -183,14 +191,15 @@ class _KontrollpanelState extends State<Kontrollpanel> {
                             ? Colors.green
                             : Colors.red,
                       ),
-                      const SizedBox(width: 8),
+                      const SizedBox(width: 8),                        // Luft mellom elementer
                       Text(
+                        // Viser tekst avhengig av tilkoblingsstatus
                         kontrollerTilkoblet
                             ? 'Kontroller tilkoblet'
                             : 'Kontroller ikke tilkoblet',
                         style: const TextStyle(
-                          color: Colors.white,
-                          fontSize: 16,
+                          color: Colors.white,                      // Tekstfarge
+                          fontSize: 16,                               // Tekststørrelse
                         ),
                       ),
                     ],
@@ -199,65 +208,65 @@ class _KontrollpanelState extends State<Kontrollpanel> {
               ),
             ),
 
-            const SizedBox(height: 24),
+            const SizedBox(height: 24),                               // Luft mellom elementer
 
-            // Batteri- og sensorboks
+            //------------------------------BATTERI OG SENSOR---------------------------------
             Row(
               children: [
                 Expanded(
                   child: Container(
-                    padding: const EdgeInsets.all(16),
+                    padding: const EdgeInsets.all(16),                 // Luft inni boksen på alle kanter
                     decoration: BoxDecoration(
                       color: const Color(0xFF7E5ABD),
-                      borderRadius: BorderRadius.circular(12),
+                      borderRadius: BorderRadius.circular(12),        // Runde hjørner
                     ),
                     child: const Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
+                      crossAxisAlignment: CrossAxisAlignment.start,   // Juster innhold til venstre
                       children: [
                         Text(
-                          'BATTERI',
+                          'BATTERI',   // Tittel
                           style: TextStyle(
-                            color: Colors.white,
-                            fontSize: 18,
-                            fontWeight: FontWeight.bold,
+                            color: Colors.white,                  // Tekstfarge
+                            fontSize: 18,                           // Tekststørrelse
+                            fontWeight: FontWeight.bold,            // Fet skrift
                           ),
                         ),
-                        SizedBox(height: 8),
+                        SizedBox(height: 8),                        // Luft mellom elementer
                         Text(
                           '---%',
                           style: TextStyle(
-                            color: Colors.white70,
+                            color: Colors.white70,                // Tekstfarge
                           ),
                         ),
-                        SizedBox(height: 60),
+                        SizedBox(height: 60),                       // Luft mellom elementer
                       ],
                     ),
                   ),
                 ),
-                const SizedBox(width: 16),
+                const SizedBox(width: 16),                         // Luft mellom elementer
                 Expanded(
                   child: Container(
-                    padding: const EdgeInsets.all(16),
+                    padding: const EdgeInsets.all(16),             // Luft inni boksen på alle kanter
                     decoration: BoxDecoration(
                       color: const Color(0xFF7E5ABD),
-                      borderRadius: BorderRadius.circular(12),
+                      borderRadius: BorderRadius.circular(12),     // Runde hjørner
                     ),
                     child: const Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
+                      crossAxisAlignment: CrossAxisAlignment.start,   // Juster innhold til venstre
                       children: [
                         Text(
-                          'SENSORDATA',
+                          'SENSORDATA',                             // Tittel
                           style: TextStyle(
-                            color: Colors.white,
-                            fontSize: 18,
-                            fontWeight: FontWeight.bold,
+                            color: Colors.white,                 // Tekstfarge
+                            fontSize: 18,                          // Tekststørrelse
+                            fontWeight: FontWeight.bold,           // Fet skrift
                           ),
                         ),
-                        SizedBox(height: 8),
+                        SizedBox(height: 8),                      // Luft mellom elementer
                         Text(
                           'Foran:\nBak:\nHøyre:\nVenstre:',
                           style: TextStyle(
-                            color: Colors.white70,
+                            color: Colors.white70,              // Tekstfarge
                           ),
                         ),
                       ],
@@ -267,53 +276,55 @@ class _KontrollpanelState extends State<Kontrollpanel> {
               ],
             ),
 
-            const SizedBox(height: 24),
+            const SizedBox(height: 24),   // Luft mellom elementer
 
-            // Feilmeldingsboks
+            //------------------------------SYSTEMLOGG---------------------------------
             Container(
-              padding: const EdgeInsets.all(16),
+              padding: const EdgeInsets.all(16),    // Luft inni boksen på alle kanter
               decoration: BoxDecoration(
-                color: const Color(0xFF8B2C39),
-                borderRadius: BorderRadius.circular(12),
+                color: const Color(0xFF8B2C39),   // Rød bakgrunnsfarge
+                borderRadius: BorderRadius.circular(12),    // Runde hjørner
               ),
+
+              // Innholdet i boksen legges i en kolonne (under hverandre)
               child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
+                crossAxisAlignment: CrossAxisAlignment.start,   // Juster innhold til venstre
                 children: [
                   const Text(
-                    'FEILMELDINGER',
+                    'SYSTEMLOGG',   // Tittel
                     style: TextStyle(
-                      color: Colors.white,
-                      fontWeight: FontWeight.bold,
-                      fontSize: 16,
+                      color: Colors.white,    // Tekstfarge
+                      fontWeight: FontWeight.bold,    // Fet skrift
+                      fontSize: 16,   // Tekststørrelse
                     ),
                   ),
-                  const SizedBox(height: 12),
+                  const SizedBox(height: 12),   // Luft under tittelen
                   Text(
-                    feilmeldinger.isEmpty
+                    feilmeldinger.isEmpty   // Hvis lista er tom
                         ? 'Ingen feilmeldinger'
-                        : feilmeldinger.map((e) => '• $e').join('\n'),
+                        : feilmeldinger.map((e) => '• $e').join('\n'),    // Ellers lag punktliste
                     style: const TextStyle(
-                      color: Colors.white70,
-                      fontSize: 14,
+                      color: Colors.white70,    // Tekstfarge
+                      fontSize: 14,   // Tekststørrelse
                     ),
                   ),
                 ],
               ),
             ),
 
-            const SizedBox(height: 24),
+            const SizedBox(height: 24),   // Luft mellom elementer
 
-            // Bilde av bilen
+            //------------------------------BILDE AV BILEN---------------------------------
             Container(
               decoration: BoxDecoration(
-                color: const Color(0xFF4A3C6E),
-                borderRadius: BorderRadius.circular(12),
+                color: const Color(0xFF4A3C6E),   // Mørk lilla bakgrunn
+                borderRadius: BorderRadius.circular(12),    // Runde hjørner
               ),
-              padding: const EdgeInsets.all(16),
+              padding: const EdgeInsets.all(16),    // Luft inni boksen på alle kanter
               child: Image.asset(
-                'images/prowltech_car.png',
-                fit: BoxFit.contain,
-                height: 160,
+                'images/prowltech_car.png',   // Stien til bildet
+                fit: BoxFit.contain,    // Bildet skal ikke bli kuttet
+                height: 160,    // Høyde på bildet
               ),
             ),
           ],
