@@ -37,6 +37,8 @@ class _KontrollpanelState extends State<Kontrollpanel> {
 
 // Metode som henter status fra Flask-serveren
   Future<void> hentStatus() async {
+    print('Prøver å hente status...');  // Debug
+
     try {
       // Sender GET-forespørsel
       final response = await http.get(
@@ -46,6 +48,8 @@ class _KontrollpanelState extends State<Kontrollpanel> {
       // Sjekker om OK
       if (response.statusCode == 200) {
         final data = jsonDecode(response.body);   // Dekoder JSON til et Dart-objekt
+        print('Data fra API: $data');
+
         // Oppdaterer state med ny data
         setState(() {
           kontrollerTilkoblet = data['kontroller_tilkoblet'];
