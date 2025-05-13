@@ -32,11 +32,10 @@ class Kontrollpanel extends StatefulWidget {    // StatefulWidget: skal hente og
 
 // Tilstanden til kontrollpanel: holder data og bygger UI
 class _KontrollpanelState extends State<Kontrollpanel> {
-  bool kontrollerTilkoblet = false;   // Viser om kontrolleren er tilkoblet
-  List<String> feilmeldinger = [];    // Feilmeldinger fra API
+  bool connected = false;   // Viser om kontrolleren er tilkoblet
 
 // Metode som henter status fra Flask-serveren
-  Future<void> hentStatus() async {
+  Future<void> get_status() async {
     print('Prøver å hente status...');  // Debug
 
     try {
@@ -52,8 +51,7 @@ class _KontrollpanelState extends State<Kontrollpanel> {
 
         // Oppdaterer state med ny data
         setState(() {
-          kontrollerTilkoblet = data['kontroller_tilkoblet'];
-          feilmeldinger = List<String>.from(data['feilmeldinger']);
+          connected = data['kontroller_tilkoblet'];
         });
       } else {
         print('Feil ved henting: ${response.statusCode}');  // Logger feilkode hvis ikke 200
@@ -66,10 +64,10 @@ class _KontrollpanelState extends State<Kontrollpanel> {
   @override
   void initState() {
     super.initState();
-    hentStatus();     // Henter status ved oppstart
+    get_status();     // Henter status ved oppstart
     // Henter status hvert 5. sekund
     Timer.periodic(const Duration(seconds: 5), (timer) {
-      hentStatus();
+      get_status();
     });
   }
 
@@ -131,7 +129,7 @@ class _KontrollpanelState extends State<Kontrollpanel> {
                             style: TextStyle(color: Colors.white),    // Tekstfarge
                           ),
                           content: const Text(
-                            'Kort info om bilen',                       // Infotekst i popup
+                            'Bilen styres via en trådløs kontroller. Sørg for at CAN-bus er aktiv før srart.',                       // Infotekst i popup
                             style: TextStyle(color: Colors.white70),    // Tekstfarge
                           ),
                           actions: [
