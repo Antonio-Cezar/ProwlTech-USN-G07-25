@@ -53,10 +53,12 @@ class _KontrollpanelState extends State<Kontrollpanel> {
         setState(() {
           connected = data['kontroller_tilkoblet'];
         });
-      } else {
+      } 
+      else {
         print('Feil ved henting: ${response.statusCode}');  // Logger feilkode hvis ikke 200
       }
-    } catch (e) {
+    } 
+    catch (e) {
       print('Klarte ikke å hente status: $e');  // Logger unntak (timeout eller nettverksfeil)
     }
   }
