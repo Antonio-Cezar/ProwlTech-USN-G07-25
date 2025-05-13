@@ -35,7 +35,7 @@ class _KontrollpanelState extends State<Kontrollpanel> {
   bool connected = false;   // Viser om kontrolleren er tilkoblet
 
 // Metode som henter status fra Flask-serveren
-  Future<void> get_status() async {
+  Future<void> getStatus() async {
     print('Prøver å hente status...');  // Debug
 
     try {
@@ -64,10 +64,10 @@ class _KontrollpanelState extends State<Kontrollpanel> {
   @override
   void initState() {
     super.initState();
-    get_status();     // Henter status ved oppstart
+    getStatus();     // Henter status ved oppstart
     // Henter status hvert 5. sekund
     Timer.periodic(const Duration(seconds: 5), (timer) {
-      get_status();
+      getStatus();
     });
   }
 
