@@ -4,7 +4,7 @@ import subprocess
 app = Flask(__name__)
 
 # Funksjon som sjekker om kontrolleren er tilkoblet via Bluetooth
-def er_kontroller_tilkoblet():
+def is_connected():
     try:
         # Kjører kommando som lister aktive Bluetooth-tilkoblinger
         output = subprocess.check_output("hcitool con", shell=True).decode()
@@ -15,7 +15,7 @@ def er_kontroller_tilkoblet():
 @app.route('/status')
 def status():
     return jsonify({
-        "kontroller_tilkoblet": er_kontroller_tilkoblet(),  # Sann/usann
+        "kontroller_tilkoblet": is_connected(),  # Sann/usann
     })
 
 if __name__ == '__main__':

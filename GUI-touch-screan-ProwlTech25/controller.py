@@ -76,7 +76,7 @@ else:
 
         def __init__(self):
             super().__init__(daemon=True)   # daemon slik at tråden stopper når hovedprogrammet avsluttes
-            self._listeners = []    # Lagrer funksjoner som skal kalles når en modus endres (callback-system)
+            self.listeners = []    # Liste med "lyttere" (funksjoner som skal få beskjed når modus endres)
 
             # Starter orginalskriptet via Python
             self.proc = subprocess.Popen(
@@ -88,31 +88,31 @@ else:
                 text=True,  # Tekststrenger, ikke bytes
             )
             
-        # Callback som mottar det nye modus-tallet, kalles når en match oppdages
-        def add_mode_listener(self, fn):
-            self._listeners.append(fn)
+        # Legger til funksjonene som skal få beskjed om endret modus
+        def register_callback(self, fn):
+            self.listeners.append(fn)
 
-        # Kall alle listeners med modus-verdien
-        def _notify(self, mode):
-            for fn in self._listeners:
+        # Gir ut den nye modusen til alle "lytterene"
+        def notify_all(self, mode):
+            for fn in self.listeners:
                 fn(mode)
 
         # Kjøres når tråden starter 
         def run(self):
-            assert self.proc.stdout is not None # Sjekker at output-strømmen er tilgjengelig
+            assert self.proc.stdout is not None
 
             # Leser linje for linje 
             for line in self.proc.stdout:
                 m = self.mode_re.search(line)   # Sjekker om linjen inneholder ønsket tekst (bruker regex-en fra tidligere)
-
-                # Ved match
                 if m:
                     mode = int(m.group(1))  # Trekker ut sifferet 
                     print(f"Fant modus: {mode}")
-                    self._notify(mode)  # Varsler alle callbacks
+                    self.notify_all(mode)  # Varsler alle callbacks
 
-    _controller = ControllerThread()
-    _controller.start()
+    # Starter bakgrunnstråd
+    controller = ControllerThread()
+    controller.start()
 
+    # Hjelpefunksjon for andre skripts til å registrere seg
     def add_mode_listener(fn):
-        _controller.add_mode_listener(fn)
+        controller.register_callback(fn)
