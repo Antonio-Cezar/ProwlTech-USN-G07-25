@@ -14,11 +14,11 @@ import os
 # Konfigurasjon for CAN-oppsett, brukt på Raspberry Pi med Zephyr-enhet
 CHANNEL = 'can0'           # CAN-enhetens navn
 BITRATE = 500000           # Hastighet på CAN-bussen
-EXTENDED_ID = True         # Zephyr bruker 29-bit ID, så vi setter extended ID
+EXTENDED_ID = True         # Zephyr bruker 29-bit ID, så extended ID settes true
 
 # CAN-meldings-IDer (brukes for å identifisere meldinger på bussen)
 MSG_ID_motor = 0x0000001   # Melding til motorstyring
-MSG_ID_COM = 0x0000020     # Melding for kommandoer (eks. tone)
+MSG_ID_COM = 0x0000020     # Melding for kommando tone
 
 
 
@@ -127,6 +127,7 @@ def beregn_fart_og_vinkel(x, y):
         vinkel += 2 * math.pi
     return fart, vinkel
 
+# Skaler fart i henhold til valgt Hastighetsmodus
 def skaler_fart(fart, profil):
      # Hastighet 1: Lav hastighet
     if profil == 1:
@@ -346,14 +347,7 @@ while True:
 
         # Beregn fart og vinkel
         fart, vinkel = beregn_fart_og_vinkel(venstre_x, venstre_y)
-
-        # === Skaler fart i henhold til valgt Hastighetsmodus ===
-        if Hastighetsmodus == 1:
-            fart = fart * 0.1  # 0.0–0.1
-        elif Hastighetsmodus == 2:
-            fart = (fart * 0.5) + (0.1 if fart > 0 else 0.0)  # 0.1–0.6
-        elif Hastighetsmodus == 3:
-            fart = (fart * 0.7) + (0.3 if fart > 0 else 0.0)  # 0.3–1.0
+        fart = skaler_fart(fart, Hastighetsmodus)
 
         
         # Rund av og send
