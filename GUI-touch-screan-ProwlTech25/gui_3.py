@@ -149,7 +149,7 @@ class ProwlTechApp(ctk.CTk):
         self.can_bus_button.place(relx=0.2, rely=0.9, anchor="center")
 
         """
-        # Avslutt-knapp
+        # Avslutt-knapp (Brukes under testing på RPi for enklere lukking av programmet)
         self.exit_button = ctk.CTkButton(
             self.front_frame,
             text="Avslutt",
@@ -322,6 +322,7 @@ class ProwlTechApp(ctk.CTk):
         self.sensor_frame.pack_propagate(False)
 
         '''
+        # Midlertidig fjernet på grunn av feil i fysisk oppsett av sensorer
         # Sensormåling - Innhold
         self.sensor_value_label = ctk.CTkLabel(
             self.sensor_frame,
@@ -402,6 +403,7 @@ class ProwlTechApp(ctk.CTk):
 
         # Starter skanning automatisk når popup åpnes
         threading.Thread(target=self.scan_and_show).start() # Kjører skanning i egen tråd slik at GUI-et ikke fryser
+        self.log_message("Bluetooth-søk startet", level="info")
 
     # Åpner info-popup
     def open_info_window(self):
@@ -665,9 +667,43 @@ class ProwlTechApp(ctk.CTk):
     '''
 #--------------------BATTERIDATA-------------------------  
     def update_battery(self):
-        battery = get_battery_percent()
-        if battery is not None:
-            self.battery_status.configure(text=f"{battery}%")
+        low_battery_logged = False
+        no_data_logged = False
+
+        while self.running:
+            battery = get_battery_percent()     # Henter batteridata
+
+            # Hvis ingen batteridata er mottatt
+            if battery is None:
+                self.battery_status.configure(text="-- %", text_color="red")
+
+                # Logger feilen kun en gang
+                if not no_data_logged:
+                    self.log_message("Ingen batteridata tilgjengelig. Sjekk tilkobling", level="error")
+                    no_data_logged = True
+                    low_battery_logged = False  # Nullstill ved tap av data
+
+            # Batteridata er mottatt
+            else:
+                self.battery_status.configure(text=f"{battery}%", text_color="white")   # Oppdater visning av batteriprosent
+
+                # Hvis batterinivået er under 20%
+                if battery < 20:
+                    self.battery_status.configure(text_color="orange")
+
+                    # Logger advarslen kun en gang 
+                    if not low_battery_logged:
+                        self.log_message(f"Batterinivå lavt: {battery} %", level="warning")
+                        low_battery_logged = True
+
+                else:
+                    low_battery_logged = False
+
+                if no_data_logged:
+                    self.log_message("Batteridata er mottatt igjen", level="success")
+                    no_data_logged = False
+
+            time.sleep(5)   # Sjekker batteri hvert 5. sekund
 
     """
     # Leser av shunt for å hente batteridata
