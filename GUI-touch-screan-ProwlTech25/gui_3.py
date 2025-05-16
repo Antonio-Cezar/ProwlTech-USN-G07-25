@@ -24,7 +24,7 @@ sys.path.append(script_dir)
 #from get_can_data import receive_sensor_data    # Funksjon til å hente ut sensordata via CAN-bus
 from can_menu_gui import CanMenuWindow  # Bruker egen klasse for CAN-menyen
 from popup_window import PopupWindow    # Bruker egen klasse for popup-vinduer
-from controller import ControllerThread
+from controller import add_mode_listener
 from shunt_data import get_battery_percent
 
 # Importerer bilder og ikoner
@@ -815,9 +815,7 @@ class ProwlTechApp(ctk.CTk):
 
         self.check_connected() 
 
-        self.ctrl_thread = ControllerThread()
-        self.ctrl_thread.add_mode_listener(self.on_mode_change)
-        self.ctrl_thread.start()
+        add_mode_listener(self.on_mode_change)
 
         self.log_message("Kontrollpanelet ble åpnet", level="info")
 
