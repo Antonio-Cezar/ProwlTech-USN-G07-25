@@ -821,7 +821,7 @@ class ProwlTechApp(ctk.CTk):
 
     def on_mode_change(self, mode):
         print(f"Fartsmodus: {mode}")
-        beskr = {1:"(Lav)", 2:"(Middela)", 3:"(Høy)"}.get(mode, "")
+        beskr = {1:"(Lav)", 2:"(Middels)", 3:"(Høy)"}.get(mode, "")
         self.after(0, lambda: self.mode_value_label.configure(text=f"Modus: {mode} {beskr}"))
 
     # Logger systemmeldinger

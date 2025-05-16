@@ -26,7 +26,7 @@ if platform.system() != "Linux":
             self.sent_once = False
             self.last_connected = False
 
-        def add_mode_listener(self, fn):
+        def add_mode_listener(self, fn): 
                 _listeners.append(fn)
 
         def run(self):
