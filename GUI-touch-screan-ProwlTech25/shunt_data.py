@@ -49,7 +49,7 @@ else:
                 hrs, rem = divmod(t, 3600)  # Timer og restsekunder
                 mins, secs = divmod(rem, 60)    # Minutter og restsekunder
                 remaining = f"{hrs:02d}:{mins:02d}:{secs:02d}"
-                return soc, voltage, capacity, current, remaining
+                return soc
 
         except Exception as e:
             print(f"Feil ved UART: {e}")
