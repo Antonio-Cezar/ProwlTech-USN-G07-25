@@ -34,6 +34,9 @@ class Kontrollpanel extends StatefulWidget {    // StatefulWidget: skal hente og
 class _KontrollpanelState extends State<Kontrollpanel> {
   bool connected = false;   // Viser om kontrolleren er tilkoblet
 
+// Systemlogg-meldinger
+List<String> syst_messages = [];
+
 // Metode som henter status fra Flask-serveren
   Future<void> getStatus() async {
     print('Prøver å hente status...');  // Debug
@@ -193,17 +196,17 @@ class _KontrollpanelState extends State<Kontrollpanel> {
                     children: [
                       Icon(
                         // Viser grønt ikon hvis tilkoblet, ellers rødt kryss
-                        kontrollerTilkoblet
+                        connected
                             ? Icons.check_circle
                             : Icons.cancel,
-                        color: kontrollerTilkoblet
+                        color: connected
                             ? Colors.green
                             : Colors.red,
                       ),
                       const SizedBox(width: 8),                        // Luft mellom elementer
                       Text(
                         // Viser tekst avhengig av tilkoblingsstatus
-                        kontrollerTilkoblet
+                        connected
                             ? 'Kontroller tilkoblet'
                             : 'Kontroller ikke tilkoblet',
                         style: const TextStyle(
@@ -309,9 +312,9 @@ class _KontrollpanelState extends State<Kontrollpanel> {
                   ),
                   const SizedBox(height: 12),   // Luft under tittelen
                   Text(
-                    feilmeldinger.isEmpty   // Hvis lista er tom
+                    syst_messages.isEmpty   // Hvis lista er tom
                         ? 'Ingen meldinger'
-                        : feilmeldinger.map((e) => '• $e').join('\n'),    // Ellers lag punktliste
+                        : syst_messages.map((e) => '• $e').join('\n'),    // Ellers lag punktliste
                     style: const TextStyle(
                       color: Colors.white70,    // Tekstfarge
                       fontSize: 14,   // Tekststørrelse
