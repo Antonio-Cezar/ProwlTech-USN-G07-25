@@ -7,7 +7,7 @@ sudo nano /boot/frimware/config.txt
 # kopier dette inn i config.txt
 --------------------------------
 dtparam=api=on                                               # Aktiverer Device Tree API
-dtoverlay=mcp2515-can0,oscillator=16000000,interrupt=25      # Legger til overlay for MCP2515 CAN-modul, med riktig krystall og interrupt
+dtoverlay=mcp2515-can0,oscillator=16000000,interrupt=25      # Legger til overlay for MCP2515 CAN-modul, med riktig elektriske svingninger og interrupt
 dtoverlay=spi-bcm2835                                        # Aktiverer SPI-brikken som brukes av MCP2515
 --------------------------------
 ========================================================
@@ -17,7 +17,7 @@ dtoverlay=spi-bcm2835                                        # Aktiverer SPI-bri
 
 
 # Konfigurer for at can0 skal starte opp automatisk i Ubuntu
-# STEP 1: Opprett og fyll inn oppstartsskriptet
+# STEG 1: Opprett og fyll inn oppstartsskriptet
 ========================================================
 sudo nano /usr/local/bin/oppstart_can0.sh                   # Oppretter nytt shell-skript
 
@@ -43,7 +43,7 @@ sudo chmod +x /usr/local/bin/start_can.sh
 
 
 # Konfigurer for å at can0 skal starte opp ved oppstart av ubunto
-# Step 2:
+# STEG 2:
 ========================================================
 sudo nano /etc/systemd/system/can-start.service
 
@@ -75,6 +75,8 @@ sudo systemctl start can-start.service
 sudo systemctl status can-start.service                     # Sjekk status og se om den kjørte uten feil
 --------------------------------
 ========================================================
+
+
 
 
 
