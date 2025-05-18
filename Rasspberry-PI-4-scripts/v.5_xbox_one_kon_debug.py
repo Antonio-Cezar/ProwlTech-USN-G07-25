@@ -14,7 +14,7 @@ import os
 # Konfigurasjon for CAN-oppsett, brukt på Raspberry Pi med Zephyr-enhet
 CHANNEL = 'can0'           # CAN-enhetens navn
 BITRATE = 125000           # Hastighet på CAN-bussen
-EXTENDED_ID = False         # Zephyr bruker 29-bit ID, så extended ID settes true
+EXTENDED_ID = True        # Zephyr bruker 29-bit ID, så extended ID settes true
 
 # CAN-meldings-IDer (brukes for å identifisere meldinger på bussen)
 MSG_ID_motor = 0x0000001   # Melding til motorstyring
@@ -71,7 +71,7 @@ def send_tone(bus, aktiv=True):
         melding = can.Message(
             arbitration_id=MSG_ID_COM,  # ID for tone-melding
             data=data,
-            is_extended_id=False
+            is_extended_id=EXTENDED_ID
         )
         # Sender meldingen på CAN-bussen
         bus.send(melding)

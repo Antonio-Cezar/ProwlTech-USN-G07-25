@@ -8,7 +8,9 @@
 // Hovedfunksjon – kjøres ved oppstart
 //--------------------------------------------------------------
 int main(void) {
+
     canBegin(); // Starter opp og konfigurerer CAN-bussen (mottak av meldinger)
+
     tone_init(); // Initialiserer tone-modulen
 
     // while løkke – holder programmet kjørende

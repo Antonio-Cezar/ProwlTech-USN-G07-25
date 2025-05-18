@@ -35,6 +35,8 @@ int main(void) {
         return;
     } 
 
+    canBegin();
+
     if (setup_can_filter(can_dev, can_rx_callback, NULL) < 0) { // Check to see if the CAN filter is set up or not.
         printk("Failed to add CAN filter\n");
         return;

@@ -11,5 +11,7 @@ uint8_t get_sensor_byte(void);
 int setup_can_filter(const struct device *dev, can_rx_callback_t rx_cb, void *cb_data);
 void can_rx_callback(const struct device *dev, struct can_frame *frame, void *user_data);
 void canBegin(void);
+const char* can_state_to_str(enum can_state state);
+
 
 #endif
