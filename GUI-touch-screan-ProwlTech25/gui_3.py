@@ -705,48 +705,6 @@ class ProwlTechApp(ctk.CTk):
 
             time.sleep(5)   # Sjekker batteri hvert 5. sekund
 
-    """
-    # Leser av shunt for å hente batteridata
-    def get_battery_data(self):
-
-        # Viser at tråden starter 
-        print("UART-tråd startet: Lytter på /dev/ttyS0 @ 9600")
-        try:
-            # Åpner seriallport ttyS0 med 9600 bps
-            with serial.Serial('/dev/ttyS0', baudrate=9600, timeout=1) as ser:
-                # Så lenge programmet kjører
-                while self.running:
-                    frame = ser.read(16)
-                    if len(frame) != 16:    # Leser nøyaktig 16 byte, hvis færre, hopp over 
-                        continue
-
-                    # Sjekker at rammen er gyldig 
-                    if frame[0] != 0xA5 or (sum(frame[0:15]) & 0xFF) != frame[15]:  # sum av byte skal stemme med checksum
-                        continue    # Hopp over om ikke gyldig
-
-                    # Parsing
-                    soc = frame[1]
-                    voltage = ((frame[2] << 8) | frame[3]) / 100.0  # Spenning: byte 2 og 3 (16-bit tall), del på 100 for volt
-                    capacity = struct.unpack('>I', frame[4:8])[0]   # Kapasitet (mAh) (32-bit tall)
-                    current = struct.unpack('>i', frame[8:12])[0]   # Strøm (mA) (32-bit tall)
-                    t = (frame[12] << 16) | (frame[13] << 8) | frame[14]    # Resterende tid i sekunder (leser 3 byte)
-                    hrs, rem = divmod(t, 3600)  # Timer og restsekunder
-                    mins, secs = divmod(rem, 60)    # Minutter og restsekunder
-                    remaining = f"{hrs:02d}:{mins:02d}:{secs:02d}"
-
-                    # Oppdater GUI med batteriprosent
-                    self.after(0, lambda pct=soc:
-                            self.battery_status.configure(text=f"{pct} %"))
-
-                    print(f"Batteri: {soc}% | {voltage:.2f}V | {current}mA | Rem: {remaining}")
-
-                    time.sleep(1)
-
-        except Exception as e:
-            self.log_message(f"Feil ved UART: {e}", level="error")
-            print("Feil ved UART:", e)
-    """
-
 #--------------------ANDRE FUNKSJONER-------------------------  
     # Progressbar
     def start_progressbar(self):
