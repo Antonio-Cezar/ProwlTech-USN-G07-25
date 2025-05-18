@@ -24,7 +24,7 @@ sys.path.append(script_dir)
 #from get_can_data import receive_sensor_data    # Funksjon til å hente ut sensordata via CAN-bus
 from can_menu_gui import CanMenuWindow  # Bruker egen klasse for CAN-menyen
 from popup_window import PopupWindow    # Bruker egen klasse for popup-vinduer
-from controller import add_mode_listener
+#from controller import add_mode_listener
 from shunt_data import get_battery_percent
 
 # Importerer bilder og ikoner
@@ -61,9 +61,9 @@ class ProwlTechApp(ctk.CTk):
         super().__init__()
         self.title("ProwlTech Kontrollpanel")           # Setter vindutittel
         self.geometry("800x480")                        # Setter størrelse 
-        self.attributes("-fullscreen", True)            # Fullskjerm på Raspberry Pi
+        #self.attributes("-fullscreen", True)            # Fullskjerm på Raspberry Pi
         self.bind("<Escape>", self.exit_fullscreen)     # ESC lukker programmet
-        self.config(cursor="none")                      # Skjuler musepeker når GUI er i gang
+        #self.config(cursor="none")                      # Skjuler musepeker når GUI er i gang
 
         #self.bluetooth_devices = []                      # Liste for bluetooth-enheter funnet under skanning
         self.device_menu = None 
@@ -801,28 +801,36 @@ class ProwlTechApp(ctk.CTk):
 
     # Funksjon: Åpne kontrollpanel
     def open_control_panel(self):
-        self.front_frame.destroy()
+        self.front_frame.destroy()  # Fjerner startsiden
 
-        self.top_section()
+        # Bygger topp- og bunnseksjonene 
+        self.top_section() 
         self.bot_section()
 
         self.running = True
+
+        self.log_message("Kontrollpanelet ble åpnet", level="info")
+
+        # Sensormålinger
         #self.sensor_value = "__"
         #threading.Thread(target=self.get_sensor_data, daemon=True).start()
         #self.update_sensor_display()
 
+        # Starter tråd for å oppdatere batterinivået 
         threading.Thread(target=self.update_battery, daemon=True).start()
 
+        # Sjekker tilkoblingsstatusen til kontrolleren
         self.check_connected() 
 
-        add_mode_listener(self.on_mode_change)
+        # Henter fartsmodus 
+        #add_mode_listener(self.on_mode_change)
 
-        self.log_message("Kontrollpanelet ble åpnet", level="info")
 
-    def on_mode_change(self, mode):
-        print(f"Fartsmodus: {mode}")
-        beskr = {1:"(Lav)", 2:"(Middels)", 3:"(Høy)"}.get(mode, "")
-        self.after(0, lambda: self.mode_value_label.configure(text=f"Modus: {mode} {beskr}"))
+    # Oppdaterer fartsmodusenboksen
+    #def on_mode_change(self, mode):
+     #   print(f"Fartsmodus: {mode}")
+      #  beskr = {1:"(Lav)", 2:"(Middels)", 3:"(Høy)"}.get(mode, "")
+       # self.after(0, lambda: self.mode_value_label.configure(text=f"Modus: {mode} {beskr}"))
 
     # Logger systemmeldinger
     def log_message(self, message: str, level="info"):
@@ -836,11 +844,11 @@ class ProwlTechApp(ctk.CTk):
 
         color = color_map.get(level, "white")
 
-        self.sys_log_textbox.configure(state="normal")
-        self.sys_log_textbox.insert("end", f"{message}\n", level)
-        self.sys_log_textbox.tag_config(level, foreground=color)
-        self.sys_log_textbox.see("end")
-        self.sys_log_textbox.configure(state="disabled")
+        self.sys_log_textbox.configure(state="normal")      # Tekstboks aktivert
+        self.sys_log_textbox.insert("end", f"{message}\n", level)   # Henter melding og level
+        self.sys_log_textbox.tag_config(level, foreground=color)    # Endrer farge etter level
+        self.sys_log_textbox.see("end")     # Scroller til siste melding
+        self.sys_log_textbox.configure(state="disabled")    # Tekstboks deaktivert
 
 
 # Starter GUI-applikasjon
