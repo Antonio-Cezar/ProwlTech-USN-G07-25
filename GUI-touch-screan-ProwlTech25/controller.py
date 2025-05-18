@@ -11,13 +11,11 @@ import platform
 #------------------------------------Mock-versjon for å teste på Windows-------------------------------------------
 # Sjekker om koden kjøres på Windows eller Linux
 if platform.system() != "Linux":
-    print("Kjører i Windows")
+    print("Kjører i Windows(hastighetsmodus)")
 
     import threading
     import time
     from bluetooth_dbus import get_raw_devices
-
-    _listeners = []
 
     class ControllerThread(threading.Thread):
         def __init__(self):
@@ -26,8 +24,14 @@ if platform.system() != "Linux":
             self.sent_once = False
             self.last_connected = False
 
-        def add_mode_listener(self, fn): 
-                _listeners.append(fn)
+            self.listeners = []
+
+        def register_callback(self, fn):
+            self.listeners.append(fn)
+
+        def notify_all(self, mode):
+            for fn in self.listeners:
+                fn(mode)
 
         def run(self):
             while True:
@@ -42,19 +46,24 @@ if platform.system() != "Linux":
                 # Tilkoblet nå, men var ikke før → send modus
                 if connected and not self.last_connected:
                     print("Mock: Kontroller tilkoblet – sender modus 1")
-                    for fn in _listeners:
+                    for fn in self.listeners:
                         fn(1)
 
                 # Frakoblet nå, men var tilkoblet før → send None
                 elif not connected and self.last_connected:
                     print("Mock: Kontroller frakoblet – sender None")
-                    for fn in _listeners:
+                    for fn in self.listeners:
                         fn("-")
 
                 self.last_connected = connected
                 time.sleep(3)
 
-    ControllerThread().start()
+    controller = ControllerThread()
+    controller.start()
+
+    # Hjelpefunksjon for andre skripts til å registrere seg
+    def add_mode_listener(fn):
+        controller.register_callback(fn)
 
 #------------------------------------Ekte versjon på Linux-------------------------------------------
 #   Skanner etter tilgjengelige enheter via Bluetooth, filtrerer bort enheter uten navn. Koble til og koble fra enheter. Henter all informasjon og returnerer til GUI-kode.

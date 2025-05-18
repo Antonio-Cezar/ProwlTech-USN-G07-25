@@ -15,7 +15,7 @@ import time
 #------------------------------------Mock-versjon for å teste på Windows-------------------------------------------
 # Sjekker om koden kjøres på Windows eller Linux
 if platform.system() != "Linux":
-    print("Kjører i Windows")
+    print("Kjører i Windows(tilkoblingsstatus)")
 
     mock_connected_device = None    # Lagrer mock-enhet som er tilkoblet
 

@@ -15,7 +15,7 @@ import struct
 #------------------------------------Mock-versjon for å teste på Windows-------------------------------------------
 # Sjekker om koden kjøres på Windows eller Linux
 if platform.system() != "Linux":
-    print("Kjører i Windows")
+    print("Kjører i Windows(batteriprosent)")
 
     def get_battery_percent():
         print("Mock: 98%")

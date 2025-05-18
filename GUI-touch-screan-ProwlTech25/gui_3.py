@@ -24,7 +24,7 @@ sys.path.append(script_dir)
 #from get_can_data import receive_sensor_data    # Funksjon til å hente ut sensordata via CAN-bus
 from can_menu_gui import CanMenuWindow  # Bruker egen klasse for CAN-menyen
 from popup_window import PopupWindow    # Bruker egen klasse for popup-vinduer
-#from controller import add_mode_listener
+from controller import add_mode_listener
 from shunt_data import get_battery_percent
 
 # Importerer bilder og ikoner
@@ -307,7 +307,7 @@ class ProwlTechApp(ctk.CTk):
         # Sensormåling - Tittel
         self.sensor_label = ctk.CTkLabel(
             self.sensor_container, 
-            text="FARTSMODUS  ",
+            text="HASTIGHETSMODUS  ",
             font=("Century Gothic", container_text_size),
             image=speed_icon,
             compound="right",
@@ -332,10 +332,10 @@ class ProwlTechApp(ctk.CTk):
         )
         self.sensor_value_label.pack(expand=True)
         '''
-        # Fartsmodus-info (midlertidig pga feil med kommunikasjon til sensorer)
+        # Hastighets-info (midlertidig pga feil med kommunikasjon til sensorer)
         self.mode_value_label = ctk.CTkLabel(
             self.sensor_frame,
-            text="Fartsmodus: -",
+            text="Modus: -",
             font=("Century Gothic", 20),
             text_color="white"
         )
@@ -667,8 +667,8 @@ class ProwlTechApp(ctk.CTk):
     '''
 #--------------------BATTERIDATA-------------------------  
     def update_battery(self):
-        low_battery_logged = False
-        no_data_logged = False
+        low_battery_logged = False  # Flagg som sørger for at lavt batteri bare logges en gang
+        no_data_logged = False      # Flagg som sørger for at tap av data bare logges en gang
 
         while self.running:
             battery = get_battery_percent()     # Henter batteridata
@@ -780,15 +780,15 @@ class ProwlTechApp(ctk.CTk):
         # Sjekker tilkoblingsstatusen til kontrolleren
         self.check_connected() 
 
-        # Henter fartsmodus 
-        #add_mode_listener(self.on_mode_change)
+        # Henter hastighetsmodus 
+        add_mode_listener(self.on_mode_change)
 
 
-    # Oppdaterer fartsmodusenboksen
-    #def on_mode_change(self, mode):
-     #   print(f"Fartsmodus: {mode}")
-      #  beskr = {1:"(Lav)", 2:"(Middels)", 3:"(Høy)"}.get(mode, "")
-       # self.after(0, lambda: self.mode_value_label.configure(text=f"Modus: {mode} {beskr}"))
+    # Oppdaterer hastighetsmodusenboksen
+    def on_mode_change(self, mode):
+        print(f"Hastighetsmodus: {mode}")
+        beskr = {1:"(Lav)", 2:"(Middels)", 3:"(Høy)"}.get(mode, "")
+        self.after(0, lambda: self.mode_value_label.configure(text=f"Modus: {mode} {beskr}"))
 
     # Logger systemmeldinger
     def log_message(self, message: str, level="info"):
