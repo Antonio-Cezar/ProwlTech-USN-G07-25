@@ -396,7 +396,6 @@ while True:
                     sist_sendte_vinkel = 0.0
 
 
-        # Håndterer sving funksjonaliteten
         # Håndterer sving-funksjonalitet uten å endre vinkel
         if abs(sving_js) > 0.01:
             # La vinkel være uendret – vi bare sender sving_js
