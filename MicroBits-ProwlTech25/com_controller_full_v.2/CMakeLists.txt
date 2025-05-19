@@ -3,4 +3,8 @@ find_package(Zephyr REQUIRED HINTS $ENV{ZEPHYR_BASE})
 
 project(com_controller_full)
 
-target_sources(app PRIVATE src/main.c src/canbus.c src/math_calc.c src/path_check.c src/interrupt_and_threads.c src/bt_controller.c)
+target_sources(app PRIVATE
+  src/main.c
+  src/canbus.c
+  src/tone.c
+)

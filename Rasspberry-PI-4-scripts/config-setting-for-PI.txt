@@ -1,0 +1,94 @@
+can0 konfigurasjoner:
+========================================================
+
+# Åpne konfigurasjonsfil for firmware (Raspberry Pi)
+sudo nano /boot/frimware/config.txt
+
+# kopier dette inn i config.txt
+--------------------------------
+dtparam=api=on                                               # Aktiverer Device Tree API
+dtoverlay=mcp2515-can0,oscillator=16000000,interrupt=25      # Legger til overlay for MCP2515 CAN-modul, med riktig elektriske svingninger og interrupt
+dtoverlay=spi-bcm2835                                        # Aktiverer SPI-brikken som brukes av MCP2515
+--------------------------------
+========================================================
+
+
+
+
+
+# Konfigurer for at can0 skal starte opp automatisk i Ubuntu
+# STEG 1: Opprett og fyll inn oppstartsskriptet
+========================================================
+sudo nano /usr/local/bin/oppstart_can0.sh                   # Oppretter nytt shell-skript
+
+#kopier dette inn i oppstart_can0.sh:
+--------------------------------
+#!/bin/bash
+CAN_INTERFACE="can0"
+BITRATE=125000
+
+ip link set $CAN_INTERFACE down                            # Stopper grensesnittet hvis det kjører
+ip link set $CAN_INTERFACE type can bitrate $BITRATE       # Konfigurerer CAN med valgt bitrate
+ip link set $CAN_INTERFACE up                              # Starter grensesnittet
+--------------------------------
+
+# Endre scriptet til kjørbar:
+--------------------------------
+sudo chmod +x /usr/local/bin/start_can.sh
+--------------------------------
+========================================================
+
+
+
+
+
+# Konfigurer for å at can0 skal starte opp ved oppstart av ubunto
+# STEG 2:
+========================================================
+sudo nano /etc/systemd/system/can-start.service
+
+# kopier dette inn can-start.service:
+--------------------------------
+[Unit]
+Description=Start CAN interface can0                        # Navn og beskrivelse
+After=network.target                                        # Venter til nettverk er klart
+
+[Service]
+Type=oneshot                                                # Kjøres kun én gang
+ExecStart=/usr/local/bin/oppstart_can0.sh                   # Kjører oppstartsskriptet vi laget
+RemainAfterExit=true                                        # Beholder "aktiv" status etter utførelse
+
+[Install]
+WantedBy=multi-user.target                                  # Starter ved normal system-oppstart
+--------------------------------
+
+
+# Aktiver tjenesten slik at den kjøres automatisk ved oppstart
+--------------------------------
+sudo systemctl enable can-start.service                     
+--------------------------------
+
+
+# Start tjenesten manuelt og sjekk at alt fungerer
+--------------------------------
+sudo systemctl start can-start.service
+sudo systemctl status can-start.service                     # Sjekk status og se om den kjørte uten feil
+--------------------------------
+========================================================
+
+
+
+
+
+# Konfigurer at v.5_xbox_one_kontroller.py skal starte ved oppsart av ubuntu
+========================================================
+nano ~/.config/autostart/kontroller_autostart.desktop
+
+# Kopier dette inn 
+[Desktop Entry]
+Type=Application                                                              # Programstarter
+Name=Start Kontroller Script
+Exec=python3 /home/prowltech/prowltech_script/v.5_xbox_one_kon_debug.py       # Kommandoen som skal kjøres ved oppstart
+Terminal=true                                                                 # Kjører i et synlig terminalvindu (for testing)
+X-GNOME-Autostart-enabled=true                                                # Sørger for at den aktiveres i oppstart 
+========================================================

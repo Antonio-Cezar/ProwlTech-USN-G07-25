@@ -1,23 +1,21 @@
-#include <zephyr/kernel.h>
-#include <zephyr/drivers/can.h>
-#include "interrupt_and_threads.h"
-#include "canbus.h"
-#include "math_calc.h"
-#include "path_check.h"
-#include "canbus.h"
-#include "bt_controller.h"
+#include <zephyr/kernel.h>     // Inkluderer Zephyr sitt kjernebibliotek for f.eks. tid og trådkontroll
+#include "canbus.h"            // henter for CAN-funksjoner (canBegin, filters, callback.)
+#include "tone.h"              // Henter for tone-funksjoner (init, play, stop.)
 
+// (PROWLTECH25 - CA)
 
+//--------------------------------------------------------------
+// Hovedfunksjon – kjøres ved oppstart
+//--------------------------------------------------------------
 int main(void) {
-    //(FENRIS24)configure_uart(uart_dev);
-    btBegin();
-    canBegin();
-    start_sensor_thread();
-    start_js_thread();
-    interruptThreadBegin();
 
+    canBegin(); // Starter opp og konfigurerer CAN-bussen (mottak av meldinger)
+
+    tone_init(); // Initialiserer tone-modulen
+
+    // while løkke – holder programmet kjørende
     while (1) {
-        k_msleep(500);  //(FENRIS24) Sleep for 100 milliseconds
+        k_msleep(500); // Venter i 500 ms mellom hver iterasjon
     }
-    return 0; //(FENRIS24) Add return statement
+    return 0;
 }

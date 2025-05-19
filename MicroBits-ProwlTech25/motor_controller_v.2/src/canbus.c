@@ -1,6 +1,7 @@
 #define M_PI 3.14159265358979323846
 #include <math.h>
 #include <stdio.h>
+#include <zephyr/sys/byteorder.h>
 
 #include <zephyr/kernel.h>
 #include <zephyr/drivers/can.h>
@@ -10,8 +11,10 @@
 #include <stdbool.h>
 #include <string.h>
 #include "canbus.h"
-#include "motorkontroller.h"
 #include "motorstyring.h" 
+
+
+static int64_t siste_mottatt_tid = 0; //tidspunkt for siste mottatte melding(RAS)
 
  //lagt til av RAS (PROWLTECH25)
 //Motorstyringen i denne filen er endret av RAS(PROWLTECH25)
@@ -115,34 +118,43 @@ void send_string(const struct device *can_dev, const char *str){ // Function for
 
 // cezar husk å kommentere og endre
 void can_rx_callback(const struct device *dev, struct can_frame *frame, void *user_data) {
-    if (frame->id == RECEIVE_ID && frame->dlc == 6) {
-        // Korrekt endian-konvertering
-        int16_t fart_i     = sys_le16_to_cpu(*(int16_t *)&frame->data[0]);
-        int16_t vinkel_i   = sys_le16_to_cpu(*(int16_t *)&frame->data[2]);
-        int16_t rotasjon_i = sys_le16_to_cpu(*(int16_t *)&frame->data[4]);
+    // Sjekk at vi faktisk fikk 8 byte som forventet
+    if (frame->id == RECEIVE_ID && frame->dlc == 8) {
 
-        // Konverter til float
-        float fart     = fart_i / 100.0f;
-        float vinkel   = vinkel_i / 100.0f;
-        float rotasjon = rotasjon_i / 100.0f;
+        siste_mottatt_tid = k_uptime_get();
+        sett_nødstopp(false);  
 
-        // Print verdier
+        // Debug: print rå data
+        printf("RÅ CAN-data (hex): ");
+        for (int i = 0; i < frame->dlc; i++) {
+            printf("%02X ", frame->data[i]);
+        }
+        printf("\n");
+
+        // Lese inn 4x int16_t fra frame->data, liten endian
+        int16_t fart_i      = sys_le16_to_cpu(*(int16_t *)&frame->data[0]);
+        int16_t vinkel_i    = sys_le16_to_cpu(*(int16_t *)&frame->data[2]);
+        int16_t rotasjon_i  = sys_le16_to_cpu(*(int16_t *)&frame->data[4]);
+        int16_t sving_js_i  = sys_le16_to_cpu(*(int16_t *)&frame->data[6]);
+
+        float fart      = fart_i / 100.0f;
+        float vinkel    = vinkel_i / 100.0f;
+        float rotasjon  = rotasjon_i / 100.0f;
+        float sving_js  = sving_js_i / 100.0f;
+
         printf("[PI → Motor-MB] Mottatt:\n");
-        printf("  Fart     : %.2f\n", fart);
-        printf("  Vinkel   : %.2f\n", vinkel, (vinkel * 180.0f / 3.14159f));
-        printf("  Rotasjon : %.2f\n", rotasjon);
+        printf("  Fart      : %.2f\n", fart);
+        printf("  Vinkel    : %.2f°\n", (vinkel * 180.0f / (float)M_PI));
+        printf("  Rotasjon  : %.2f\n", rotasjon);
+        printf("  Sving JS  : %.2f\n", sving_js);
         printf("-----------------------------\n");
 
-        // Velg joystick-modus ut ifra rotasjon
-        bool joystick_mode = (rotasjon == 0.0f);
+        kontroller_motorene(fart, vinkel, rotasjon); // legg evt. til sving_js
 
-        // Klargjør for motorstyring
-        int vinkel_deg = (int)(vinkel * 180.0f / 3.14159f);
-        int fart_int = (int)(fart * 100);
-
-        control_motors(vinkel_deg, fart_int, joystick_mode);
     } else {
         printf("CAN frame ignorert: ID 0x%X, DLC %d\n", frame->id, frame->dlc);
     }
 }
+
+
 
