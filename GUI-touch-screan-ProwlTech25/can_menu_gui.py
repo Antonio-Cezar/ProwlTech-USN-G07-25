@@ -1,8 +1,18 @@
+"""
+
+can_menu_gui.py
+
+Inneholder implementasjon av GUI for CAN-bus-menyen hentet fra 'meny_velger.sh'
+
+"""
+
+
 import customtkinter as ctk
 from popup_window import PopupWindow
 import subprocess
 import os 
 
+# Setter opp sti til de eksterne skriptene som skal brukes
 SCRIPT_DIR = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "Raspberry-PI-4-scripts"))
 VESC_SCRIPT = os.path.join(SCRIPT_DIR, "vesc_cmd.py")
 
@@ -27,27 +37,29 @@ corner = 30
 container_text_size = 14
 button_corner = 40
 
+#-------------------CAN-Meny-vinduet som opprettes---------------------------------------------------
 class CanMenuWindow(ctk.CTkToplevel):
     def __init__(self, master):
         super().__init__(master)
 
+        # Grunnleggende vinduoppsett
         self.title("CAN-meny")
         self.geometry("800x480")
         self.configure(fg_color="#0D0D1F")
         self.resizable(False, False)
 
-        # Sørg for at vinduet åpnes som et popup-vindu foran hoved-GUI
-        self.transient(master)      # Koblet opp mot hovedvinduet
-        self.focus()    # Legger vinduet foran det andre
-        self.lift()     # Legger vinduet foran det andre 
+        # Sørger for at vinduet vises foran hovedvinduet
+        self.transient(master)    
+        self.focus() 
+        self.lift()    
         self.wait_visibility()
         self.grab_set()
 
-    
-        # Toppseksjon
+        # Toppseksjon med tittel
         self.top_frame = ctk.CTkFrame(self, fg_color=top_panel_color)
         self.top_frame.pack(fill="x")
 
+        # Tittel
         self.title_label = ctk.CTkLabel(
             self.top_frame,
             text="Velg Kontrollmeny",
@@ -60,7 +72,17 @@ class CanMenuWindow(ctk.CTkToplevel):
         self.button_frame = ctk.CTkFrame(self, fg_color=background_color)
         self.button_frame.pack(expand=True)
 
-        # Åpne CAN-bus meny
+        # Statusfelt for CAN
+        self.can_status_label = ctk.CTkLabel(
+            self.button_frame,
+            text="Henter status...",
+            font=("Century Gothic", 16),
+            text_color="white"
+        )
+        self.can_status_label.pack(padx=20, pady=10)
+        self.update_can_status()
+
+        # Åpner popup: CAN-bus-meny
         self.can_button = ctk.CTkButton(
             self.button_frame,
             text="Åpne CAN-bus-kontrollmeny",
@@ -72,21 +94,7 @@ class CanMenuWindow(ctk.CTkToplevel):
         )
         self.can_button.pack(pady=10, padx=20, fill="x")
 
-        '''
-        # Alternativ 2: Motorkontroller meny
-        self.motor_button = ctk.CTkButton(
-            self.button_frame,
-            text="2. Motorkontroller meny",
-            font=("Century Gothic", 16),
-            fg_color=button_color,
-            hover_color=button_hover_color,
-            corner_radius=20,
-            command=self.open_motor_meny
-        )
-        self.motor_button.pack(pady=10, padx=20, fill="x")
-        '''
-
-        # Åpne kontroller meny
+        # Åpner popup: Kontroller-meny
         self.controller_button = ctk.CTkButton(
             self.button_frame,
             text="Åpne kontroller-meny",
@@ -98,7 +106,7 @@ class CanMenuWindow(ctk.CTkToplevel):
         )
         self.controller_button.pack(pady=10, padx=20, fill="x")
 
-        # Avslutt-knapp
+        # Knapp for å lukke vinduet
         self.exit_button = ctk.CTkButton(
             self.button_frame,
             text="Avslutt",
@@ -110,8 +118,7 @@ class CanMenuWindow(ctk.CTkToplevel):
         )
         self.exit_button.pack(pady=(20, 10))
 
-#-------------------Popup-vinduer---------------------------------------------------
-
+#-------------------CAN-kontroll-vindu---------------------------------------------------
     def open_canbus_meny(self):
         print("Åpner CAN-bus meny...")
         self.popup = PopupWindow(self, title="CAN-bus meny")
@@ -126,7 +133,7 @@ class CanMenuWindow(ctk.CTkToplevel):
         self.can_status_label.pack(padx=40, pady=10)
         self.update_can_status()
 
-        # Start CAN-bus
+        # Knapp: Start CAN på nytt
         self.start_can_button = ctk.CTkButton(
             self.popup.bottom,
             text="Start CAN-bus på nytt",
@@ -138,7 +145,7 @@ class CanMenuWindow(ctk.CTkToplevel):
         )
         self.start_can_button.pack(padx=40, pady=10, fill="x")
 
-        # Slå av can0
+        # Knapp: Slå av can0
         self.turn_off_button = ctk.CTkButton(
             self.popup.bottom,
             text="Slå av can0",
@@ -150,7 +157,7 @@ class CanMenuWindow(ctk.CTkToplevel):
         )
         self.turn_off_button.pack(padx=40, pady=10, fill="x")
 
-        # Slå på can0
+        # Knapp: Slå på can0
         self.turn_on_button = ctk.CTkButton(
             self.popup.bottom,
             text="Skru på can0",
@@ -162,7 +169,7 @@ class CanMenuWindow(ctk.CTkToplevel):
         )
         self.turn_on_button.pack(padx=40, pady=10, fill="x")
 
-        # Vis detaljer
+        # Knapp: Vis detaljer
         self.status_button = ctk.CTkButton(
             self.popup.bottom,
             text="Vis CAN-status",
@@ -174,63 +181,24 @@ class CanMenuWindow(ctk.CTkToplevel):
         )
         self.status_button.pack(padx=40, pady=10, fill="x")
 
-    '''
-    def open_motor_meny(self):
-        print("Åpner motorkontroller meny...")
-        self.popup = PopupWindow(self, title="Motorkontroller-meny")
-
-        # Statuslinje
-        self.motor_status_label = ctk.CTkLabel(
+        # Knapp: Vis CAN-dump
+        self.candump_button = ctk.CTkButton(
             self.popup.bottom,
-            text="Henter status...",
-            font=("Century Gothic", 16),
-            text_color="white"
-        )
-        self.motor_status_label.pack(padx=40, pady=10)
-        self.update_motor_status()  # Henter og oppdaterer 
-
-        # Start-knapp
-        self.start_button = ctk.CTkButton(
-            self.popup.bottom,
-            text="Send PÅ-kommando til VESC",
+            text="Vis CAN-dump (trafikk)",
             font=("Century Gothic", 16),
             fg_color=button_color,
             hover_color=button_hover_color,
             corner_radius=20,
-            command=self.send_start
+            command=self.start_candump
         )
-        self.start_button.pack(padx=40, pady=10, fill="x")
+        self.candump_button.pack(padx=40, pady=10, fill="x")
 
-        # Stopp-knapp
-        self.stop_button = ctk.CTkButton(
-            self.popup.bottom,
-            text="Send AV-kommando til VESC",
-            font=("Century Gothic", 16),
-            fg_color=button_color,
-            hover_color=button_hover_color,
-            corner_radius=20,
-            command=self.send_stop
-        )
-        self.stop_button.pack(padx=40, pady=10, fill="x")
-
-        # Temperatur-knapp
-        self.temp_button = ctk.CTkButton(
-            self.popup.bottom,
-            text="Hent temperatur fra VESC",
-            font=("Century Gothic", 16),
-            fg_color=button_color,
-            hover_color=button_hover_color,
-            corner_radius=20,
-            command=self.get_temp
-        )
-        self.temp_button.pack(padx=40, pady=10, fill="x")
-
-    '''    
+ #-------------------Kontroller-meny-vindu--------------------------------------------------- 
     def open_controller_menu(self):
         print("Åpner kontroller meny...")
         self.popup = PopupWindow(self, title="Kontroller-meny")
 
-        # Start Xbox One-kontroller
+        # Knapp: Start Xbox One-kontroller
         self.xbox_button = ctk.CTkButton(
             self.popup.bottom,
             text="Start Xbox One-kontroller",
@@ -242,7 +210,7 @@ class CanMenuWindow(ctk.CTkToplevel):
         )
         self.xbox_button.pack(pady=20, padx=40, fill="x")
 
-#----------------------------------------DIV. FUNKSJONER---------------------------------------------------
+#----------------------------------------Funksjoner---------------------------------------------------
     def update_motor_status(self):
         status = subprocess.getoutput(f"python3 {VESC_SCRIPT} --can_id 10 --check_status")
         motor = subprocess.getoutput(f"python3 {VESC_SCRIPT} --can_id 10 --get_status")
@@ -287,5 +255,13 @@ class CanMenuWindow(ctk.CTkToplevel):
         output = subprocess.getoutput("ip -details link show can0")
         self.can_status_label.configure(text=f"Detaljert status:\n{output}")
 
+    # Starter candump i nytt terminalvindu
+    def start_candump(self):
+        try:
+            subprocess.Popen([
+                "lxterminal", "-e", "bash -c 'candump can0; exec bash'"
+            ])
+        except FileNotFoundError:
+            print("Fant ikke lxterminal eller candump.")
 
 
