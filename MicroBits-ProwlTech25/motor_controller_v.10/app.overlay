@@ -1,0 +1,95 @@
+
+// Dette er en enhetstre overlay fil. Den brukes for å definere hardware-konfigurasjonen(fenris2024)
+// til kernelen under "runtime".(fenris2024)
+&spi1 {								//(fenris2024)
+	status = "okay";				//(fenris2024)
+	pinctrl-0 = <&spi1_default>;	//(fenris2024)
+	pinctrl-names = "default";		//(fenris2024)
+	cs-gpios = <&gpio1 2 GPIO_ACTIVE_LOW>;			//(fenris2024)
+	mcp2515_can: mcp2515@0 {						//(fenris2024)
+		compatible = "microchip,mcp2515";			//(fenris2024)
+		spi-max-frequency = <8000000>;				//(fenris2024)
+		int-gpios = <&gpio0 2 GPIO_ACTIVE_LOW>;		//(fenris2024)
+		status = "okay";							//(fenris2024)
+		label = "CAN_Recieve";						//(fenris2024)
+		reg = <0x0>;								//(fenris2024)
+		osc-freq = <16000000>;						//(fenris2024)
+		bus-speed = <125000>;						//(fenris2024)
+		sjw = <1>;									//(fenris2024)
+		prop-seg = <2>;								//(fenris2024)
+		phase-seg1 = <7>;							//(fenris2024)
+		phase-seg2 = <6>;							//(fenris2024)
+		#address-cells = <1>;						//(fenris2024)
+		#size-cells = <0>;							//(fenris2024)
+	};
+}; 	// pinCtrl seksjonen definerer pin konfigurasjonen for de ulike periferene.(fenris2024)
+
+//velger uart1 som det jeg ønsker å konfigurere på den fysiske chippen
+&uart1 {
+
+	//setter status som okay så den blir aktivert
+	status = "okay";
+
+	//setter baud rate så den matcher det som VESC-firmware bruker
+	current-speed = <115200>;
+
+	//for å definere hvilke pins som skal brukes for RX og TX
+	pinctrl-0 = <&uart1_default>;
+
+	//setter navn på konfigurasjonen og at den skal brukes som default
+	pinctrl-names = "default";
+};
+
+&pwm0 {
+	status = "okay";
+	pinctrl-0 = <&pwm0_default>;
+	pinctrl-names = "default";
+};
+
+// Én samlet &pinctrl-blokk for alle periferiers pin-konfigurasjon(fenris2024)
+// pinCtrl seksjonen definerer pin konfigurasjonen for de ulike periferene. (fenris2024)
+// For å vite hvilke GPIO port-nummer og PIN nummer i hver GPIO port som tilhører de ulike pinnene(fenris2024)
+// på microbiten sitt GPIO-brett er tabellen på denne nettsiden brukt:(fenris2024)
+// https://tech.microbit.org/hardware/edgeconnector/(fenris2024)
+&pinctrl {
+	spi1_default: spi1_default {
+		group1 {
+			psels = <NRF_PSEL(SPIM_MOSI, 0, 13)>,
+			        <NRF_PSEL(SPIM_SCK, 0, 17)>,
+			        <NRF_PSEL(SPIM_MISO, 0, 1)>;
+		};
+	};
+
+	//for å definere pinne konfigurasjonen for UART1 periferien
+	uart1_default: uart1_default {
+		
+		//lager en gruppe som holder alle pinnevalg for UART1 
+		group1 {
+
+			//psels står for pin select og brukes for å koble UART mot fysiske GPIO pinner
+			//UART TX skal bruke GPIO port 0 og pinne 28 som tilsvarer p4 på microbit
+			//UART RX skal bruke GPIO port 0 og pinne 31 som tilsvarer p3 på microbit
+			//denne tabellen er brukt for å forstå dette og referansen er hentet her:
+			// https://tech.microbit.org/hardware/edgeconnector/
+			psels = <NRF_PSEL(UART_TX, 0, 28)>, //p4
+			        <NRF_PSEL(UART_RX, 0, 31)>;   //p3
+		};
+	};
+
+	pwm0_default: pwm0_default {
+		group1 {
+			psels = <NRF_PSEL(PWM_OUT0, 0, 0)>; // P0.00 = innebygd speaker
+		};
+	};
+};
+
+// Velger MCP2515 som CAN-enhet(fenris2024)
+/ {
+	chosen {
+		zephyr,canbus = &mcp2515_can;
+	};
+
+	aliases {
+		pwm-speaker = &pwm0;
+	};
+};
