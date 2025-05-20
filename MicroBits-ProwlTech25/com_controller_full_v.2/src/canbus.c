@@ -10,7 +10,7 @@
 static uint8_t received_byte;
 
 //--------------------------------------------------------------
-// Initialiserer og starter CAN-kommunikasjon
+// Initialiserer og starter CAN-kommunikasjon - FENRIS24
 //--------------------------------------------------------------
 void canBegin(void) {
     const struct device *const can_dev = get_can_dev(); // Hent peker til CAN-enhet
@@ -46,21 +46,21 @@ const char* can_state_to_str(enum can_state state) {
 
 
 //--------------------------------------------------------------
-// Returnerer peker til riktig CAN-enhet definert i device tree
+// Returnerer peker til riktig CAN-enhet definert i device tree - FENRIS24
 //--------------------------------------------------------------
 const struct device *const get_can_dev(void) {
     return DEVICE_DT_GET(DT_CHOSEN(zephyr_canbus));
 }
 
 //--------------------------------------------------------------
-// Returnerer siste mottatte byte (brukes av annen logikk)
+// Returnerer siste mottatte byte (brukes av annen logikk) - FENRIS24
 //--------------------------------------------------------------
 uint8_t get_sensor_byte(void) {
     return received_byte;
 }
 
 //--------------------------------------------------------------
-// Legger til CAN-filtre for IDene vi ønsker å ta imot
+// Legger til CAN-filtre for IDene vi ønsker å ta imot - FENRIS24
 //--------------------------------------------------------------
 int setup_can_filter(const struct device *dev, can_rx_callback_t rx_cb, void *cb_data) {
     struct can_filter filter_byte = {
@@ -83,20 +83,27 @@ int setup_can_filter(const struct device *dev, can_rx_callback_t rx_cb, void *cb
 
 
 //--------------------------------------------------------------
-// Callback-funksjon når CAN-melding mottas
+// Callback-funksjon når CAN-melding mottas - ProwlTech25
+// Denne funksjonen blir kalt automatisk når en CAN-melding mottas.
 //--------------------------------------------------------------
 void can_rx_callback(const struct device *dev, struct can_frame *frame, void *user_data) {
+    // Skriver ut informasjon om mottatt CAN-melding (ID og datalengde)
     printk("[CAN] Mottok melding: ID=0x%X, DLC=%d\n", frame->id, frame->dlc);
+
+    // Skriver ut hvert databyte i meldingen
     for (int i = 0; i < frame->dlc; i++) {
-        printk("  Data[%d] = 0x%02X\n", i, frame->data[i]);
+        printk("  Data[%d] = 0x%02X\n", i, frame->data[i]); //AI hjelp med forståelig formatering
     }
 
+    // Sjekk om meldingen er av typen RECEIVE_ID_BYTE og har nøyaktig ett databyte
     if (frame->id == RECEIVE_ID_BYTE && frame->dlc == 1) {
         received_byte = frame->data[0];
 
+    // Sjekk om meldingen er av typen RECEIVE_ID_TONE og har ett databyte
     } else if (frame->id == RECEIVE_ID_TONE && frame->dlc == 1) {
         uint8_t tone_value = frame->data[0];
 
+        // Hvis tone_value er ulik 0, start tone. Ellers stopp den.
         if (tone_value) {
             printk("[CAN] → Spiller tone\n");
             play_tone(); // Aktiver tone-funksjon
