@@ -84,6 +84,7 @@ def send_tone(bus, aktiv=True):
 
 def vis_data(fart, vinkel, rotasjon, sving_js, data):
     #Viser verdier sendt til CAN, nyttig for debug
+    #Hjelp fra AI for forstålig utskrift
     os.system('clear')
     print("========================================")
     print("SENDT DATA TIL CAN-BUS")
@@ -405,6 +406,7 @@ while True:
             sist_sendte_vinkel = vinkel_r
             continue
 
+        #Hjelp fra AI for forstålig utskrift
         print(" ")
         print(" ")
         os.system('clear')
