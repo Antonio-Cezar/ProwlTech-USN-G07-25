@@ -669,22 +669,27 @@ class ProwlTechApp(ctk.CTk):
     def update_battery(self):
         low_battery_logged = False  # Flagg som sørger for at lavt batteri bare logges en gang
         no_data_logged = False      # Flagg som sørger for at tap av data bare logges en gang
+        misses = 0
 
         while self.running:
             battery = get_battery_percent()     # Henter batteridata
 
             # Hvis ingen batteridata er mottatt
             if battery is None:
-                self.battery_status.configure(text="-- %", text_color="red")
+                misses += 1
 
-                # Logger feilen kun en gang
-                if not no_data_logged:
-                    self.log_message("Ingen batteridata tilgjengelig. Sjekk tilkobling", level="error")
-                    no_data_logged = True
-                    low_battery_logged = False  # Nullstill ved tap av data
+                if misses >= 3:
+                    self.battery_status.configure(text="-- %", text_color="red")
+
+                    # Logger feilen kun en gang
+                    if not no_data_logged:
+                        self.log_message("Ingen batteridata tilgjengelig. Sjekk tilkobling", level="error")
+                        no_data_logged = True
+                        low_battery_logged = False  # Nullstill ved tap av data
 
             # Batteridata er mottatt
             else:
+                misses = 0
                 self.battery_status.configure(text=f"{battery}%", text_color="white")   # Oppdater visning av batteriprosent
 
                 # Hvis batterinivået er under 20%
