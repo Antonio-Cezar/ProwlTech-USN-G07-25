@@ -32,20 +32,26 @@ Fordi systemet er bygd opp av flere komponenter, såa brukes CAN-bus-protokollen
 
 
 # Kommunikasjonsflyt
-For å få et overblikk av informasjon utvekslingen mellom komponentene og hvilken typer programvarer som ligger i de ulike komponentene så er det laget et kommunikasjonsflyt diagram (se Figur \ref{fig:Kommunikasjonsflyt-diagram}). I diagrammet kan man se komponenten i de grønne boksene og de ulike typer koder og funksjonaliteter de har. 
+For å få et overblikk av informasjon utvekslingen mellom komponentene og hvilken typer programvarer som ligger i de ulike komponentene så er det laget et kommunikasjonsflyt diagram. I diagrammet kan man se komponenten i de grønne boksene og de ulike typer koder og funksjonaliteter de har. 
 
-De grønne boksene representerer komponentene. Raspberry Pi prosesserer flere ulike funksjoner samtidig. Den har tre programmer der den ene er en CAN-bus kode som initialiserer og enheten \textit{can0} som er for modulen (MCP2515). Den har også en utviklet canbus-meny som skal gjøre det enklere å se status, starte på nytt kommunikasjonen og se \textit{CAN-bus-dump} som er trafikken og er nærmere forklart \textit{i kapittel} \ref{sec:CAN_meny} hvordan denne fungerer.
+De grønne boksene representerer komponentene. Raspberry Pi prosesserer flere ulike funksjoner samtidig. Den har tre programmer der den ene er en CAN-bus kode som initialiserer og enheten can0 som er for modulen (MCP2515). Den har også en utviklet canbus-meny som skal gjøre det enklere å se status, starte på nytt kommunikasjonen.
 
-Det er også et Bluetooth-kontroller Python-skript som behandler og sender bevegelighetsverdier videre til motor-microbit. Det har også blitt lagt til en funksjonalitet for avspilling av en tone ved knappetrykk og forklares nærmere \textit{i kapittel} \ref{sec:Tredjepart_Bluetooth_kontroller}. 
+Det er også et Bluetooth-kontroller Python-skript som behandler og sender bevegelighetsverdier videre til motor-microbit. Det har også blitt lagt til en funksjonalitet for avspilling av en tone ved knappetrykk.
 
-Siste utviklet program på Raspberry Pi er GUI som forklares \textit{i kapittel} \ref{sec:Grafisk_brukergrensesnitt}. Dette er en visuell og interaktiv måte for å gi operatør av bilen et styrings panel for bilen. GUI som er utviklet har funksjonaliteter tilpasset behov for en operatør av bil som å kunne se status på batteri, hente ulike informasjoner og vise på vise det og koble til Bluetooth-kontroller.
+Siste utviklet program på Raspberry Pi er GUI som. Dette er en visuell og interaktiv måte for å gi operatør av bilen et styrings panel for bilen. GUI som er utviklet har funksjonaliteter tilpasset behov for en operatør av bil som å kunne se status på batteri, hente ulike informasjoner og vise på vise det og koble til Bluetooth-kontroller.
 
-Siste tre microbit-ene i diagrammet håndterer forskjellige deler av systemet. Det er en for sensor, motorstyring og COM. COM-microbit-en ble brukt før for tilkobling av en gammel kontroller, men denne ble byttet ut på grunn av manglende funksjonaliteter som forklares \textit{i kapittelet} \ref{sec:Tredjepart_Bluetooth_kontroller}. For å ikke fjerne denne microbit-en helt fra system med tanke på andre mulige fremtidige oppgaver denne kan bli brukt for, så har den da ikke blitt fjernet fra systemet og heller lagt til en funksjonalitet for et lydsignal som forklares \textit{i kapittel} \ref{sec:com_microbit}. motormicrobit-en styrer EL-drivlinjene til bilen der det har blitt utviklet ny metode for styring som forklares \textit{i kapittel} \ref{sec:Motorstyring}. Til slutt så er det sensor-microbit som det ikke har blitt gjort noen nye endringer på og forblir den samme koden som ble utviklet av forrige bachelorgruppe.
+Siste tre microbit-ene i diagrammet håndterer forskjellige deler av systemet. Det er en for sensor, motorstyring og COM. COM-microbit-en ble brukt før for tilkobling av en gammel kontroller, men denne ble byttet ut på grunn av manglende funksjonaliteter. For å ikke fjerne denne microbit-en helt fra system med tanke på andre mulige fremtidige oppgaver denne kan bli brukt for, så har den da ikke blitt fjernet fra systemet og heller lagt til en funksjonalitet for et lydsignal. Motormicrobit-en styrer EL-drivlinjene til bilen der det har blitt utviklet ny metode for styring. Til slutt så er det sensor-microbit som det ikke har blitt gjort noen nye endringer på og forblir den samme koden som ble utviklet av forrige bachelorgruppe.
 
 ![alt text](img/kommunikasjonsflyt.jpg)
 
 
 # CAN-BUS kommunikasjons protokoll
+CAN står for Controller Area Network og er en kommunikasjonsprotokoll. Denne protokollen har blitt implementert av gruppen Fenris på bilen og utviklet videre. CAN-bus-protokollen på bilen er infrastrukturen for datakomponentene på bilen som danner en kommunikasjonsbru for komponentene. 
+
+CAN-bus-systemet gjør at bilen kan håndtere flere kommandoer samtidig, sensoravlesninger og systemmeldinger uten overbelastning. Dette er med på å lage et responsivt og stabilt system som kan skaleres opp med flere datakomponenter etter behov.
+
+Figuren viser slik komponentene i systemet er koblet til CAN-bus-linjen. Figuren tar for seg også komponentene som var fra før og de som nå er implementert i systemet. Dette er lagt frem ved å dele opp i blå og røde bokser. De blå boksene på figuren er komponenter og tilkoblingsmetoder av tidligere bachelorgruppen Fenris. De røde boksene er de nye komponentene tilkoblet systemet.
+
 
 ![alt text](img/Komponent%20kobling%20på%20CAN-bus%20v9.jpg)
 
@@ -61,10 +67,13 @@ Figuren viser visuelt hvordan dette fungerer
 
 # Kontroller
 
+Det utviklede kontrolleroppsettet inkluderer alle minimumsfunksjoner fra tidligere faser, men er i tillegg utvidet med funksjonaliteter som gir mer avansert kontroll over bilen. Figuren viser en oversikt over funksjonene som er optimale for tredjepartskontrolleren, slik at bilen kan kontrolleres best mulig.
+
 ![alt text](img/Controller%20og%20kjøreretninger%20v3.jpg)
 
 
 # GUI
+Et av hovedkravene for systemet var å ha en integrert GUI som viser kritisk informasjon om kjøretøyets tilstand. GUI-et skal være et hjelpemiddel for brukeren av bilen som raskt skal kunne se batteristatus, status på hver enkelt sensor og eventuelle feilmeldinger fra systemet. Brukeren skal også kunne koble til og fra kontrollere. GUI-et skal være brukervennlig med et simpelt og oversiktlig design. For å gi en visuell oversikt over det ferdigutviklede systemet, vises skjermbilder av GUI-et.
 
 ![alt text](img/GUI_wireframe_3.png)
 
