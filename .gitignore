@@ -1,4 +1,0 @@
-.venv/
-external
-**/build*/
-.vscode/compile_commands.json
