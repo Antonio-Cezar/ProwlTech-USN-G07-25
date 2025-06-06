@@ -16,6 +16,18 @@ etter prioritet.
 
 # Komponenter og tilkobling på kjøretøyet:
 
+Fordi systemet er bygd opp av flere komponenter, såa brukes CAN-bus-protokollen til å kommunisere med hverandre. 
+
+• Motorkontrollene bruker VESC-tools til å kommunisere med hverandre via et eget CAN-bus-system. ´En motorkontroller fungerer som master-slave og de andre fire er slave.
+
+• Raspberry Pi og de tre microbit-ene forbindes med hverandre med et eget CAN-bus-system som er utviklet av en tidligere bachelorgruppe og utvikles videre på i år.
+
+• GUI-enheten består av en Raspberry Pi koblet til en touchskjerm, som gir sanntidsinformasjon og kontrollmuligheter.
+
+• Strømforsyningen er distribuert via en 12V-regulator for motorer og en 5V-regulator for Raspberry Pi og microbit-ene.
+
+• Sensorer er strategisk plassert for å registrere omgivelsesdata.
+
 ![alt text](img/Bil%20og%20komponent%20modell-Data%20v5.jpg)
 
 
