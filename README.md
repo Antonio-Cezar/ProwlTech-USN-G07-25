@@ -3,6 +3,8 @@ Bachelorgruppe 07 har forbedret en Mecanum-drevet bil med omnidireksjonell beveg
 
 
 # ABC-kravene:
+For å sikre at systemet dekker de nødvendige funksjonene innenfor datadelen av prosjektet, ble det utarbeidet en kravliste. Disse kravene omhandler alt fra bevegelighet og brukergrensesnitt til sensor- og kommunikasjonsfunksjoner. Tabellen viser en oversikt over kravene for data, rangert
+etter prioritet.
 
 ![alt text](img/IMG_7309.PNG)
 
@@ -12,7 +14,7 @@ Bachelorgruppe 07 har forbedret en Mecanum-drevet bil med omnidireksjonell beveg
 ![alt text](img/ph.bilv2.jpg)
 
 
- #Komponenter og tilkobling på kjøretøyet:
+# Komponenter og tilkobling på kjøretøyet:
 
 ![alt text](img/Bil%20og%20komponent%20modell-Data%20v5.jpg)
 
