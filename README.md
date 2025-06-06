@@ -1,8 +1,8 @@
 # ProwlTech
 Bachelorgruppe 07 har forbedret en Mecanum-drevet bil med omnidireksjonell bevegelse ved å oppgradere både maskinvaren og programvaren. Ved hjelp av Zephyr på en Micro:bit ble en Raspberry Pi integrert som brukergrensesnitt. Årets ABC-krav ble oppfylt ved å forberede systemet for fremtidig autonom funksjonalitet gjennom modulær design og klargjøring.
 
-# ==================
-ABC-kravene:
+
+# ABC-kravene:
 
 ![alt text](img/IMG_7309.PNG)
 
